@@ -1,13 +1,19 @@
+#########################################
+#				Makefile				#
+#	Autor:	Vojtech Mašek (xmasek15)	#
+#########################################
+
 CC=gcc
 
 RM=rm -f
-CFLAGS= -std=gnu99 -pedantic -Wall
+CFLAGS= -std=gnu99 -pedantic -Wall -Wextra 
 
 #name of compiled binary
 BIN=projekt_ifj
 
 #adds source .c files from our project dir that have to be compiled
 SRCS=$(wildcard *.c)
+
 #replacement of .c suffix of source files to .o suffix used for object files
 OBJS=$(subst .c,.o,$(SRCS))
 
