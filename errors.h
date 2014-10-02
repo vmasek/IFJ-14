@@ -28,11 +28,12 @@ enum msgs
 
 
 /**Vypise chybovu/stavovu hlasku z err_table[] na stderr.
+ * Ako stavove kody pouzivat tie z enum msgs.
  * Vrati navratovy kod prisluchajuci danej hlaske/kodu.
  * 
- * @param ret_msg_id - ID navratoveho kodu podla ktoreho vypise hlasku
- * @return ret_msg_id - samotny navratovy kod
+ * @param   ret_msg_id  - ID nav. kodu podla ktoreho vypise hlasku
+ * @return ret_msg_id   - samotny navratovy kod
  */
-extern unsigned int print_error(unsigned int ret_msg_id);
+unsigned int print_error(unsigned int ret_msg_id);
 
 #endif

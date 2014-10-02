@@ -33,7 +33,14 @@ const char *err_table[] =
     [INTERNAL_ERROR] =          "Interni chyba interpretu.\n",
 };
 
-inline unsigned int print_error(unsigned int ret_msg_id)
+/**Vypise chybovu/stavovu hlasku z err_table[] na stderr.
+ * Ako stavove kody pouzivat tie z enum msgs.
+ * Vrati navratovy kod prisluchajuci danej hlaske/kodu.
+ * 
+ * @param   ret_msg_id  - ID nav. kodu podla ktoreho vypise hlasku
+ * @return ret_msg_id   - samotny navratovy kod
+ */
+inline unsigned int print_error(unsigned int ret_msg_id) 
 {
     fprintf(stderr, "%s", err_table[ret_msg_id]);
     return ret_msg_id;
