@@ -2,7 +2,7 @@
  * Nazev:   errors.c
  * Popis:   Chybove hlasky
  * Autori:  Tomas Paulus (xpaulu01), Vojtech Mašek (xmasek15)
- *****************************************************/
+ ************************************************************/
 
 #include "errors.h"
 

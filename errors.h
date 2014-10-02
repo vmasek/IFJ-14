@@ -2,10 +2,10 @@
  * Nazev:   errors.h
  * Popis:   Chybove hlasky
  * Autori:  Tomas Paulus (xpaulu01), Vojtech Mašek (xmasek15)
- *****************************************************/
+ **************************************************************/
 
-#ifndef _ERRORS_H
-#define _ERRORS_H
+#ifndef __ERRORS_H__
+#define __ERRORS_H__
 
 #include <stdio.h>
 
@@ -36,4 +36,4 @@ enum msgs
  */
 unsigned int print_error(unsigned int ret_msg_id);
 
-#endif
+#endif //__ERRORS_H__
