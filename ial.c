@@ -1,7 +1,7 @@
 /***********************************************
  * Popis:   Implementace funkci z predmetu IAL
  * Nazev:   ial.c
- * Autori:  Albert Uchytil (xuchyt03)
+ * Autori:  Albert Uchytil (xuchyt03), Pavel Tobias (xtobia01)
  ***********************************************/
  
 #include "ial.h"
@@ -73,4 +73,69 @@ int kmp_substr(char *string, char *sub)
         }
     }
     return -1; /* Pokud se dostaneme sem, vyskyt podretezce nebyl nalezen. */
+}
+
+/**
+ * Rozdeleni pole znaku na 2 sub-pole a jejich slouceni (merge)
+ *
+ * @param src const char* Zdrojove pole znaku.
+ * @param dst char* Cilove pole znaku, kam je slouceno zdrojove pole.
+ * @param len unsigned Delka zdrojoveho/ciloveho pole.
+ * @param middle unsigned Pocatecni index praveho sub-pole.
+ */
+void ms_merge(const char *src, char *dst, unsigned len, unsigned middle)
+{
+    unsigned index_l = 0;
+    unsigned index_r = middle;
+
+    index_r = middle;
+
+    for (unsigned index_dst = 0; index_dst < len; index_dst++) {
+        if (index_r >= len || (index_l < middle &&
+                               src[index_l] < src[index_r])) {
+            dst[index_dst] = src[index_l];
+            index_l++;
+        } else {
+            dst[index_dst] = src[index_r];
+            index_r++;
+        }
+    }
+}
+
+/**
+ * Bottom-up implementace merge-sortu
+ * 
+ * @param str char* Retezec k serazeni.
+ */
+void ms_sort(char *str)
+{
+    unsigned str_len = strlen(str);
+    char buffer[str_len];
+    char *src = str;
+    char *dst = buffer;
+
+    for (unsigned sub_len = 2; sub_len < str_len * 2; sub_len *= 2) {
+        for (unsigned pos = 0; pos < str_len; pos += sub_len)
+            ms_merge(src + pos, dst + pos, MIN(sub_len, str_len - pos),
+                     sub_len / 2);
+        ms_swap(&src, &dst);
+    }
+
+    if (src == buffer) {
+        memcpy(str, buffer, str_len);
+    }
+}
+
+/**
+ * Vzajemne premireni 2 ukazatelu na char
+ *
+ * @param str1 char** Ukazatel na prvniho ukazatele. 
+ * @param str2 char** Ukazatel na druheho ukazatele.
+ */
+void ms_swap(char **str1, char **str2)
+{
+    char *swap_str = *str1;
+
+    *str1 = *str2;
+    *str2 = swap_str;
 }
