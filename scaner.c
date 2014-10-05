@@ -37,7 +37,7 @@ enum token_keyword {
     FORWARD,
     FUNCTION,
     IF,         // i
-    TOKEN_INTEGER,
+    INTEGER,
     READLN,     // r
     REAL,
     SORT,       // s
@@ -98,7 +98,7 @@ static enum token_keyword _get_keyword(char *name) {
             return   IF;
 
         if (!strcmp("integer",name))
-            return   TOKEN_INTEGER;
+            return   INTEGER;
 
         break;
 
