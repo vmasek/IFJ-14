@@ -27,26 +27,26 @@
  */
 enum token_keyword {
     NOT_A_KEYWORD = 0,   
-    BEGIN,      // b
-    BOOLEAN,
-    DO,         // d
-    ELSE,       // e
-    END,
-    FALSE,      // f
-    FIND,
-    FORWARD,
-    FUNCTION,
-    IF,         // i
-    INTEGER,
-    READLN,     // r
-    REAL,
-    SORT,       // s
-    STRING,
-    THEN,       // t
-    TRUE,
-    VAR,        // v
-    WHILE,      // w
-    WRITE,
+    KEYWORD_BEGIN,      // b
+    KEYWORD_BOOLEAN,
+    KEYWORD_DO,         // d
+    KEYWORD_ELSE,       // e
+    KEYWORD_END,
+    KEYWORD_FALSE,      // f
+    KEYWORD_FIND,
+    KEYWORD_FORWARD,
+    KEYWORD_FUNCTION,
+    KEYWORD_IF,         // i
+    KEYWORD_INTEGER,
+    KEYWORD_READLN,     // r
+    KEYWORD_REAL,
+    KEYWORD_SORT,       // s
+    KEYWORD_STRING,
+    KEYWORD_THEN,       // t
+    KEYWORD_TRUE,
+    KEYWORD_VAR,        // v
+    KEYWORD_WHILE,      // w
+    KEYWORD_WRITE,
 };
 
 /*
@@ -55,92 +55,92 @@ enum token_keyword {
 static enum token_keyword _get_keyword(char *name) {
     switch (name[0]) {
     case 'b':
-        if (!strcmp("begin", name))
-            return   BEGIN;
+        if (!strcmp(name, "begin"))
+            return KEYWORD_BEGIN;
 
-        if (!strcmp("boolean", name))
-            return   BOOLEAN;
+        if (!strcmp(name, "boolean"))
+            return KEYWORD_BOOLEAN;
 
         break;
 
     case 'd':
-        if (!strcmp("do", name))
-            return   DO;
+        if (!strcmp(name, "do"))
+            return KEYWORD_DO;
 
         break;
 
     case 'e':
-        if (!strcmp("else",name))
-            return   ELSE;
+        if (!strcmp(name, "else"))
+            return KEYWORD_ELSE;
 
-        if (!strcmp("end",name))
-            return   END;
+        if (!strcmp(name, "end"))
+            return KEYWORD_END;
 
         break;
 
     case 'f':
-        if (!strcmp("false",name))
-            return   FALSE;
+        if (!strcmp(name, "false"))
+            return KEYWORD_FALSE;
 
-        if (!strcmp("find",name))
-            return   FIND;
+        if (!strcmp(name, "find"))
+            return KEYWORD_FIND;
 
-        if (!strcmp("forward",name))
-            return   FORWARD;
+        if (!strcmp(name, "forward"))
+            return KEYWORD_FORWARD;
 
-        if (!strcmp("function",name))
-            return   FUNCTION;
+        if (!strcmp(name, "function"))
+            return KEYWORD_FUNCTION;
 
         break;
 
     case 'i':
-        if (!strcmp("if",name))
-            return   IF;
+        if (!strcmp(name, "if"))
+            return KEYWORD_IF;
 
-        if (!strcmp("integer",name))
-            return   INTEGER;
+        if (!strcmp(name, "integer"))
+            return KEYWORD_INTEGER;
 
         break;
 
     case 'r':
-        if (!strcmp("readln",name))
-            return   READLN;
+        if (!strcmp(name, "readln"))
+            return KEYWORD_READLN;
 
-        if (!strcmp("real",name))
-            return   REAL;
+        if (!strcmp(name, "real"))
+            return KEYWORD_REAL;
 
         break;
 
     case 's':
-        if (!strcmp("sort",name))
-            return   SORT;
+        if (!strcmp(name, "sort"))
+            return KEYWORD_SORT;
 
-        if (!strcmp("string",name))
-            return   STRING;
+        if (!strcmp(name, "string"))
+            return KEYWORD_STRING;
 
         break;
 
     case 't':
-        if (!strcmp("then",name))
-            return   THEN;
+        if (!strcmp(name, "then"))
+            return KEYWORD_THEN;
 
-        if (!strcmp("true",name))
-            return   TRUE;
+        if (!strcmp(name, "true"))
+            return KEYWORD_TRUE;
 
         break;
 
     case 'v':
-        if (!strcmp("var",name))
-            return   VAR;
+        if (!strcmp(name, "var"))
+            return KEYWORD_VAR;
 
         break;
 
     case 'w':
-        if (!strcmp("while",name))
-            return   WHILE;
+        if (!strcmp(name, "while"))
+            return KEYWORD_WHILE;
 
-        if (!strcmp("write",name))
-            return   WRITE;
+        if (!strcmp(name, "write"))
+            return KEYWORD_WRITE;
 
         break;
     }
