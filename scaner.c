@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define TOKEN_IDENTIFIER_MAX_LENGTH 32
+#define TOKEN_IDENTIFIER_MAX_LENGTH 127
 
 
 /*
