@@ -199,6 +199,7 @@ enum lexer_state {
     START,
     ID_KEYWORD,
     STRING_LOADING,
+    INT_LOADING,
     COMMENT,
     MAYBE_ASSIGNMENT,
 };
@@ -238,7 +239,8 @@ void get_token(Token *token) {
             if (symbol >= '0' && symbol <= '9') {
                 token->value_int = symbol - '0'; // FIXME: ugly conversion!
                 token->type = TOKEN_INT;
-                return;
+                state = INT_LOADING;
+                break;
             }
 
             switch (symbol) {
@@ -303,6 +305,16 @@ void get_token(Token *token) {
                 // FIXME: return the symbol back!
                 token->value_symbol = COLON;
                 return;
+            }
+
+            break;
+
+        case INT_LOADING:
+            if (symbol >= '0' && symbol <= '9') {
+                token->value_int *= 10;
+                token->value_int += symbol - '0'; // FIXME: ugly conversion!
+            } else {
+                return; // FIXME: ungetc
             }
 
             break;
