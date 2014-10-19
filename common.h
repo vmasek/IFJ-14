@@ -15,3 +15,5 @@
  * Funkce provede konverzi znaku na cislo, ktere zadanemu znaku odpovida.
  */
 inline int char_to_int(char c);
+
+#endif
