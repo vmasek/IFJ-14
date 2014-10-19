@@ -1,4 +1,5 @@
 #include "scaner.h"
+#include "common.h"
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
@@ -152,7 +153,7 @@ void get_token(Token *token, FILE *input) {
             }
 
             if (symbol >= '0' && symbol <= '9') {
-                token->value.value_int = symbol - '0'; // FIXME: ugly conversion!
+                token->value.value_int = char_to_int(symbol);
                 token->type = TOKEN_INT;
                 state = INT_LOADING;
                 break;
@@ -227,7 +228,7 @@ void get_token(Token *token, FILE *input) {
         case INT_LOADING:
             if (symbol >= '0' && symbol <= '9') {
                 token->value.value_int *= 10;
-                token->value.value_int += symbol - '0'; // FIXME: ugly conversion!
+                token->value.value_int += char_to_int(symbol);
                 break;
 
             } else if (symbol == '.') {
