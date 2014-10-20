@@ -1,15 +1,16 @@
-/*
- * Nazev:   cstring.h
- * Popis:   Chybove hlasky
- * Autor:   Vojtech Mašek (xmasek15)
- **************************************************************/
+/**
+ * @file	cstring.h
+ * @name	Chybove hlasky (header file)
+ * @author	Vojtech Mašek (xmasek15)
+ * @brief	Implementacia cstrig retazcov pre projekt do predmetu IFJ
+ ****************************************************************************/
 
 #ifndef __CSTRING_H__
 #define __CSTRING_H__
 
 #include    <sys/types.h>
 
-#define     CSTRING_SIZE_START  16
+#define     CSTRING_START_SIZE  16
 
 typedef struct
 {
@@ -18,8 +19,8 @@ typedef struct
 }   cstring;
 
 /* Print */
-void        print_cstr(const cstring *);
-void        print_cstr_all(const cstring *);
+void        print_cstr(cstring const *);
+void        print_cstr_all(cstring const *);
 
 
 /* Allocation and copying */
@@ -28,7 +29,10 @@ cstring     *cstr_create_cstr(cstring const *);
 int         cstr_resize(cstring *, ulong);
 
 
+
 /* = and += */
+cstring 	*cstr_append_chr(cstring *, char);
+
 cstring     *cstr_assign_str(cstring *, char const *);
 cstring     *cstr_append_str(cstring *, char const *);
 

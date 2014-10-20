@@ -1,14 +1,14 @@
-/*
- * Nazev:   cstring.c
- * Popis:   Chybove hlasky
- * Autor:   Vojtech Mašek (xmasek15)
- ************************************************************/
+/**
+ * @file	cstring.c
+ * @name	Chybove hlasky
+ * @author	Vojtech Mašek (xmasek15)
+ * @brief	Implementacia cstrig retazcov pre projekt do predmetu IFJ
+ ****************************************************************************/
 
 #include    "errors.h"
 #include    "cstring.h"
 #include    <string.h>
 #include    <stdlib.h>
-
 
 
 /**
@@ -23,18 +23,72 @@
  */
 static cstring *append(cstring *s, char const *str, ulong size)
 {
-    if (size >= s->tab_size && cstr_resize(s, size)) /** Kontrola dlzky, ak bude
-    dlzka prekrocena zavola sa resize, iba ak budu obe podmienky vyhodnotene
-    ako true (potrebna dlzka je vecsia a nepodari sa predlzenie) bude vrateny NULL */
+	/**Kontrola dlzky, ak bude dlzka prekrocena zavola sa resize, iba ak budu
+	 * obe podmienky vyhodnotene ako true (potrebna dlzka je vecsia a nepodari
+	 * sa predlzenie) bude vrateny NULL.
+	 * @code
+	 * if (size >= s->tab_size && cstr_resize(s, size))
+	 *     return NULL; @endcode
+	 */
+    if (size >= s->tab_size && cstr_resize(s, size))
         return NULL;
-    if (s->size == 0) /** ak je retazec cstring prazdny */
-        strcpy(s->str, str); /** tak sa str prekopiruje */
+
+    if (s->size == 0) // ak je retazec cstring prazdny
+        strcpy(s->str, str); // tak sa str prekopiruje
     else
-        strcat(s->str, str); /** inak bude vlozeny na koniec */
+        strcat(s->str, str); // inak bude vlozeny na koniec
+
     s->size = size;
     return s;
 }
 
+
+/**
+ * @brief Rychle znasobenie pamete pre retazec v cstringu
+ * @param s cstring ktory bude realokovany
+ * @returns Pozor vracia (-1) //TRUE ak realokovanie zlyhalo inak (0) //FALSE
+ *
+ * Realokuje pamet pre cstring retazec tak ze znasobi aktualne alokovane
+ * mnozstvo dvomi.
+ * Funkcia vyuzivana pri appendovani charov do cstringu, tento proces bude
+ * casty a potrebujeme aby nebol zdrzovany neustalim realokovanim zdrojov.
+ * Bola tak zvolena pametova narocnost na ukor vyssej rychlosti.
+ */
+static int cstr_quick_resize(cstring *s)
+{
+	ulong new_size = s->tab_size *2;
+    char *tmp;
+	//bude prealokovane na dvojnasobok aktualnej velkosti
+    if (!(tmp = realloc(s->str, new_size)))
+        return -1;
+    s->str = tmp;
+    s->tab_size = new_size;
+    return 0;
+}
+
+
+/**
+ * @brief Prida char k cstring retazcu
+ * @param s ukazadel na cstring kde chceme pridat char.
+ * @param c char ktory bude appendnuty
+ * @returns ukazatel na cstring s pridanym charom
+ *
+ * Funkcia ktora zabezpecuje moznost rychleho pridavania charov na koniec
+ * cstring retazca, ak je potrebna realokacia pamete pre retazec, tak vola
+ * funkciu @see cstr_quick_resize(), tento sposob pridavania znakov do cstring
+ * retazca je vyrazne rychlejsi ako neustale vkladanie string alebo realokacia
+ * vzdy pre jeden char naviac.
+ */
+cstring *cstr_append_chr(cstring *s, char c)
+{
+	///pokial bude ako false vyhodnotena uz prva podmienka tak sa resize ani volat nebude, princip v podstate rovnaky ako pri @see append() ale s upravami vynechavajucimi zbytocne operacie
+	if (s->size+1 >= s->tab_size && cstr_quick_resize(s))
+        return NULL;
+
+    s->str[s->size] = c;
+    s->str[s->size+=1] = '\0';
+    return s;
+}
 
 /**
  * @brief Spoji retazec s cstringom
@@ -42,7 +96,7 @@ static cstring *append(cstring *s, char const *str, ulong size)
  * @param str retazec znakov ktory pripoji na koniec cstringu
  * @returns ukazatel na predlzeny cstring
  *
- * Pouziva staticky funkciu append implementovanu v cstring.c, blizsie detaily
+ * Pouziva staticku funkciu append implementovanu v cstring.c, blizsie detaily
  * uvedene priamo tam.
  */
 cstring *cstr_append_str(cstring *s, char const *str)
@@ -57,7 +111,7 @@ cstring *cstr_append_str(cstring *s, char const *str)
  * @param cstr cstring ktory bude pripojeny na koniec cstringu s
  * @returns ukazatel na predlzeny cstring
  *
- * Pouziva staticky funkciu append implementovanu v cstring.c, blizsie detaily
+ * Pouziva staticku funkciu append implementovanu v cstring.c, blizsie detaily
  * uvedene priamo tam.
  */
 cstring *cstr_append_cstr(cstring *s, cstring const *cstr)
@@ -74,6 +128,7 @@ cstring *cstr_append_cstr(cstring *s, cstring const *cstr)
  *
  * Pouziva staticky funkciu append implementovanu v cstring.c, blizsie detaily
  * uvedene priamo tam.
+ * @see append()
  */
 cstring *cstr_assign_str(cstring *s, char const *str)
 {
@@ -107,7 +162,7 @@ cstring *cstr_assign_cstr(cstring *s, cstring const *cstr)
  */
 cstring *cstr_create_str(char const *str)
 {
-    cstring  *s = calloc(1, sizeof(*s));
+    cstring *s = calloc(1, sizeof(*s));
 
     if (s)
         return cstr_append_str(s, str);
@@ -123,11 +178,10 @@ cstring *cstr_create_str(char const *str)
  * @return ukazatel na novovytvoreny cstring
  *
  * Obsah retazec z cstringu cstr ktory dostane parametrom zapise do novovytvoreneho
- *
  */
 cstring *cstr_create_cstr(cstring const *cstr)
 {
-    cstring  *s = calloc(1, sizeof(*s));
+    cstring *s = calloc(1, sizeof(*s));
 
     if (s)
         return cstr_append_cstr(s, cstr);
@@ -142,28 +196,26 @@ cstring *cstr_create_cstr(cstring const *cstr)
  * @param s cstring ktory potrebujeme realokovat
  * @param size minimalna velkost o ktoru je potrebne zvecsit
  * @returns Pozor vracia (-1) //TRUE ak realokovanie zlyhalo inak (0) //FALSE
- *
- *
  */
 int cstr_resize(cstring *s, ulong size)
 {
     /** Ak je cstring prazdny bude size nastavena na defaultnu hodnotu,
-        inak je size2 velkost momentalnej naalokovanej dlzky */
-    ulong size2 = s->tab_size ? s->tab_size : CSTRING_SIZE_START;
+        inak je new_size velkost momentalnej naalokovanej dlzky */
+    ulong new_size = s->tab_size ? s->tab_size : CSTRING_START_SIZE;
     char  *tmp;
 
-    size2 *= (size + 1) / size2 + 1; /** zmensi alebo zvecsi size2 na potrebnu hodnotu */
-    if (!(tmp = realloc(s->str, size2)))
+    new_size *= (size + 1) / new_size + 1; /** zmensi alebo zvecsi new_size na potrebnu hodnotu */
+    if (!(tmp = realloc(s->str, new_size)))
         return -1;
     s->str = tmp;
-    s->tab_size = size2;
+    s->tab_size = new_size;
     return 0;
 }
 
 
 /**
  * @brief Vlozi na zaciatok cstring retazca ukoncovaci znak a nastavi velkost na nulu.
- * @param s [description]
+ * @param s ukazatel na cstring ktory bude vycisteny
  */
 void cstr_clear(cstring *s)
 {
@@ -187,7 +239,7 @@ void cstr_free(cstring *s)
  * @brief Vypise retazec cstingu na samostany riadok.
  * @param s ukazatel na cstring
  */
-void print_cstr(const cstring *s)
+void print_cstr(cstring const *s)
 {
     //printf("%s\n",s->str);
     puts(s->str);
@@ -200,14 +252,19 @@ void print_cstr(const cstring *s)
  *
  * Format : "size / capacity - [c_str()]"
  */
-void print_cstr_all(const cstring *s)
+void print_cstr_all(cstring const *s)
 {
     printf("\t%lu / %lu - [ %s ]\n", s->size, s->tab_size, s->str);
+    for(uint i=0; i<s->tab_size; i++)
+    {
+		printf("\t%d\t=\t%c\n", s->str[i], s->str[i]);
+	}
 }
 
 
+
 /*
-//Testovaci main
+//----------------------------Testovaci-main----------------------------------
 int main()
 {
     cstring*  str = cstr_create_str("Blablla");
