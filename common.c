@@ -1,14 +1,16 @@
-/*
- * Nazev:   common.c
- * Popis:   Funkce vyuzitelne napric moduly
- * Autori:  Albert Uchytil (xuchyt03)
- ************************************************************/
+/**
+ * @file	common.c
+ * @name	Funkce vyuzitelne napric moduly
+ * @author	Albert Uchytil (xuchyt03)
+ ****************************************************************************/
+
+#include "common.h"
 
 /**
  * @brief Prevede znak na odpovidajici cislo
  * @param c znak, ktery se bude konvertovat
  * @returns ciselnou hodnotu odpovidajici znaku
- * 
+ *
  * Funkce provede konverzi znaku na cislo, ktere zadanemu znaku odpovida.
  * V pripade, ze nejde o cislici je navracena 0.
  */
