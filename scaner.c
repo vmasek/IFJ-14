@@ -348,6 +348,7 @@ void get_token(Token *token, FILE *input) {
 /* 
  * Just for testing purpose
  */
+/*
 int main() {
     FILE *input = fopen("test", "r");
     Token *token = malloc(sizeof(Token *));
@@ -374,4 +375,4 @@ int main() {
     fclose(input);
 
     return 0;
-}
+} */
