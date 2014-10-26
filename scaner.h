@@ -12,9 +12,7 @@
  *
  * Can operate only when:
  *  - all tokens are separated by space
- *  - no floats
- *  - no strings
- *  - no comments
+ *  - limited strings (no special chars)
  *  - no errors in syntax
  *
  * Author: Adam Samalik

@@ -12,9 +12,8 @@
  *
  * Can operate only when:
  *  - all tokens are separated by space
+ *  - limited strings (no special chars)
  *  - no floats
- *  - no strings
- *  - no comments
  *  - no errors in syntax
  *
  * Author: Adam Samalik
