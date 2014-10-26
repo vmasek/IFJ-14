@@ -1,5 +1,4 @@
 #include "scaner.h"
-#include "common.h"
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
@@ -128,7 +127,7 @@ static enum token_keyword _get_keyword(char *name) {
  */
 void get_token(Token *token, FILE *input) {
     char symbol = 0;
-    enum lexer_state state = START;
+    enum lexer_state state = LEXER_START;
 
     int token_name_pos = 0;
     enum token_keyword keyword;
@@ -136,7 +135,7 @@ void get_token(Token *token, FILE *input) {
     while (1) {
         symbol = getc(input);
         switch (state) {
-        case START:
+        case LEXER_START:
             if (isspace(symbol))
                 break;
 
@@ -148,14 +147,14 @@ void get_token(Token *token, FILE *input) {
             if (symbol >= 'a' && symbol <= 'z') { // FIXME: more rules!
                 token->value.value_name[token_name_pos] = symbol;
                 token_name_pos ++;
-                state = ID_KEYWORD;
+                state = LEXER_ID_KEYWORD;
                 break;
             }
 
             if (symbol >= '0' && symbol <= '9') {
-                token->value.value_int = char_to_int(symbol);
+                token->value.value_int = symbol - '0'; // FIXME: ugly conversion!
                 token->type = TOKEN_INT;
-                state = INT_LOADING;
+                state = LEXER_INT_LOADING;
                 break;
             }
 
@@ -187,7 +186,7 @@ void get_token(Token *token, FILE *input) {
 
             case ':':
                 token->type = TOKEN_SYMBOL;
-                state = MAYBE_ASSIGNMENT;
+                state = LEXER_MAYBE_ASSIGNMENT;
                 break;
 
             case ';':
@@ -209,11 +208,80 @@ void get_token(Token *token, FILE *input) {
                 token->type = TOKEN_SYMBOL;
                 token->value.value_symbol = PARENTHESIS_R;
                 return;
-            }
 
+
+            case '\'':
+                token->type = TOKEN_STRING;
+                state = LEXER_STR_START;
+                break;
+
+            case '{':
+                state = LEXER_COMMENT;
+                break;
+
+            }
             break;
 
-        case MAYBE_ASSIGNMENT:
+
+        case LEXER_COMMENT:
+            if (symbol == '}') {
+                state = LEXER_START;
+                break;
+            }
+            break;
+
+
+        case LEXER_STR_START:
+            if (symbol == '\'') {
+                state = LEXER_STR_AP;
+                break;
+            }
+
+            token->value.value_string = cstr_create_str(&symbol);
+            state = LEXER_STR_LOAD;
+            break;
+
+
+        case LEXER_STR_LOAD:
+            if (symbol == '\'') {
+                state = LEXER_STR_AP;
+                break;
+            }
+
+            cstr_append_str(token->value.value_string, &symbol);
+            break;
+
+
+        case LEXER_STR_AP:
+            if (symbol == '\'') {
+                cstr_append_str(token->value.value_string, &symbol);
+                state = LEXER_STR_LOAD;
+                break;
+            }
+    
+            if (symbol =='#') {
+                state = LEXER_STR_SPEC;
+                break;
+            }
+
+            //ungetchar
+            return;
+
+
+        case LEXER_STR_SPEC:
+            if (symbol == '\'') {
+                // FIXME transform that number into a char and append that shit
+                cstr_append_str(token->value.value_string, "[SPECIAL]");
+                state = LEXER_STR_LOAD;
+                break;
+            }
+
+            // FIXME
+            // load another number if it's number and if not, go fuck yourself
+            break;
+
+
+        case LEXER_MAYBE_ASSIGNMENT:
             if (symbol == '=') {
                 token->value.value_symbol = ASSIGNMENT;
                 return;
@@ -225,14 +293,14 @@ void get_token(Token *token, FILE *input) {
 
             break;
 
-        case INT_LOADING:
+        case LEXER_INT_LOADING:
             if (symbol >= '0' && symbol <= '9') {
                 token->value.value_int *= 10;
-                token->value.value_int += char_to_int(symbol);
+                token->value.value_int += symbol - '0'; // FIXME: ugly conversion!
                 break;
 
             } else if (symbol == '.') {
-                state = FLOAT_LOADING;
+                state = LEXER_FLOAT_LOADING;
                 token->type = TOKEN_FLOAT;
                 token->value.value_float = (float)token->value.value_int;
                 break;
@@ -243,12 +311,12 @@ void get_token(Token *token, FILE *input) {
 
             break;
 
-        case FLOAT_LOADING:
+        case LEXER_FLOAT_LOADING:
             
 
             break;
 
-        case ID_KEYWORD:
+        case LEXER_ID_KEYWORD:
             if (isspace(symbol)) { // FIXME: tokens are not separated by spaces!
                 token->value.value_name[token_name_pos] = 0;
                 token_name_pos = 0;
@@ -281,7 +349,6 @@ void get_token(Token *token, FILE *input) {
 /* 
  * Just for testing purpose
  */
-/*
 int main() {
     FILE *input = fopen("test", "r");
     Token *token = malloc(sizeof(Token *));
@@ -289,15 +356,18 @@ int main() {
     while(1) {
         get_token(token, input);
         if (token->type == TOKEN_ID)
-            printf (" TOKEN_ID %s, ", token->value.value_name);
+            printf (" TOKEN_ID          %s", token->value.value_name);
         else if (token->type == TOKEN_KEYWORD)
-            printf (" TOKEN_KEYWORD %d, ", token->value.value_keyword);
+            printf (" TOKEN_KEYWORD     %d", token->value.value_keyword);
         else if (token->type == TOKEN_INT)
-            printf (" TOKEN_INT %d, ", token->value.value_int);
+            printf (" TOKEN_INT         %d", token->value.value_int);
         else if (token->type == TOKEN_SYMBOL)
-            printf (" TOKEN_SYMBOL %d, ", token->value.value_int);
+            printf (" TOKEN_SYMBOL      %d", token->value.value_int);
+        else if (token->type == TOKEN_STRING)
+            printf (" TOKEN_STRING      %s", token->value.value_string->str);
         else
             break;
+        printf("\n");
     }
 
     printf("\n");
@@ -305,4 +375,4 @@ int main() {
     fclose(input);
 
     return 0;
-} */
+}

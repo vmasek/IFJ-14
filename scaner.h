@@ -5,6 +5,7 @@
 
 #define TOKEN_IDENTIFIER_MAX_LENGTH 127
 
+#include "cstring.h"
 
 /*
  * Very early pre-alpha release.
@@ -82,7 +83,7 @@ typedef struct {
         int                 value_int;
         float               value_float;
         char                value_name[TOKEN_IDENTIFIER_MAX_LENGTH];
-        char               *value_string; 
+        cstring            *value_string; 
         enum token_keyword  value_keyword;
         enum token_symbol   value_symbol;
     } value;
@@ -91,13 +92,16 @@ typedef struct {
 
 /* State of the lexical analyzer FSM */
 enum lexer_state {
-    START,
-    ID_KEYWORD,
-    STRING_LOADING,
-    INT_LOADING,
-    FLOAT_LOADING,
-    COMMENT,
-    MAYBE_ASSIGNMENT,
+    LEXER_START,
+    LEXER_ID_KEYWORD,
+    LEXER_STR_START,
+    LEXER_STR_AP,
+    LEXER_STR_LOAD,
+    LEXER_STR_SPEC,
+    LEXER_INT_LOADING,
+    LEXER_FLOAT_LOADING,
+    LEXER_COMMENT,
+    LEXER_MAYBE_ASSIGNMENT,
 };
 
 
