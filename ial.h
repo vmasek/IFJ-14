@@ -1,8 +1,8 @@
-/***********************************************
- * Popis:   Rozhrani poskytujici funkce z predmetu IAL
- * Nazev:   ial.c
- * Autori:  Albert Uchytil (xuchyt03), Pavel Tobias (xtobia01)
- ***********************************************/
+/**
+ * @file	ial.h
+ * @name	Functions from Algorithms.
+ * @author	Albert Uchytil (xuchyt03), Pavel Tobias (xtobia01)
+ ******************************************************************/
 
 #ifndef __IAL_H__
 #define __IAL_H__
@@ -10,19 +10,19 @@
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
 /**
- * Pomocna tabulka pro Knuth-Morris-Prattuv algoritmus.
+ * @brief Creates Partial match table for Knuth–Morris–Pratt algorithm.
  * 
- * @param word char* Retezec, ze ktereho je vypocitana pomocna tabulka.
- * @param _out int*  Pomocna tabulka, ktera je naplnena.
+ * @param word char* String which is used for table construction.
+ * @param _out int*  Table that is filled.
  */
 void kmp_table(char *word, int *_out);
 
 /**
- * Knuth-Morris-Prattuv algoritmus pro vyhledavani podretezce v retezci.
+ * @brief Knuth–Morris–Pratt algorithm that searches for occurances of substring.
  * 
- * @param  string Retezec, ve kterem je provadeno vyhledavani.
- * @param  sub    Podretezec, ktery je vyhledavan.
- * @return int    V pripade vyskytu navraci index zacatku substringu, jinak -1.
+ * @param  string String in which we search for substring.
+ * @param  sub    Substring which we want to match.
+ * @return int    On successful match returns beginning of a match, else -1.
  */
 int kmp_substr(char *string, char *sub);
 

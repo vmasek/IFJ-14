@@ -1,18 +1,19 @@
 /**
- * @file	common.c
- * @name	Rozhrani poskytujici funkce vyuzitelne napric moduly
+ * @file	common.h
+ * @name	Interface with common functions that could be used across modules
  * @author	Albert Uchytil (xuchyt03)
- ****************************************************************************/
+ *********************************************************************************/
 
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
 /**
- * @brief Prevede znak na odpovidajici cislo
- * @param c znak, ktery se bude konvertovat
- * @returns ciselnou hodnotu odpovidajici znaku
+ * @brief Function converts char to int.
+ * @param c char that's going to be converted
+ * @returns integer value between 0 and 9
  *
- * Funkce provede konverzi znaku na cislo, ktere zadanemu znaku odpovida.
+ * Function converts char to numeric value represented by the char.
+ * Returns 0 when the char is not a digit.
  */
 int char_to_int(char c);
 

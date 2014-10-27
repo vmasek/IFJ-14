@@ -1,8 +1,8 @@
-/***********************************************
- * Popis:   Implementace funkci z predmetu IAL
- * Nazev:   ial.c
- * Autori:  Albert Uchytil (xuchyt03), Pavel Tobias (xtobia01)
- ***********************************************/
+/**
+ * @file	ial.h
+ * @name	Implementation of functions from Algorithms.
+ * @author	Albert Uchytil (xuchyt03), Pavel Tobias (xtobia01)
+ *******************************************************************/
  
 #include "ial.h"
 
@@ -10,16 +10,16 @@
 #include <string.h>
 
 /**
- * Pomocna tabulka pro Knuth-Morris-Prattuv algoritmus.
+ * @brief Creates Partial match table for Knuth–Morris–Pratt algorithm.
  * 
- * @param word char* Retezec, ze ktereho je vypocitana pomocna tabulka.
- * @param _out int*  Pomocna tabulka, ktera je naplnena.
+ * @param word char* String which is used for table construction.
+ * @param _out int*  Table that is filled.
  */
 void kmp_table(char *word, int *_out)
 {
-    int length_word = strlen(word); /* Delka retezce. */
-    int table_position = 2;         /* Pozice v pomocne tabulce. */
-    int candidate = 0;              /* Index aktualne zkoumaneho podretezce */
+    int length_word = strlen(word); /* String length. */
+    int table_position = 2;         /* Position within partial match table. */
+    int candidate = 0;              /* Index of substring which is currently getting checked. */
 
     if (length_word > table_position) {
         _out[0] = -1;
@@ -41,18 +41,18 @@ void kmp_table(char *word, int *_out)
 }
 
 /**
- * Knuth-Morris-Prattuv algoritmus pro vyhledavani podretezce v retezci.
+ * @brief Knuth–Morris–Pratt algorithm that searches for occurances of substring.
  * 
- * @param  string Retezec, ve kterem je provadeno vyhledavani.
- * @param  sub    Podretezec, ktery je vyhledavan.
- * @return int    V pripade vyskytu navraci index zacatku substringu, jinak -1.
+ * @param  string String in which we search for substring.
+ * @param  sub    Substring which we want to match.
+ * @return int    On successful match returns beginning of a match, else -1.
  */
 int kmp_substr(char *string, char *sub)
 {
     int sub_len = strlen(sub);
     int string_len = strlen(string);
-    int curr_match = 0;     /* Index zacatku aktualne prosetrovane shody. */
-    int curr_position = 0;  /* Index pozice v retezci sub. */
+    int curr_match = 0;     /* Index of current match that is getting checked. */
+    int curr_position = 0;  /* Index of position within sub string. */
     int table[sub_len];
     kmp_table(sub, table);
 
@@ -72,7 +72,7 @@ int kmp_substr(char *string, char *sub)
             }
         }
     }
-    return -1; /* Pokud se dostaneme sem, vyskyt podretezce nebyl nalezen. */
+    return -1; /* If we get here, occurance of substring was not found. */
 }
 
 /**
