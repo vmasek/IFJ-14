@@ -76,12 +76,12 @@ int kmp_substr(char *string, char *sub)
 }
 
 /**
- * Rozdeleni pole znaku na 2 sub-pole a jejich slouceni (merge)
+ * @brief Merging function for merge-sort.
  *
- * @param src const char* Zdrojove pole znaku.
- * @param dst char* Cilove pole znaku, kam je slouceno zdrojove pole.
- * @param len unsigned Delka zdrojoveho/ciloveho pole.
- * @param middle unsigned Pocatecni index praveho sub-pole.
+ * @param src    Source array of characters.
+ * @param dst    Destination array where source array is merged.
+ * @param len    Length of src/dst.
+ * @param middle Initial index of right-hand sub-array.
  */
 void ms_merge(const char *src, char *dst, unsigned len, unsigned middle)
 {
@@ -103,9 +103,9 @@ void ms_merge(const char *src, char *dst, unsigned len, unsigned middle)
 }
 
 /**
- * Bottom-up implementace merge-sortu
+ * @brief Bottom-up implementation of merge-sort.
  * 
- * @param str char* Retezec k serazeni.
+ * @param str Null-terminated character array to sort.
  */
 void ms_sort(char *str)
 {
@@ -127,10 +127,10 @@ void ms_sort(char *str)
 }
 
 /**
- * Vzajemne premireni 2 ukazatelu na char
+ * Pointer-swapping helper function for merge-sort.
  *
- * @param str1 char** Ukazatel na prvniho ukazatele. 
- * @param str2 char** Ukazatel na druheho ukazatele.
+ * @param str1 Pointer to first pointer. 
+ * @param str2 Pointer to second pointer.
  */
 void ms_swap(char **str1, char **str2)
 {
