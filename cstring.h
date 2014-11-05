@@ -12,6 +12,7 @@
 
 #define     CSTRING_START_SIZE  16
 
+
 typedef struct
 {
     char    *str;

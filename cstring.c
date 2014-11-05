@@ -255,7 +255,7 @@ void print_cstr(cstring const *s)
 void print_cstr_all(cstring const *s)
 {
     printf("\t%lu / %lu - [ %s ]\n", s->size, s->tab_size, s->str);
-    for(uint i=0; i<s->tab_size; i++)
+    for(uint i=0; i<s->size; i++)
     {
 		printf("\t%d\t=\t%c\n", s->str[i], s->str[i]);
 	}
@@ -268,22 +268,32 @@ void print_cstr_all(cstring const *s)
 int main()
 {
     cstring*  str = cstr_create_str("Blablla");
-    print_cstr_all(str);                                                // { 7 / 16 - [ Blablla ]   }
-    print_cstr_all(cstr_assign_str(str, "LEET"));                       // { 4 / 16 - [ LEET ]  }
-    print_cstr_all(cstr_append_str(str, " 1337"));                      // { 9 / 16 - [ LEET 1337 ] }
+	print_cstr_all(str);												// { 7 / 16 - [ Blablla ]	}
+	print_cstr_all(cstr_assign_str(str, "LEET"));						// { 4 / 16 - [ LEET ]	}
+    print_cstr_all(cstr_append_str(str, " 1337"));						// { 9 / 16 - [ LEET 1337 ]	}
     cstr_clear(str);
-    print_cstr_all(cstr_append_str(str, "@+!\t5%^*#42=answ2' '"));      // { 20 / 32 - [ @+! 5%^*#42=answ2' ' ] }
+    print_cstr_all(cstr_append_str(str, "@+!\t5%^*#42=answ2' '"));		// { 20 / 32 - [ @+! 5%^*#42=answ2' ' ]	}
 
-    cstr_free(str);
+    cstring*  ch_str = cstr_create_str("11111111111");
+    print_cstr_all(ch_str);
+    cstr_clear(ch_str);
+    print_cstr_all(ch_str);
+
+    for (uint i=0; i<20; i++)
+    {
+		print_cstr_all(cstr_append_chr(ch_str, 'A'));
+		printf("\n");
+	}
+
 
     cstring*  str1;
     cstring*  str2;
 
-    printf("\n\n\n");
-    //  {   131 / 144 - [ ... ] }
-    //  {   131 / 144 - [ ... ] }
-    //  {   626 / 720 - [ ... ] }
-    //  {   757 / 864 - [ ... ] }
+	printf("\n\n\n");
+	//	{	131 / 144 - [ ... ]	}
+	//	{	131 / 144 - [ ... ]	}
+	//	{	626 / 720 - [ ... ]	}
+	//	{	757 / 864 - [ ... ]	}
 
     print_cstr_all(str1 = cstr_create_str("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean et est a dui semper facilisis. Pellentesque placerat elit a nunc."));
     printf("\n\n");
@@ -296,6 +306,9 @@ int main()
     printf("\n\n");
     print_cstr_all(cstr_assign_str(str1, " & "));
 
+
+	cstr_free(str);
+    cstr_free(ch_str);
     cstr_free(str1);
     cstr_free(str2);
 
