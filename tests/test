@@ -1,0 +1,11 @@
+#!/bin/bash
+# Test script
+# Albert Uchytil
+
+make
+rm *.o
+rm .depend
+rm ../*.o
+rm ../.depend
+./test_ifj
+rm test_ifj
