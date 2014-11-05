@@ -21,7 +21,7 @@ void kmp_table(char *word, int *_out)
     int table_position = 2;         /* Position within partial match table. */
     int candidate = 0;              /* Index of substring which is currently getting checked. */
 
-    if (length_word > table_position) {
+    if (length_word >= table_position) {
         _out[0] = -1;
         _out[1] = 0;
     }
