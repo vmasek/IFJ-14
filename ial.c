@@ -1,7 +1,7 @@
 /**
  * @file    ial.h
  * @name    Implementation of functions from Algorithms.
- * @author  Albert Uchytil (xuchyt03), Pavel Tobias (xtobia01)
+ * @author  Albert Uchytil (xuchyt03), Pavel Tobias (xtobia01), Vojtech Mašek (xmasek15)
  *******************************************************************/
 
 #include "ial.h"
@@ -149,7 +149,7 @@ void ms_swap(char **str1, char **str2)
 
 void tree_init(Tree *tree)
 {
-    if(tree)
+    if (tree)
         tree->root = tree->last = NULL;
 }
 
@@ -158,19 +158,16 @@ void tree_init(Tree *tree)
 void tree_node_free(Tree_Node *node)
 {
     printf("free");
-    if(!node)
-    {
+    if (!node) {
         printf("not node\n");
         return;
     }
 
-    if(node->left)
-    {
+    if (node->left) {
         printf(" left\n");
         tree_node_free(node->left);
     }
-    if(node->right)
-    {
+    if (node->right) {
         printf(" right\n");
         tree_node_free(node->right);
     }
@@ -182,7 +179,7 @@ void tree_node_free(Tree_Node *node)
 
 void tree_free(Tree *tree)
 {
-    if(!tree||!tree->root)
+    if (!tree || !tree->root)
         return;
 
     tree_node_free(tree->root);
@@ -201,14 +198,14 @@ static inline int string_cmp( const char *str1, const char *str2)
     else if ( size1 > size2 )
         return -1;              ///RIGHT
 
-    return ((strcmp(str1, str2)==0) ? 0 : -1 );
+    return ((strcmp(str1, str2) == 0) ? 0 : -1 );
 }
 
 Tree_Node *tree_find_node_recursive(Tree_Node *node, cstring *key)
 {
-    if(node == NULL)
+    if (node == NULL)
         return NULL;
-    else if(!strcmp(node->key->str, key->str))
+    else if (!strcmp(node->key->str, key->str))
         return node;
     else if (strlen(node->key->str) > strlen(key->str))
         return tree_find_node_recursive(node->left, key);
@@ -220,20 +217,15 @@ Tree_Node *tree_node_find(Tree_Node *node, char *key)
 {
     static int result;
 
-    while(node)
-    {
-        printf("#\tkey: %s\tNode: %s\n",key, node->key->str);
-        if( (result = string_cmp( key, node->key->str )) < 0 ) ///here was string_cmp replaced by classi strcmp that is fully functioning, string_cmp did not work
-        {
+    while (node) {
+        printf("#\tkey: %s\tNode: %s\n", key, node->key->str);
+        if ( (result = string_cmp( key, node->key->str )) < 0 ) { ///here was string_cmp replaced by classic strcmp that is fully functioning, string_cmp did not work
             printf("right search\n");
             node = node->right;
-        }
-        else if( result > 0 )
-        {
+        } else if ( result > 0 ) {
             printf("left search\n");
             node = node->left;
-        }
-        else /// node with same key as parameter key was found and will be returned
+        } else /// node with same key as parameter key was found and will be returned
             return node;
     }
 
@@ -264,8 +256,7 @@ static inline void tree_create_root(Tree *tree, cstring *key, void *data)
 
 int tree_insert(Tree *tree, cstring *key, void *data)
 {
-    if (!tree->root)
-    {
+    if (!tree->root) {
         tree_create_root(tree, key, data);
         return 0;
     }
@@ -275,16 +266,12 @@ int tree_insert(Tree *tree, cstring *key, void *data)
     Tree_Node *tmp = tree->root;
     uint result;
 
-    while(tmp)
-    {
+    while (tmp) {
         result = strlen(tmp->key->str);
-        if (key_size < result)
-        {
+        if (key_size < result) {
             printf("left insert\n");
-            if(!tmp->left)
-            {
-                if(!(tmp->left = malloc(sizeof(Tree_Node))))
-                {
+            if (!tmp->left) {
+                if (!(tmp->left = malloc(sizeof(Tree_Node)))) {
                     printf("malloc fail\n");
                 }
                 tmp->left->key = key;
@@ -292,17 +279,12 @@ int tree_insert(Tree *tree, cstring *key, void *data)
                 tmp->left->data = data;
                 tree->last = tmp->left;
                 return 0;
-            }
-            else
+            } else
                 tmp = tmp->left;
-        }
-        else if(key_size >= result)
-        {
+        } else if (key_size >= result) {
             printf("right insert\n");
-            if (!tmp->right)
-            {
-                if(!(tmp->right = malloc(sizeof(Tree_Node))))
-                {
+            if (!tmp->right) {
+                if (!(tmp->right = malloc(sizeof(Tree_Node)))) {
                     printf("malloc fail\n");
                 }
                 tmp->right->key = key;
@@ -310,12 +292,9 @@ int tree_insert(Tree *tree, cstring *key, void *data)
                 tmp->right->data = data;
                 tree->last = tmp->right;
                 return 0;
-            }
-            else
+            } else
                 tmp = tmp->right;
-        }
-        else
-        {
+        } else {
             printf("last insert\n");
             tree->last = tmp;
             return 0;
@@ -400,18 +379,15 @@ void tree_print(Tree *tree)
 }*/
 
 
-static void tree_print_nodes(Tree_Node *node, char* sufix, char fromdir)
+static void tree_print_nodes(Tree_Node *node, char *sufix, char fromdir)
 {
-    if (node != NULL)
-    {
-        char* suf2 = (char*) malloc(strlen(sufix) + 4);
+    if (node != NULL) {
+        char *suf2 = (char *) malloc(strlen(sufix) + 4);
         strcpy(suf2, sufix);
-        if (fromdir == 'L')
-        {
+        if (fromdir == 'L') {
             suf2 = strcat(suf2, "  |");
             printf("%s\n", suf2);
-        }
-        else
+        } else
             suf2 = strcat(suf2, "   ");
 
         tree_print_nodes(node->right, suf2, 'R');
@@ -433,7 +409,7 @@ void tree_print(Tree *tree)
     if (tree != NULL)
         tree_print_nodes(tree->root, "", 'X');
     else
-        fprintf(stderr,"Tree uninicialized\n");
+        fprintf(stderr, "Tree uninicialized\n");
     printf("\n");
 }
 

@@ -1,7 +1,7 @@
 /**
  * @file    ial.h
  * @name    Functions from Algorithms.
- * @author  Albert Uchytil (xuchyt03), Pavel Tobias (xtobia01)
+ * @author  Albert Uchytil (xuchyt03), Pavel Tobias (xtobia01), Vojtech Mašek (xmasek15)
  ******************************************************************/
 
 #ifndef __IAL_H__
@@ -13,8 +13,7 @@
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
 
-typedef struct Tree_Node
-{
+typedef struct Tree_Node {
     struct Tree_Node    *left;
     struct Tree_Node    *right;
     cstring             *key;
@@ -22,8 +21,7 @@ typedef struct Tree_Node
 
 }   Tree_Node;
 
-typedef struct
-{
+typedef struct {
     Tree_Node   *root;
     Tree_Node   *last;
 }   Tree;
@@ -75,9 +73,9 @@ void ms_swap(char **str1, char **str2);
 
 
 int         tree_insert(Tree *, cstring *, void *);
-Tree_Node*  tree_find_key(Tree*, cstring*);
-Tree_Node*  tree_find_key_ch(Tree*, char*);
-Tree_Node*  tree_node_find(Tree_Node *, char *);
+Tree_Node  *tree_find_key(Tree *, cstring *);
+Tree_Node  *tree_find_key_ch(Tree *, char *);
+Tree_Node  *tree_node_find(Tree_Node *, char *);
 void        tree_init(Tree *);
 void        tree_free(Tree *);
 void        tree_print(Tree *);
