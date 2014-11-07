@@ -1,8 +1,8 @@
 /**
- * @file	cstring.h
- * @name	Chybove hlasky (header file)
- * @author	Vojtech Mašek (xmasek15)
- * @brief	Implementacia cstrig retazcov pre projekt do predmetu IFJ
+ * @file    cstring.h
+ * @name    Chybove hlasky (header file)
+ * @author  Vojtech Mašek (xmasek15)
+ * @brief   Implementacia cstrig retazcov pre projekt do predmetu IFJ
  ****************************************************************************/
 
 #ifndef __CSTRING_H__
@@ -13,8 +13,7 @@
 #define     CSTRING_START_SIZE  16
 
 
-typedef struct
-{
+typedef struct {
     char    *str;
     ulong   size, tab_size;
 }   cstring;
@@ -22,6 +21,10 @@ typedef struct
 /* Print */
 void        print_cstr(cstring const *);
 void        print_cstr_all(cstring const *);
+
+/* Copying and Comparing */
+int         cstr_cmp(cstring const *, cstring const *);
+cstring     *cstr_copy(cstring const *);
 
 
 /* Allocation and copying */
@@ -32,7 +35,7 @@ int         cstr_resize(cstring *, ulong);
 
 
 /* = and += */
-cstring 	*cstr_append_chr(cstring *, char);
+cstring     *cstr_append_chr(cstring *, char);
 
 cstring     *cstr_assign_str(cstring *, char const *);
 cstring     *cstr_append_str(cstring *, char const *);

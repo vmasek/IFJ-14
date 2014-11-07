@@ -1,8 +1,8 @@
 /**
- * @file	cstring.c
- * @name	Chybove hlasky
- * @author	Vojtech Mašek (xmasek15)
- * @brief	Implementacia cstrig retazcov pre projekt do predmetu IFJ
+ * @file    cstring.c
+ * @name    Chybove hlasky
+ * @author  Vojtech Mašek (xmasek15)
+ * @brief   Implementacia cstrig retazcov pre projekt do predmetu IFJ
  ****************************************************************************/
 
 #include    "errors.h"
@@ -23,13 +23,13 @@
  */
 static cstring *append(cstring *s, char const *str, ulong size)
 {
-	/**Kontrola dlzky, ak bude dlzka prekrocena zavola sa resize, iba ak budu
-	 * obe podmienky vyhodnotene ako true (potrebna dlzka je vecsia a nepodari
-	 * sa predlzenie) bude vrateny NULL.
-	 * @code
-	 * if (size >= s->tab_size && cstr_resize(s, size))
-	 *     return NULL; @endcode
-	 */
+    /**Kontrola dlzky, ak bude dlzka prekrocena zavola sa resize, iba ak budu
+     * obe podmienky vyhodnotene ako true (potrebna dlzka je vecsia a nepodari
+     * sa predlzenie) bude vrateny NULL.
+     * @code
+     * if (size >= s->tab_size && cstr_resize(s, size))
+     *     return NULL; @endcode
+     */
     if (size >= s->tab_size && cstr_resize(s, size))
         return NULL;
 
@@ -56,9 +56,9 @@ static cstring *append(cstring *s, char const *str, ulong size)
  */
 static int cstr_quick_resize(cstring *s)
 {
-	ulong new_size = s->tab_size *2;
+    ulong new_size = s->tab_size * 2;
     char *tmp;
-	//bude prealokovane na dvojnasobok aktualnej velkosti
+    //bude prealokovane na dvojnasobok aktualnej velkosti
     if (!(tmp = realloc(s->str, new_size)))
         return -1;
     s->str = tmp;
@@ -81,12 +81,12 @@ static int cstr_quick_resize(cstring *s)
  */
 cstring *cstr_append_chr(cstring *s, char c)
 {
-	///pokial bude ako false vyhodnotena uz prva podmienka tak sa resize ani volat nebude, princip v podstate rovnaky ako pri @see append() ale s upravami vynechavajucimi zbytocne operacie
-	if (s->size+1 >= s->tab_size && cstr_quick_resize(s))
+    ///pokial bude ako false vyhodnotena uz prva podmienka tak sa resize ani volat nebude, princip v podstate rovnaky ako pri @see append() ale s upravami vynechavajucimi zbytocne operacie
+    if (s->size + 1 >= s->tab_size && cstr_quick_resize(s))
         return NULL;
 
     s->str[s->size] = c;
-    s->str[s->size+=1] = '\0';
+    s->str[s->size += 1] = '\0';
     return s;
 }
 
@@ -190,6 +190,19 @@ cstring *cstr_create_cstr(cstring const *cstr)
     return NULL;
 }
 
+/**
+ * @brief  Copies cstring.
+ * @param  cstr pointer to cstring, from witch will be taken data.
+ * @return pointer to created cstring.
+ *
+ * Warning: does not create exact copy of cstring, just copies "str" value and
+ * creates new cstring with that value.
+ */
+cstring *cstr_copy(cstring const *cstr)
+{
+    return cstr_create_str(cstr->str);
+}
+
 
 /**
  * @brief Zvecsuje pamet pre cstring retazec
@@ -245,6 +258,19 @@ void print_cstr(cstring const *s)
     puts(s->str);
 }
 
+/**
+ * @brief Compares two cstrings.
+ * @param s1 first cstring to compare
+ * @param s2 second cstring to compare
+ * @returns int value, if cstrings are same returns 0, else <>0
+ *
+ * Uses strcmp to compare "str" valuses of cstrings.
+ */
+int cstr_cmp(cstring const *s1, cstring const *s2)
+{
+    return strcmp(s1->str, s2->str);
+}
+
 
 /**
  * @brief Vypise cely csting na samostany riadok.
@@ -255,10 +281,9 @@ void print_cstr(cstring const *s)
 void print_cstr_all(cstring const *s)
 {
     printf("\t%lu / %lu - [ %s ]\n", s->size, s->tab_size, s->str);
-    for(uint i=0; i<s->size; i++)
-    {
-		printf("\t%d\t=\t%c\n", s->str[i], s->str[i]);
-	}
+    for (uint i = 0; i < s->size; i++) {
+        printf("\t%d\t=\t%c\n", s->str[i], s->str[i]);
+    }
 }
 
 
@@ -268,11 +293,11 @@ void print_cstr_all(cstring const *s)
 int main()
 {
     cstring*  str = cstr_create_str("Blablla");
-	print_cstr_all(str);												// { 7 / 16 - [ Blablla ]	}
-	print_cstr_all(cstr_assign_str(str, "LEET"));						// { 4 / 16 - [ LEET ]	}
-    print_cstr_all(cstr_append_str(str, " 1337"));						// { 9 / 16 - [ LEET 1337 ]	}
+    print_cstr_all(str);                                                // { 7 / 16 - [ Blablla ]   }
+    print_cstr_all(cstr_assign_str(str, "LEET"));                       // { 4 / 16 - [ LEET ]  }
+    print_cstr_all(cstr_append_str(str, " 1337"));                      // { 9 / 16 - [ LEET 1337 ] }
     cstr_clear(str);
-    print_cstr_all(cstr_append_str(str, "@+!\t5%^*#42=answ2' '"));		// { 20 / 32 - [ @+! 5%^*#42=answ2' ' ]	}
+    print_cstr_all(cstr_append_str(str, "@+!\t5%^*#42=answ2' '"));      // { 20 / 32 - [ @+! 5%^*#42=answ2' ' ] }
 
     cstring*  ch_str = cstr_create_str("11111111111");
     print_cstr_all(ch_str);
@@ -281,19 +306,19 @@ int main()
 
     for (uint i=0; i<20; i++)
     {
-		print_cstr_all(cstr_append_chr(ch_str, 'A'));
-		printf("\n");
-	}
+        print_cstr_all(cstr_append_chr(ch_str, 'A'));
+        printf("\n");
+    }
 
 
     cstring*  str1;
     cstring*  str2;
 
-	printf("\n\n\n");
-	//	{	131 / 144 - [ ... ]	}
-	//	{	131 / 144 - [ ... ]	}
-	//	{	626 / 720 - [ ... ]	}
-	//	{	757 / 864 - [ ... ]	}
+    printf("\n\n\n");
+    //  {   131 / 144 - [ ... ] }
+    //  {   131 / 144 - [ ... ] }
+    //  {   626 / 720 - [ ... ] }
+    //  {   757 / 864 - [ ... ] }
 
     print_cstr_all(str1 = cstr_create_str("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean et est a dui semper facilisis. Pellentesque placerat elit a nunc."));
     printf("\n\n");
@@ -307,7 +332,7 @@ int main()
     print_cstr_all(cstr_assign_str(str1, " & "));
 
 
-	cstr_free(str);
+    cstr_free(str);
     cstr_free(ch_str);
     cstr_free(str1);
     cstr_free(str2);
