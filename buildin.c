@@ -38,10 +38,9 @@ char *copy(char *s, int i, int n)
 
     originstr = s;
 
-    /*TODO: Fix to return exact error_code if malloc isnt correct
-            F
+    /*TODO: Fix to return exact error_code if malloc isnt correct */
     for (position = 0 ; position < i ; position++)      /* Go to index position */
-    originstr++;
+        originstr++;
 
     for (position = 0 ; position < (n - i) ; position++) { /* Copy characters */
         *(substr + position) = *originstr;
