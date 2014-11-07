@@ -8,7 +8,7 @@
 #define __IAL_H__
 
 #include    "cstring.h"
-
+#include    "common.h"
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 

@@ -10,6 +10,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+
+#define TREE_LEFT 1
+#define TREE_RIGT (-1)
+#define TREE_ROOT 0
+
 /**
  * @brief Creates Partial match table for Knuth–Morris–Pratt algorithm.
  *
@@ -157,18 +162,18 @@ void tree_init(Tree *tree)
 
 void tree_node_free(Tree_Node *node)
 {
-    printf("free");
+    debug("free");
     if (!node) {
-        printf("not node\n");
+        debug("not node\n");
         return;
     }
 
     if (node->left) {
-        printf(" left\n");
+        debug(" left\n");
         tree_node_free(node->left);
     }
     if (node->right) {
-        printf(" right\n");
+        debug(" right\n");
         tree_node_free(node->right);
     }
 
@@ -218,12 +223,14 @@ Tree_Node *tree_node_find(Tree_Node *node, char *key)
     static int result;
 
     while (node) {
-        printf("#\tkey: %s\tNode: %s\n", key, node->key->str);
+		#ifdef DEBUG
+			fprintf(stderr, "FOUND:\t\t#\tkey: %s\tNode: %s\n", key, node->key->str);
+        #endif
         if ( (result = string_cmp( key, node->key->str )) < 0 ) { ///here was string_cmp replaced by classic strcmp that is fully functioning, string_cmp did not work
-            printf("right search\n");
+            debug("right search\n");
             node = node->right;
         } else if ( result > 0 ) {
-            printf("left search\n");
+            debug("left search\n");
             node = node->left;
         } else /// node with same key as parameter key was found and will be returned
             return node;
@@ -246,13 +253,14 @@ Tree_Node *tree_find_key_ch(Tree *tree, char *key)
 
 static inline void tree_create_root(Tree *tree, cstring *key, void *data)
 {
-    printf("root insert\n");
+    debug("root insert\n");
     tree->root = malloc(sizeof(Tree_Node));
     tree->root->key = key;
     tree->root->left = tree->root->right = NULL;
     tree->root->data = data;
     tree->last = tree->root;
 }
+
 
 int tree_insert(Tree *tree, cstring *key, void *data)
 {
@@ -268,11 +276,12 @@ int tree_insert(Tree *tree, cstring *key, void *data)
 
     while (tmp) {
         result = strlen(tmp->key->str);
+
         if (key_size < result) {
-            printf("left insert\n");
+            debug("left insert\n");
             if (!tmp->left) {
                 if (!(tmp->left = malloc(sizeof(Tree_Node)))) {
-                    printf("malloc fail\n");
+                    debug("malloc fail\n");
                 }
                 tmp->left->key = key;
                 tmp->left->left = tmp->left->right = NULL;
@@ -282,10 +291,10 @@ int tree_insert(Tree *tree, cstring *key, void *data)
             } else
                 tmp = tmp->left;
         } else if (key_size >= result) {
-            printf("right insert\n");
+            debug("right insert\n");
             if (!tmp->right) {
                 if (!(tmp->right = malloc(sizeof(Tree_Node)))) {
-                    printf("malloc fail\n");
+                    debug("malloc fail\n");
                 }
                 tmp->right->key = key;
                 tmp->right->left = tmp->right->right = NULL;
@@ -294,10 +303,6 @@ int tree_insert(Tree *tree, cstring *key, void *data)
                 return 0;
             } else
                 tmp = tmp->right;
-        } else {
-            printf("last insert\n");
-            tree->last = tmp;
-            return 0;
         }
     }
     return 0;
