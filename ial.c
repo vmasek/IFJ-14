@@ -159,7 +159,6 @@ void tree_init(Tree *tree)
 }
 
 
-
 void tree_node_free(Tree_Node *node)
 {
     debug("free");
@@ -223,14 +222,14 @@ Tree_Node *tree_node_find(Tree_Node *node, char *key)
     static int result;
 
     while (node) {
-		#ifdef DEBUG
-			fprintf(stderr, "FOUND:\t\t#\tkey: %s\tNode: %s\n", key, node->key->str);
-        #endif
+#ifdef DEBUG
+        fprintf(stderr, "FOUND:\t\t#\tkey: %s\tNode: %s\n\n\n", key, node->key->str);
+#endif
         if ( (result = string_cmp( key, node->key->str )) < 0 ) { ///here was string_cmp replaced by classic strcmp that is fully functioning, string_cmp did not work
-            debug("right search\n");
+            debug("right search");
             node = node->right;
         } else if ( result > 0 ) {
-            debug("left search\n");
+            debug("left search");
             node = node->left;
         } else /// node with same key as parameter key was found and will be returned
             return node;
@@ -254,11 +253,37 @@ Tree_Node *tree_find_key_ch(Tree *tree, char *key)
 static inline void tree_create_root(Tree *tree, cstring *key, void *data)
 {
     debug("root insert\n");
-    tree->root = malloc(sizeof(Tree_Node));
+    if (!(tree->root = malloc(sizeof(Tree_Node)))) {
+        debug("malloc fail\n");
+    }
     tree->root->key = key;
     tree->root->left = tree->root->right = NULL;
     tree->root->data = data;
     tree->last = tree->root;
+}
+
+static inline void tree_create_left(Tree *tree, Tree_Node *tmp, cstring *key, void *data)
+{
+    debug("left insert\n");
+    if (!(tmp->left = malloc(sizeof(Tree_Node)))) {
+        debug("malloc fail\n");
+    }
+    tmp->left->key = key;
+    tmp->left->left = tmp->left->right = NULL;
+    tmp->left->data = data;
+    tree->last = tmp->left;
+}
+
+static inline void tree_create_right(Tree *tree, Tree_Node *tmp, cstring *key, void *data)
+{
+    debug("right insert\n");
+    if (!(tmp->right = malloc(sizeof(Tree_Node)))) {
+        debug("malloc fail\n");
+    }
+    tmp->right->key = key;
+    tmp->right->left = tmp->right->right = NULL;
+    tmp->right->data = data;
+    tree->last = tmp->right;
 }
 
 
@@ -278,28 +303,28 @@ int tree_insert(Tree *tree, cstring *key, void *data)
         result = strlen(tmp->key->str);
 
         if (key_size < result) {
-            debug("left insert\n");
+            debug("left shift");
             if (!tmp->left) {
-                if (!(tmp->left = malloc(sizeof(Tree_Node)))) {
-                    debug("malloc fail\n");
-                }
-                tmp->left->key = key;
-                tmp->left->left = tmp->left->right = NULL;
-                tmp->left->data = data;
-                tree->last = tmp->left;
+                tree_create_left(tree, tmp, key, data);
                 return 0;
             } else
                 tmp = tmp->left;
-        } else if (key_size >= result) {
-            debug("right insert\n");
+        } else if (key_size > result) {
+            debug("right shift");
             if (!tmp->right) {
-                if (!(tmp->right = malloc(sizeof(Tree_Node)))) {
-                    debug("malloc fail\n");
-                }
-                tmp->right->key = key;
-                tmp->right->left = tmp->right->right = NULL;
-                tmp->right->data = data;
-                tree->last = tmp->right;
+                tree_create_right(tree, tmp, key, data);
+                return 0;
+            } else
+                tmp = tmp->right;
+        } else {
+            if (!cstr_cmp(key, tmp->key)) {
+                tmp->data = data;
+                tree->last = tmp;
+                return 0;
+            }
+            debug("right shift");
+            if (!tmp->right) {
+                tree_create_right(tree, tmp, key, data);
                 return 0;
             } else
                 tmp = tmp->right;
