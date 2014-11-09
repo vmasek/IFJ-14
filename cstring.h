@@ -1,8 +1,8 @@
 /**
  * @file    cstring.h
- * @name    Chybove hlasky (header file)
+ * @name    Cstring (header file)
  * @author  Vojtech Mašek (xmasek15)
- * @brief   Implementacia cstrig retazcov pre projekt do predmetu IFJ
+ * @brief   Implementation of cstrig strings for IFJ projekt
  ****************************************************************************/
 
 #ifndef __CSTRING_H__
@@ -44,7 +44,7 @@ cstring     *cstr_assign_cstr(cstring *, cstring const *);
 cstring     *cstr_append_cstr(cstring *, cstring const *);
 
 
-/* clean and free */
+/* Clean and Free */
 void        cstr_clear(cstring *);
 void        cstr_free(cstring *);
 

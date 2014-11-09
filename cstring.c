@@ -1,8 +1,8 @@
 /**
  * @file    cstring.c
- * @name    Chybove hlasky
+ * @name    Cstring
  * @author  Vojtech Mašek (xmasek15)
- * @brief   Implementacia cstrig retazcov pre projekt do predmetu IFJ
+ * @brief   Implementation of cstrig strings for IFJ projekt
  ****************************************************************************/
 
 #include    "errors.h"
@@ -12,20 +12,18 @@
 
 
 /**
- * @brief Predlzenie cstringu
- * @param s ukazatel na cstring ktory bude predlzovany
- * @param str retazec o ktory sa predlzi cstring
- * @param size dlzka retazca o ktory budeme predlzovat
- * @returns ukazatel na predlzeny cstring s
+ * @brief Extension of cstring.
+ * @param s pointer to csting that will be extended.
+ * @param str string that will be used to exted cstring.
+ * @param size lenght of string "str".
+ * @returns pointer to extended cstring s.
  *
- * Funkcia vykonava predlzenie cstring retazca a zarovnen kontroluje
- * nevyziadane chovanie pri realokacii.
+ * Function extends cstring controls the behavior of the unsolicited reallocation.
  */
 static cstring *append(cstring *s, char const *str, ulong size)
 {
-    /**Kontrola dlzky, ak bude dlzka prekrocena zavola sa resize, iba ak budu
-     * obe podmienky vyhodnotene ako true (potrebna dlzka je vecsia a nepodari
-     * sa predlzenie) bude vrateny NULL.
+    /**If size will be exceeded, resize will be called, only if both statements
+     * are true (needed size is bigger and enlargement fails) NULL will be returned.
      * @code
      * if (size >= s->tab_size && cstr_resize(s, size))
      *     return NULL; @endcode
@@ -44,15 +42,16 @@ static cstring *append(cstring *s, char const *str, ulong size)
 
 
 /**
- * @brief Rychle znasobenie pamete pre retazec v cstringu
- * @param s cstring ktory bude realokovany
- * @returns Pozor vracia (-1) //TRUE ak realokovanie zlyhalo inak (0) //FALSE
+ * @brief Quick enlargement of memory allocated for strig in cstring.
+ * @param s cstring that will be reallocated.
+ * @returns Warning returns (-1) //TRUE if realloc failed, else if everything is ok (0) //FALSE
  *
- * Realokuje pamet pre cstring retazec tak ze znasobi aktualne alokovane
- * mnozstvo dvomi.
- * Funkcia vyuzivana pri appendovani charov do cstringu, tento proces bude
- * casty a potrebujeme aby nebol zdrzovany neustalim realokovanim zdrojov.
- * Bola tak zvolena pametova narocnost na ukor vyssej rychlosti.
+ * Reallocates memory for cstring string, multiples actual allocated size by 2.
+ * Function is used for appending of chars to cstring, this will be used
+ * frequently so it needst to be quick, and every delay by by reallocating
+ * will be uselles.
+ * Memory consumption was selected instead of time consumption, so there will
+ * be no slowdowns.
  */
 static int cstr_quick_resize(cstring *s)
 {
@@ -68,20 +67,19 @@ static int cstr_quick_resize(cstring *s)
 
 
 /**
- * @brief Prida char k cstring retazcu
- * @param s ukazadel na cstring kde chceme pridat char.
- * @param c char ktory bude appendnuty
- * @returns ukazatel na cstring s pridanym charom
+ * @brief Appends char to cstring.
+ * @param s pointer to cstring where char will be appended.
+ * @param c char that will be appended.
+ * @returns cstrig with appended char.
  *
- * Funkcia ktora zabezpecuje moznost rychleho pridavania charov na koniec
- * cstring retazca, ak je potrebna realokacia pamete pre retazec, tak vola
- * funkciu @see cstr_quick_resize(), tento sposob pridavania znakov do cstring
- * retazca je vyrazne rychlejsi ako neustale vkladanie string alebo realokacia
- * vzdy pre jeden char naviac.
+ * Function provides fast of chars at the end of the cstring, when reallocation
+ * of memory is needed @see cstr_quick_resize() will be called, this method of
+ * adding characters to a cstring chain is significantly faster than constantly
+ * inserting string or reallocate always for one extra char.
  */
 cstring *cstr_append_chr(cstring *s, char c)
 {
-    ///pokial bude ako false vyhodnotena uz prva podmienka tak sa resize ani volat nebude, princip v podstate rovnaky ako pri @see append() ale s upravami vynechavajucimi zbytocne operacie
+	/** As long as false is evaluated in the first condition resize will not be called, the principe is essentially the same as for @see append() but with modifications excluding unnecessary operations */
     if (s->size + 1 >= s->tab_size && cstr_quick_resize(s))
         return NULL;
 
@@ -90,14 +88,15 @@ cstring *cstr_append_chr(cstring *s, char c)
     return s;
 }
 
+
 /**
- * @brief Spoji retazec s cstringom
- * @param s ukazatel na cstring ktory bude predlzeny
- * @param str retazec znakov ktory pripoji na koniec cstringu
- * @returns ukazatel na predlzeny cstring
+ * @brief Appends string to cstring.
+ * @param s pointer to cstring where string will be appended.
+ * @param str that will be appended.
+ * @returns cstrig with appended string.
  *
- * Pouziva staticku funkciu append implementovanu v cstring.c, blizsie detaily
- * uvedene priamo tam.
+ * Uses static function @see append implemented in cstring.c, more details
+ * written there.
  */
 cstring *cstr_append_str(cstring *s, char const *str)
 {
@@ -106,13 +105,13 @@ cstring *cstr_append_str(cstring *s, char const *str)
 
 
 /**
- * @brief Spoji csting s cstringom
- * @param s ukazatel na cstring ktory bude predlzeny
- * @param cstr cstring ktory bude pripojeny na koniec cstringu s
- * @returns ukazatel na predlzeny cstring
+ * @brief Appends ctring to cstring
+ * @param s pointer to cstring where cstring will be appended.
+ * @param cstr that will be appended.
+ * @returns cstrig with appended cstring.
  *
- * Pouziva staticku funkciu append implementovanu v cstring.c, blizsie detaily
- * uvedene priamo tam.
+ * Uses static function @see append implemented in cstring.c, more details
+ * written there.
  */
 cstring *cstr_append_cstr(cstring *s, cstring const *cstr)
 {
@@ -121,14 +120,13 @@ cstring *cstr_append_cstr(cstring *s, cstring const *cstr)
 
 
 /**
- * @brief Priradi cstingu retazec
- * @param s ukazatel na cstring do ktoreho bude retazec priradeny
- * @param str retazec ktoru bude priradeny
- * @returns ukazatel na naplneny cstring s
+ * @brief Assigns string to cstring.
+ * @param s poiter to cstring where will be str assigned.
+ * @param str string that will be assigned.
+ * @returns cstring
  *
- * Pouziva staticky funkciu append implementovanu v cstring.c, blizsie detaily
- * uvedene priamo tam.
- * @see append()
+ * Uses static function @see append implemented in cstring.c, more details
+ * written there.
  */
 cstring *cstr_assign_str(cstring *s, char const *str)
 {
@@ -138,13 +136,13 @@ cstring *cstr_assign_str(cstring *s, char const *str)
 
 
 /**
- * @brief Priradi cstingu s cstring cstr
- * @param s ukazatel na cstring do ktoreho bude cstring cstr priradeny
- * @param cstr cstring ktory bude priradeny
- * @returns ukazatel na naplneny cstring s
+ * @brief Assigns cstring to cstring.
+ * @param s poiter to cstring where will be cstr assigned.
+ * @param cstr cstring that will be assigned.
+ * @returns cstring
  *
- * Pouziva staticky funkciu append implementovanu v cstring.c, blizsie detaily
- * uvedene priamo tam.
+ * Uses static function @see append implemented in cstring.c, more details
+ * written there.
  */
 cstring *cstr_assign_cstr(cstring *s, cstring const *cstr)
 {
@@ -154,11 +152,11 @@ cstring *cstr_assign_cstr(cstring *s, cstring const *cstr)
 
 
 /**
- * @brief  Vytvori novy cstring.
- * @param  str [description]
- * @return ukazatel na novovytvoreny cstring
+ * @brief  Creates new cstring.
+ * @param  str string that will be written into newly created cstring.
+ * @return pointer to new cstring.
  *
- * Alokuje pamet pre retazec a vytvori strukturu.
+ * Writes str from parameters into newly created cstring.
  */
 cstring *cstr_create_str(char const *str)
 {
@@ -173,11 +171,11 @@ cstring *cstr_create_str(char const *str)
 
 
 /**
- * @brief  Vytvori novy cstring.
- * @param  cstr ukazatel na cstring z ktoreho sa budu brat data
- * @return ukazatel na novovytvoreny cstring
+ * @brief  Creates new cstring.
+ * @param  cstr pointer to a cstring from which the data will be taken.
+ * @return pointer to newly created cstring.
  *
- * Obsah retazec z cstringu cstr ktory dostane parametrom zapise do novovytvoreneho
+ * Writes string from cstr parameter into newly created cstring.
  */
 cstring *cstr_create_cstr(cstring const *cstr)
 {
@@ -205,15 +203,15 @@ cstring *cstr_copy(cstring const *cstr)
 
 
 /**
- * @brief Zvecsuje pamet pre cstring retazec
- * @param s cstring ktory potrebujeme realokovat
- * @param size minimalna velkost o ktoru je potrebne zvecsit
- * @returns Pozor vracia (-1) //TRUE ak realokovanie zlyhalo inak (0) //FALSE
+ * @brief Enlarges memory allocated for cstring string.
+ * @param s cstring that will be reallocated.
+ * @param size minimal size that needs to be added.
+ * @returns Warning returns (-1) //TRUE if realloc failed, else if everything is ok (0) //FALSE
  */
 int cstr_resize(cstring *s, ulong size)
 {
-    /** Ak je cstring prazdny bude size nastavena na defaultnu hodnotu,
-        inak je new_size velkost momentalnej naalokovanej dlzky */
+    /** If cstring is empty size will be set to default value,
+        else is new_size set as size of new requied lenght */
     ulong new_size = s->tab_size ? s->tab_size : CSTRING_START_SIZE;
     char  *tmp;
 
@@ -227,8 +225,10 @@ int cstr_resize(cstring *s, ulong size)
 
 
 /**
- * @brief Vlozi na zaciatok cstring retazca ukoncovaci znak a nastavi velkost na nulu.
- * @param s ukazatel na cstring ktory bude vycisteny
+ * @brief Clears cstring.
+ * @param s pointer to cstring that will be cleared.
+ *
+ * Inserts null terminate char to begin of the cstring and sets size to zero.
  */
 void cstr_clear(cstring *s)
 {
@@ -238,8 +238,8 @@ void cstr_clear(cstring *s)
 
 
 /**
- * @brief Uvolni pamet alokovanu pre data a strukturu cstringu.
- * @param s ukazatel na cstring
+ * @brief Frees memory alocated for cstring.
+ * @param s pointer to cstring.
  */
 void cstr_free(cstring *s)
 {
@@ -249,8 +249,8 @@ void cstr_free(cstring *s)
 
 
 /**
- * @brief Vypise retazec cstingu na samostany riadok.
- * @param s ukazatel na cstring
+ * @brief Prints cstring on one line.
+ * @param s pointer to cstring.
  */
 void print_cstr(cstring const *s)
 {
@@ -273,8 +273,8 @@ int cstr_cmp(cstring const *s1, cstring const *s2)
 
 
 /**
- * @brief Vypise cely csting na samostany riadok.
- * @param s ukazatel na cstring
+ * @brief Prints whole cstring.
+ * @param s pointer to cstring.
  *
  * Format : "size / capacity - [c_str()]"
  */
@@ -287,10 +287,9 @@ void print_cstr_all(cstring const *s)
 }
 
 
-
 /*
 //----------------------------Testovaci-main----------------------------------
-int main()
+int main(void)
 {
     cstring*  str = cstr_create_str("Blablla");
     print_cstr_all(str);                                                // { 7 / 16 - [ Blablla ]   }
@@ -332,10 +331,32 @@ int main()
     print_cstr_all(cstr_assign_str(str1, " & "));
 
 
+	if(cstr_cmp(str, str1))
+	{
+		printf("\n1. compare ok\n");
+	}
+	else
+	{
+		printf("\n1. compare fail\n");
+	}
+
+	print_cstr_all(str = cstr_assign_str(str, "aaaaaaaaaaaaaaaaaaaaaaa\n"));
+	print_cstr_all(str = cstr_assign_cstr(str, str1));
+
+	if(!cstr_cmp(str, str1))
+	{
+		printf("\n2. compare ok\n");
+	}
+	else
+	{
+		printf("\n2. compare fail\n");
+	}
+
     cstr_free(str);
     cstr_free(ch_str);
     cstr_free(str1);
     cstr_free(str2);
+
 
     return SUCCESS;
 }
