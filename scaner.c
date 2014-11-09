@@ -13,7 +13,6 @@
  * Can operate only when:
  *  - all tokens are separated by space
  *  - limited strings (no special chars)
- *  - no floats
  *  - no errors in syntax
  *
  * Author: Adam Samalik
@@ -121,6 +120,15 @@ static enum token_keyword _get_keyword(char *name) {
 
 
 /*
+ * Append a character to a string
+ */
+static void strcatc(char * destination, char c) {
+    char buffer[2] = "\0\0";
+    buffer[0] = c;
+    strcat(destination, buffer);
+}
+
+/*
  * Load (another) lexeme from the source file
  * and return it's Token representation
  */
@@ -130,6 +138,8 @@ void get_token(Token *token, FILE *input) {
 
     int token_name_pos = 0;
     enum token_keyword keyword;
+
+    char buffer[100] = "";
 
     while (1) {
         symbol = getc(input);
@@ -151,7 +161,7 @@ void get_token(Token *token, FILE *input) {
             }
 
             if (symbol >= '0' && symbol <= '9') {
-                token->value.value_int = symbol - '0'; // FIXME: ugly conversion!
+                strcatc(buffer, symbol);
                 token->type = TOKEN_INT;
                 state = LEXER_INT_LOADING;
                 break;
@@ -308,23 +318,18 @@ void get_token(Token *token, FILE *input) {
 
         case LEXER_INT_LOADING:
             if (symbol >= '0' && symbol <= '9') {
-                token->value.value_int *= 10;
-                token->value.value_int += symbol - '0'; // FIXME: ugly conversion!
+                strcatc(buffer, symbol);
                 break;
 
-            } else if (symbol == '.') {
+            } else if (symbol == '.' || symbol == 'e') {
+                strcatc(buffer, symbol);
                 state = LEXER_FLOAT_LOADING;
                 token->type = TOKEN_FLOAT;
                 token->value.value_float = (float)token->value.value_int;
                 break;
 
-            } else if (symbol == 'e') {
-                state = LEXER_EXP_FLOAT_LOADING;
-                token->type = TOKEN_FLOAT;
-                token->value.value_float = (float)token->value.value_int;
-                break;
-
             } else {
+                token->value.value_int = (int)atof(buffer);
                 return; // FIXME: ungetc
             }
 
@@ -332,18 +337,12 @@ void get_token(Token *token, FILE *input) {
 
         case LEXER_FLOAT_LOADING:
             if (! (symbol >= '0' && symbol <= '9')) {
+                token->value.value_float = atof(buffer);
                 // FIXME ungetc()
                 return;
             }
 
-            break;
-
-        case LEXER_EXP_FLOAT_LOADING:
-            if (! (symbol >= '0' && symbol <= '9')) {
-                // FIXME: ungetc()
-                return;
-            }
-
+            strcatc(buffer, symbol);
             break;
 
         case LEXER_ID_KEYWORD:
@@ -379,7 +378,6 @@ void get_token(Token *token, FILE *input) {
 /* 
  * Just for testing purpose
  */
-/*
 int main() {
     FILE *input = fopen("test", "r");
     Token *token = malloc(sizeof(Token *));
@@ -392,6 +390,8 @@ int main() {
             printf (" TOKEN_KEYWORD     %d", token->value.value_keyword);
         else if (token->type == TOKEN_INT)
             printf (" TOKEN_INT         %d", token->value.value_int);
+        else if (token->type == TOKEN_FLOAT)
+            printf (" TOKEN_FLOAT       %f", token->value.value_float);
         else if (token->type == TOKEN_SYMBOL)
             printf (" TOKEN_SYMBOL      %d", token->value.value_int);
         else if (token->type == TOKEN_STRING)
@@ -401,9 +401,26 @@ int main() {
         printf("\n");
     }
 
+    char s[100] = "";
+
+    strcatc(s, '1');
+
+    strcatc(s, '9');
+
+    strcatc(s, '.');
+
+    strcatc(s, '2');
+
+    strcatc(s, '0');
+
+    strcatc(s, '1');
+
+    printf("float value : %f \n" ,atof(s));
+    printf("float value : %f \n" ,strtof(s, NULL));
+
     printf("\n");
 
     fclose(input);
 
     return 0;
-} */
+}
