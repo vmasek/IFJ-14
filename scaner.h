@@ -56,6 +56,7 @@ enum token_symbol {
     ASSIGNMENT,     // :=
     SEMICOLON,      // ;
     DOT,            // .
+    DOUBLE_DOT,     // ..
     COLON,          // :
     PARENTHESIS_L,  // (
     PARENTHESIS_R,  // )
@@ -64,6 +65,7 @@ enum token_symbol {
 
 /* List of all Token types */
 enum token_type {
+    TOKEN_ERROR = 0,  //  --
     TOKEN_ID,         //  value_name
     TOKEN_INT,        //  value_int
     TOKEN_FLOAT,      //  value_float
@@ -98,8 +100,10 @@ enum lexer_state {
     LEXER_STR_SPEC,
     LEXER_INT_LOADING,
     LEXER_FLOAT_LOADING,
+    LEXER_EXP_FLOAT_LOADING,
     LEXER_COMMENT,
     LEXER_MAYBE_ASSIGNMENT,
+    LEXER_MAYBE_DOUBLE_DOT,
 };
 
 

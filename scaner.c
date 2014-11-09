@@ -186,7 +186,7 @@ void get_token(Token *token, FILE *input) {
             case ':':
                 token->type = TOKEN_SYMBOL;
                 state = LEXER_MAYBE_ASSIGNMENT;
-                break;
+                break; // can be ':=' or ':'
 
             case ';':
                 token->type = TOKEN_SYMBOL;
@@ -195,8 +195,8 @@ void get_token(Token *token, FILE *input) {
 
             case '.':
                 token->type = TOKEN_SYMBOL;
-                token->value.value_symbol = DOT;
-                return;
+                state = LEXER_MAYBE_DOUBLE_DOT;
+                break; // can be '..' or '.'
 
             case '(':
                 token->type = TOKEN_SYMBOL;
@@ -285,12 +285,26 @@ void get_token(Token *token, FILE *input) {
                 token->value.value_symbol = ASSIGNMENT;
                 return;
             } else {
-                // FIXME: return the symbol back!
+                // FIXME: ungetc()
                 token->value.value_symbol = COLON;
                 return;
             }
 
             break;
+
+
+        case LEXER_MAYBE_DOUBLE_DOT:
+            if (symbol == '.') {
+                token->value.value_symbol = DOUBLE_DOT;
+                return;
+            } else {
+                // FIXME: ungetc()
+                token->value.value_symbol = DOT;
+                return;
+            }
+
+            break;
+
 
         case LEXER_INT_LOADING:
             if (symbol >= '0' && symbol <= '9') {
@@ -304,6 +318,12 @@ void get_token(Token *token, FILE *input) {
                 token->value.value_float = (float)token->value.value_int;
                 break;
 
+            } else if (symbol == 'e') {
+                state = LEXER_EXP_FLOAT_LOADING;
+                token->type = TOKEN_FLOAT;
+                token->value.value_float = (float)token->value.value_int;
+                break;
+
             } else {
                 return; // FIXME: ungetc
             }
@@ -311,7 +331,18 @@ void get_token(Token *token, FILE *input) {
             break;
 
         case LEXER_FLOAT_LOADING:
-            
+            if (! (symbol >= '0' && symbol <= '9')) {
+                // FIXME ungetc()
+                return;
+            }
+
+            break;
+
+        case LEXER_EXP_FLOAT_LOADING:
+            if (! (symbol >= '0' && symbol <= '9')) {
+                // FIXME: ungetc()
+                return;
+            }
 
             break;
 
