@@ -378,6 +378,7 @@ void get_token(Token *token, FILE *input) {
 /* 
  * Just for testing purpose
  */
+/* 
 int main() {
     FILE *input = fopen("test", "r");
     Token *token = malloc(sizeof(Token *));
@@ -401,26 +402,8 @@ int main() {
         printf("\n");
     }
 
-    char s[100] = "";
-
-    strcatc(s, '1');
-
-    strcatc(s, '9');
-
-    strcatc(s, '.');
-
-    strcatc(s, '2');
-
-    strcatc(s, '0');
-
-    strcatc(s, '1');
-
-    printf("float value : %f \n" ,atof(s));
-    printf("float value : %f \n" ,strtof(s, NULL));
-
-    printf("\n");
 
     fclose(input);
 
     return 0;
-}
+} */
