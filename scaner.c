@@ -217,6 +217,16 @@ void get_token(Token *token, FILE *input) {
                 token->value.value_symbol = PARENTHESIS_R;
                 return;
 
+            case '>':
+                token->type = TOKEN_SYMBOL;
+                state = LEXER_MAYBE_GREATER_EQUAL;
+                break; // can be '>=' or '>'
+
+            case '<':
+                token->type = TOKEN_SYMBOL;
+                state = LEXER_MAYBE_LESS_EQUAL;
+                break; // can be '<=' or '<>' or '<'
+
 
             case '\'':
                 token->type = TOKEN_STRING;
@@ -226,6 +236,7 @@ void get_token(Token *token, FILE *input) {
             case '{':
                 state = LEXER_COMMENT;
                 break;
+
 
             }
             break;
@@ -286,6 +297,34 @@ void get_token(Token *token, FILE *input) {
 
             // FIXME
             // load another number if it's number and if not, go fuck yourself
+            break;
+
+        case LEXER_MAYBE_GREATER_EQUAL:
+            if (symbol == '=') {
+                token->value.value_symbol = GREATER_EQUAL;
+                return;
+            } else {
+                ungetc(symbol, input);
+                token->value.value_symbol = GREATER_THAN;
+                return;
+            }
+
+            break;
+
+
+        case LEXER_MAYBE_LESS_EQUAL:
+            if (symbol == '=') {
+                token->value.value_symbol = LESS_EQUAL;
+                return;
+            } else if (symbol == '>') {
+                token->value.value_symbol = NOT_EQUAL;
+                return;
+            } else {
+                ungetc(symbol, input);
+                token->value.value_symbol = LESS_THAN;
+                return;
+            }
+
             break;
 
 

@@ -59,6 +59,11 @@ enum token_symbol {
     COLON,          // :
     PARENTHESIS_L,  // (
     PARENTHESIS_R,  // )
+    GREATER_THAN,   // >
+    LESS_THAN,      // <
+    GREATER_EQUAL,  // >=
+    LESS_EQUAL,     // <=
+    NOT_EQUAL,      // <>
 };
 
 
@@ -103,6 +108,8 @@ enum lexer_state {
     LEXER_COMMENT,
     LEXER_MAYBE_ASSIGNMENT,
     LEXER_MAYBE_DOUBLE_DOT,
+    LEXER_MAYBE_GREATER_EQUAL,
+    LEXER_MAYBE_LESS_EQUAL, // also applies for <>
 };
 
 
