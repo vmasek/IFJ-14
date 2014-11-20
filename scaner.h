@@ -80,7 +80,7 @@ typedef struct {
     enum token_type type;
     union {
         int                 value_int;
-        float               value_float;
+        double              value_float;
         char                value_name[TOKEN_IDENTIFIER_MAX_LENGTH];
         cstring            *value_string; 
         enum token_keyword  value_keyword;
@@ -99,6 +99,7 @@ enum lexer_state {
     LEXER_STR_SPEC,
     LEXER_INT_LOADING,
     LEXER_FLOAT_LOADING,
+    LEXER_FLOAT_EXP_LOADING,
     LEXER_COMMENT,
     LEXER_MAYBE_ASSIGNMENT,
     LEXER_MAYBE_DOUBLE_DOT,

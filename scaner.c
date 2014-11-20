@@ -320,11 +320,18 @@ void get_token(Token *token, FILE *input) {
                 strcatc(buffer, symbol);
                 break;
 
-            } else if (symbol == '.' || symbol == 'e') {
+            } else if (symbol == '.') {
                 strcatc(buffer, symbol);
                 state = LEXER_FLOAT_LOADING;
                 token->type = TOKEN_FLOAT;
-                token->value.value_float = (float)token->value.value_int;
+                token->value.value_float = (double)token->value.value_int;
+                break;
+
+            } else if (symbol == 'e') {
+                strcatc(buffer, symbol);
+                state = LEXER_FLOAT_EXP_LOADING;
+                token->type = TOKEN_FLOAT;
+                token->value.value_float = (double)token->value.value_int;
                 break;
 
             } else {
@@ -336,6 +343,16 @@ void get_token(Token *token, FILE *input) {
             break;
 
         case LEXER_FLOAT_LOADING:
+            if (! ((symbol >= '0' && symbol <= '9') || symbol == 'e')) {
+                token->value.value_float = atof(buffer);
+                ungetc(symbol, input);
+                return;
+            }
+
+            strcatc(buffer, symbol);
+            break;
+
+        case LEXER_FLOAT_EXP_LOADING:
             if (! (symbol >= '0' && symbol <= '9')) {
                 token->value.value_float = atof(buffer);
                 ungetc(symbol, input);
