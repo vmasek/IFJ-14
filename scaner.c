@@ -17,11 +17,14 @@
  *
  */
 
-
 /*
  * Get a keyword code from it's string representation.
  */
 static enum token_keyword _get_keyword(char *name) {
+    // lowercase it before
+    for(int i = 0; name[i]; i++){
+        name[i] = tolower(name[i]);
+    }
     switch (name[0]) {
     case 'b':
         if (!strcmp(name, "begin"))
@@ -151,7 +154,9 @@ void get_token(Token *token, FILE *input) {
                 return;
             }
 
-            if (symbol >= 'a' && symbol <= 'z') { // FIXME: more rules!
+            if ((symbol >= 'a' && symbol <= 'z') ||
+                (symbol >= 'A' && symbol <= 'Z') ||
+                (symbol == '_')) {
                 token->value.value_name[token_name_pos] = symbol;
                 token_name_pos ++;
                 state = LEXER_ID_KEYWORD;
@@ -296,8 +301,6 @@ void get_token(Token *token, FILE *input) {
             }
 
             strcatc(buffer, symbol);
-            // FIXME
-            // load another number if it's number and if not, go fuck yourself
             break;
 
         case LEXER_MAYBE_GREATER_EQUAL:
@@ -403,8 +406,10 @@ void get_token(Token *token, FILE *input) {
             break;
 
         case LEXER_ID_KEYWORD:
-            if (!(symbol >= 'a' && symbol <= 'z')) { // FIXME: it's maybe not
-                                        //limited just to this symbols...
+            if (!((symbol >= 'a' && symbol <= 'z') ||
+                  (symbol >= 'A' && symbol <= 'Z') ||
+                  (symbol >= '0' && symbol <= '9') ||
+                  (symbol == '_'))) {
                 token->value.value_name[token_name_pos] = 0;
                 token_name_pos = 0;
                 keyword = _get_keyword(token->value.value_name);
@@ -416,17 +421,15 @@ void get_token(Token *token, FILE *input) {
                 }
                 ungetc(symbol, input);
                 return;
-            } 
+            } else {
+                token->value.value_name[token_name_pos] = symbol;
+                token_name_pos ++;
+                break;
+            }
 
             if (symbol == EOF) {
                 token->type = TOKEN_EOF;
                 return;
-            }
-
-            if (symbol >= 'a' && symbol <= 'z') { // FIXME: more rules!
-                token->value.value_name[token_name_pos] = symbol;
-                token_name_pos ++;
-                break;
             }
 
             break;
