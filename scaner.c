@@ -11,7 +11,6 @@
  * Very early pre-alpha release.
  *
  * Can operate only when:
- *  - limited strings (no special chars)
  *  - no errors in syntax
  *
  * Author: Adam Samalik
@@ -289,12 +288,14 @@ void get_token(Token *token, FILE *input) {
 
         case LEXER_STR_SPEC:
             if (symbol == '\'') {
-                // FIXME transform that number into a char and append that shit
-                cstr_append_str(token->value.value_string, "[SPECIAL]");
+                // FIXME what if the int is too big?!
+                symbol = (int)atof(buffer);
+                cstr_append_str(token->value.value_string, &symbol);
                 state = LEXER_STR_LOAD;
                 break;
             }
 
+            strcatc(buffer, symbol);
             // FIXME
             // load another number if it's number and if not, go fuck yourself
             break;
