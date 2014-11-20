@@ -11,7 +11,6 @@
  * Very early pre-alpha release.
  *
  * Can operate only when:
- *  - all tokens are separated by space
  *  - limited strings (no special chars)
  *  - no errors in syntax
  *
@@ -273,7 +272,7 @@ void get_token(Token *token, FILE *input) {
                 break;
             }
 
-            //ungetchar
+            ungetc(symbol, input);
             return;
 
 
@@ -295,7 +294,7 @@ void get_token(Token *token, FILE *input) {
                 token->value.value_symbol = ASSIGNMENT;
                 return;
             } else {
-                // FIXME: ungetc()
+                ungetc(symbol, input);
                 token->value.value_symbol = COLON;
                 return;
             }
@@ -308,7 +307,7 @@ void get_token(Token *token, FILE *input) {
                 token->value.value_symbol = DOUBLE_DOT;
                 return;
             } else {
-                // FIXME: ungetc()
+                ungetc(symbol, input);
                 token->value.value_symbol = DOT;
                 return;
             }
@@ -330,7 +329,8 @@ void get_token(Token *token, FILE *input) {
 
             } else {
                 token->value.value_int = (int)atof(buffer);
-                return; // FIXME: ungetc
+                ungetc(symbol, input);
+                return;
             }
 
             break;
@@ -338,7 +338,7 @@ void get_token(Token *token, FILE *input) {
         case LEXER_FLOAT_LOADING:
             if (! (symbol >= '0' && symbol <= '9')) {
                 token->value.value_float = atof(buffer);
-                // FIXME ungetc()
+                ungetc(symbol, input);
                 return;
             }
 
@@ -346,7 +346,8 @@ void get_token(Token *token, FILE *input) {
             break;
 
         case LEXER_ID_KEYWORD:
-            if (isspace(symbol)) { // FIXME: tokens are not separated by spaces!
+            if (!(symbol >= 'a' && symbol <= 'z')) { // FIXME: it's maybe not
+                                        //limited just to this symbols...
                 token->value.value_name[token_name_pos] = 0;
                 token_name_pos = 0;
                 keyword = _get_keyword(token->value.value_name);
@@ -356,6 +357,7 @@ void get_token(Token *token, FILE *input) {
                     token->type = TOKEN_KEYWORD;
                     token->value.value_keyword = keyword;
                 }
+                ungetc(symbol, input);
                 return;
             } 
 
@@ -378,7 +380,6 @@ void get_token(Token *token, FILE *input) {
 /* 
  * Just for testing purpose
  */
-/* 
 int main() {
     FILE *input = fopen("test", "r");
     Token *token = malloc(sizeof(Token *));
@@ -406,4 +407,4 @@ int main() {
     fclose(input);
 
     return 0;
-} */
+}

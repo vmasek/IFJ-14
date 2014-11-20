@@ -11,7 +11,6 @@
  * Very early pre-alpha release.
  *
  * Can operate only when:
- *  - all tokens are separated by space
  *  - limited strings (no special chars)
  *  - no errors in syntax
  *
