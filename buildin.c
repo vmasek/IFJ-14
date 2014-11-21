@@ -6,6 +6,7 @@
 
 #include "ial.h"
 #include "cstring.h"
+#include "buildin.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -66,18 +67,3 @@ cstring *sort(cstring *s)
     ms_sort(s->str);
     return s;
 }
-
-//Main for testing purposes
-/*
-int main()
-{
-
-    cstring *Vojto = cstr_create_str("1234657");
-    cstring *Albert = cstr_create_str("34");
-
-    printf("Skuska length: %d \n", length(Vojto));
-    printf("Skuska copy:  %s \n", copy(Vojto, 2, 4)->str);
-    printf("Skuska find: %d \n", find(Vojto, Albert));
-    printf("Skuska sort:  %s \n", sort(Vojto)->str);
-    return 0;
-}*/
