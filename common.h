@@ -17,6 +17,20 @@
 #define debug(Message)
 #endif
 
+/**
+ * Value checking macro
+ */
+#define CHECK_VALUE(val, ret) if (((ret) = (val)) != SUCCESS) return (ret);
+
+/**
+ * Union representing value of any type
+ */
+typedef union {
+    int integer;
+    double real;
+    cstring string;
+    bool boolean;
+} Value;
 
 /**
  * @brief Function converts char to int.
