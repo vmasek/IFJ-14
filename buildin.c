@@ -5,81 +5,79 @@
  *******************************************************************/
 
 #include "ial.h"
+#include "cstring.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 /**
- * @brief Counting characters in string and returns number of characters.
+ * @brief Counting characters in cstring and returns length of cstring.
  *
- * @param  str char* String whose characters we want to count.
- * @return     int   Number of characters in string.
+ * @param  s cstring String whose characters we want to count.
+ * @return   int       Number of characters in string.
  */
-int length(char *str)
+int length(cstring *s)
 {
-    return strlen(str);
+    return strlen(s->str);
 }
 
 /**
- * @brief Copy characters from the character in the string at position i and copy
+ * @brief Copy characters from cstring in to the cstring from position i and copy
  * as much characters as the value of n is.
  *
- * @param  s char*  String from which is copied substring.
- * @param  i int    Index at which a substring starts.
- * @param  n int    Number of characters which are copied.
- * @return   char*  Returns copied substring.
+ * @param  s cstring    String from which is copied substring.
+ * @param  i int        Index at which a substring starts.
+ * @param  n int        Number of characters which are copied.
+ * @return   cstring    Returns copied substring.
  */
-char *copy(char *s, int i, int n)
+cstring *copy(const cstring *s, int i, int n)
 {
-    /* TODO: Is it correct? */
-    char *substr = malloc((n - i) * sizeof(char));
-    char *originstr = malloc(strlen(s) * sizeof(char)); /* Copy of original string, which we dont want to edit */
-    int position;
+    char *string = calloc((n - i) + 1, 1);
+    strncpy(string, &s->str[i - 1], n);
 
-    originstr = s;
-
-    /*TODO: Fix to return exact error_code if malloc isnt correct */
-    for (position = 0 ; position < i ; position++)      /* Go to index position */
-        originstr++;
-
-    for (position = 0 ; position < (n - i) ; position++) { /* Copy characters */
-        *(substr + position) = *originstr;
-        originstr++;
-    }
-    *(substr + position) = '\0';
-
-    return substr;
-}
-
-int find(char *s, char *search)
-{
-    return kmp_substr(s, search);
+    return cstr_create_str(string);
 }
 
 /**
- * @brief Sorting string characters by ordinal value.
+ * @brief Finds first occurence of substring and returns index where substring starts.
+ *        If searched substring is empty, returns position 1.
  *
- * @param  s char* String which will be sorted.
- * @return   char* Sorted string.
+ * @param  s        cstring    String which is sweeped for substring.
+ * @param  search   cstring    Substring which is searched for.
+ * @return          int        Returns index where ẃas first occurence of substring found.
+ *                             If searched substring is empty, returns position 1.
  */
-char *sort(char *s)
+int find(cstring *s, cstring *search)
 {
-    char *sub = malloc(strlen(s) * sizeof(char));
-    sub = s; /* Copy of original string, which we dont want to edit */
-    ms_sort(sub);
-
-    return sub;
+    if (strcmp(s->str, "") == 0)
+        return 1;
+    else
+        return (kmp_substr(s->str, search->str) + 1);
 }
 
-/* Main for testing purposes
+/**
+ * @brief Sorting cstring characters by ordinal value.
+ *
+ * @param  s cstring String which will be sorted.
+ * @return   cstring String which was sorted.
+ */
+cstring *sort(cstring *s)
+{
+    ms_sort(s->str);
+    return s;
+}
+
+//Main for testing purposes
+/*
 int main()
 {
-    char str[] = "1234567";
-    char str2[] = "34";
-    char str3[] = {'d', 'c', 'b', 'a'};
-    printf("%d\n", length(str));
-    printf("substring je %s \n", copy(str, 2, 4));
-    printf("Nasiel som substring na pozicii %d\n", find(str, str2));
-    printf("usporiadany string je %s \n", sort(str3));
+
+    cstring *Vojto = cstr_create_str("1234657");
+    cstring *Albert = cstr_create_str("34");
+
+    printf("Skuska length: %d \n", length(Vojto));
+    printf("Skuska copy:  %s \n", copy(Vojto, 2, 4)->str);
+    printf("Skuska find: %d \n", find(Vojto, Albert));
+    printf("Skuska sort:  %s \n", sort(Vojto)->str);
     return 0;
 }*/
