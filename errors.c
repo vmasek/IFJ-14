@@ -1,15 +1,14 @@
 /**
- * @file	errors.c
- * @name	Chybove hlasky
- * @authors	Tomas Paulus (xpaulu01), Vojtech Mašek (xmasek15)
- * @brief	Chybove hlasky a stavy pouzite pre projekt do predmetu IFJ
- ****************************************************************************/
+ * @file    errors.c
+ * @name    Chybove hlasky
+ * @authors Tomas Paulus (xpaulu01), Vojtech Mašek (xmasek15)
+ * @brief   Error messages and error return codes for IFJ2014
+ */
 
 #include "errors.h"
 
-const char *err_table[] =
-{
-    /** Stavove hlasky */
+const char *err_table[] = {
+    /** Error messages */
     [LEXICAL_ERROR] =
     "Chyba v programu v ramci lexikalni analyzy.\n"
     "Chybna struktura aktualniho lexemu.\n",
@@ -35,13 +34,14 @@ const char *err_table[] =
 };
 
 /**
- * @brief	Sluzi na vypisovanie error hlasom a navracanie ich error kodov
- * @param   ret_msg_id  - ID nav. kodu podla ktoreho vypise hlasku
- * @return 	ret_msg_id   - samotny navratovy kod
+ * @brief   Printing error messages and returning their error codes.
  *
- * Vypise chybovu/stavovu hlasku z err_table[] na stderr.
- * Ako stavove kody pouzivat tie z enum msgs.
- * Vrati navratovy kod prisluchajuci danej hlaske/kodu.
+ * @param   ret_msg_id  ID of returning code.
+ * @return  ret_msg_id  Return code.
+ *
+ * Prints error/state message from err_table[] to stderr.
+ * Use enum msgs codes for state codes.
+ * Returning code for returning state.
  */
 inline unsigned int print_error(unsigned int ret_msg_id)
 {
