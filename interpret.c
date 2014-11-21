@@ -1,4 +1,3 @@
-
 /**
  * @file    interpret.c
  * @name    Implementation of interpret
@@ -13,7 +12,7 @@
 
 // TESTING PURPOSES
 // T for Type of variable
-typedef enum {
+/*typedef enum {
     T_Undefined = 0,
     T_Integer,
     T_Double,
@@ -61,7 +60,7 @@ int interpret(int instruction, Value *testValue)
     }
     return 0;
 }
-
+*/
 // TESTING PURPOSES
 /*
 int main()
