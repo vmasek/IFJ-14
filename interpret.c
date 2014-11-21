@@ -63,6 +63,7 @@ int interpret(int instruction, Value *testValue)
 }
 
 // TESTING PURPOSES
+/*
 int main()
 {
     Value testValue;
@@ -72,5 +73,5 @@ int main()
     interpret(I_print, &testValue);
 
     return 0;
-}
+}*/
 
