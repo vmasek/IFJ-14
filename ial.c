@@ -194,8 +194,8 @@ void tree_free(Tree *tree)
 
 static inline int string_cmp( const char *str1, const char *str2)
 {
-    uint size1 = strlen(str1); /// TODO: optimize sizes (cstring has its size written)
-    uint size2 = strlen(str2);
+    unsigned int size1 = strlen(str1); /// TODO: optimize sizes (cstring has its size written)
+    unsigned int size2 = strlen(str2);
 
     if ( size1 < size2 )
         return 1;               ///LEFT
@@ -294,10 +294,10 @@ int tree_insert(Tree *tree, cstring *key, void *data)
         return 0;
     }
 
-    uint key_size = strlen(key->str);
+    unsigned int key_size = strlen(key->str);
 
     Tree_Node *tmp = tree->root;
-    uint result;
+    unsigned int result;
 
     while (tmp) {
         result = strlen(tmp->key->str);
@@ -409,7 +409,7 @@ void tree_print(Tree *tree)
 }*/
 
 
-static void tree_print_nodes(Tree_Node *node, char *sufix, char fromdir)
+static void tree_print_nodes(Tree_Node *node, const char *sufix, const char fromdir)
 {
     if (node != NULL) {
         char *suf2 = (char *) malloc(strlen(sufix) + 4);

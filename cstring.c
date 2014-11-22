@@ -20,7 +20,7 @@
  *
  * Function extends cstring controls the behavior of the unsolicited reallocation.
  */
-static cstring *append(cstring *s, char const *str, ulong size)
+static cstring *append(cstring *s, char const *str, unsigned long size)
 {
     /**If size will be exceeded, resize will be called, only if both statements
      * are true (needed size is bigger and enlargement fails) NULL will be returned.
@@ -55,7 +55,7 @@ static cstring *append(cstring *s, char const *str, ulong size)
  */
 static int cstr_quick_resize(cstring *s)
 {
-    ulong new_size = s->tab_size * 2;
+    unsigned long new_size = s->tab_size * 2;
     char *tmp;
     //bude prealokovane na dvojnasobok aktualnej velkosti
     if (!(tmp = realloc(s->str, new_size)))
@@ -208,11 +208,11 @@ cstring *cstr_copy(cstring const *cstr)
  * @param size minimal size that needs to be added.
  * @returns Warning returns (-1) //TRUE if realloc failed, else if everything is ok (0) //FALSE
  */
-int cstr_resize(cstring *s, ulong size)
+int cstr_resize(cstring *s, unsigned long size)
 {
     /** If cstring is empty size will be set to default value,
         else is new_size set as size of new requied lenght */
-    ulong new_size = s->tab_size ? s->tab_size : CSTRING_START_SIZE;
+    unsigned long new_size = s->tab_size ? s->tab_size : CSTRING_START_SIZE;
     char  *tmp;
 
     new_size *= (size + 1) / new_size + 1; /** zmensi alebo zvecsi new_size na potrebnu hodnotu */
@@ -281,7 +281,7 @@ int cstr_cmp(cstring const *s1, cstring const *s2)
 void print_cstr_all(cstring const *s)
 {
     printf("\t%lu / %lu - [ %s ]\n", s->size, s->tab_size, s->str);
-    for (uint i = 0; i < s->size; i++) {
+    for (unsigned int i = 0; i < s->size; i++) {
         printf("\t%d\t=\t%c\n", s->str[i], s->str[i]);
     }
 }

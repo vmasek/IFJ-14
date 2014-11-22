@@ -7,6 +7,9 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
+#include <stdbool.h>
+#include "cstring.h"
+
 /**
  * Debbugin macro
  * Prints out message + info about file and line.

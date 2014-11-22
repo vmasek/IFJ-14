@@ -15,7 +15,7 @@
 
 typedef struct {
     char    *str;
-    ulong   size, tab_size;
+    unsigned long   size, tab_size;
 }   cstring;
 
 /* Print */
@@ -30,7 +30,7 @@ cstring     *cstr_copy(cstring const *);
 /* Allocation and copying */
 cstring     *cstr_create_str(char const *);
 cstring     *cstr_create_cstr(cstring const *);
-int         cstr_resize(cstring *, ulong);
+int         cstr_resize(cstring *, unsigned long);
 
 
 
