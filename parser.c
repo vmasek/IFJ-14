@@ -4,9 +4,7 @@
 #include "ial.h"
 #include "scaner.h"
 
-
-
-
+/*
 struct var_record {
     Value value;
     int inited;
@@ -57,3 +55,5 @@ int nt_var_section(FILE *input, Tree vars)
 
     return SUCCESS;
 }
+
+*/
