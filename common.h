@@ -13,11 +13,13 @@
 /**
  * Debbugin macro
  * Prints out message + info about file and line.
+ * format DEBUG: file.c:line:[stack_push]:
  */
 #ifdef DEBUG
-#define debug(Message) fprintf(stderr, "DEBUG: %s:%d:\t" Message "\n", __FILE__, __LINE__)
+#define debug(Message) fprintf(stderr, "DEBUG: %s:%d:[%s]:\t\t" Message "\n", __FILE__, __LINE__, __func__)
 #else
 #define debug(Message)
+
 #endif
 
 /**
