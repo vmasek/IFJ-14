@@ -12,21 +12,33 @@
  * @brief Inicialize stack structure.
  * @param stack poiner to stack structure.
  */
-void stack_init(Stack *stack)
+int stack_init(Stack *stack)
 {
 	if(!stack)
-		return;
+	{
+		debug("No stack given");
+		return INTERNAL_ERROR;
+	}
 
 	stack->top = NULL;
 	stack->count = 0;
+	return SUCCESS;
 }
 
-void stack_push(Stack *stack, int type, void *value)
+int stack_push(Stack *stack, int type, void *value)
 {
 	if(!stack)
-		return;
+	{
+		debug("No stack given");
+		return INTERNAL_ERROR;
+	}
 
 	Stack_Node *tmp = malloc(sizeof(Stack_Node)); ///try using calloc and time diff
+
+	if(!tmp)
+	{
+		return INTERNAL_ERROR;
+	}
 
 	tmp->type = type;
 
@@ -37,26 +49,42 @@ void stack_push(Stack *stack, int type, void *value)
 
 	stack->top = tmp;
 	stack->count++;
+
+	return SUCCESS;
 }
 
-void stack_top(Stack *stack, int *type, void *value)
+int stack_top(Stack *stack, int *type, void **value)
 {
-	if(!stack||!stack->top)
-		return;
+	if(!stack)
+	{
+		debug("No stack given");
+		return INTERNAL_ERROR;
+	}
+	if(!stack->top)
+	{
+		debug("Stack is empty");
+		return INTERNAL_ERROR;
+	}
 
 	Stack_Node *tmp = stack->top;
 
 	*type = tmp->type;
-	//printf("TOP_DEBUG: value in int representation is ===>   %d\n", *(int*)tmp->value);
-	//printf("TOP_DEBUG: value in char representation is ===>   %c\n", *(char*)tmp->value);
-
-	*(int*)value = *(int*)(tmp->value);  ///TODO: this is just wrong, will be rewritten
+	*value = (tmp->value);
+	return SUCCESS;
 }
 
-void stack_pop(Stack *stack)
+int stack_pop(Stack *stack)
 {
-	if(!stack||!stack->top)
-		return;
+	if(!stack)
+	{
+		debug("No stack given");
+		return INTERNAL_ERROR;
+	}
+	if(!stack->top)
+	{
+		debug("Stack is empty");
+		return INTERNAL_ERROR;
+	}
 
 	Stack_Node *tmp = stack->top;
 
@@ -64,12 +92,16 @@ void stack_pop(Stack *stack)
 	stack->count--;
 
 	free(tmp);
+	return SUCCESS;
 }
 
 static Stack_Node *stack_find_first_type(Stack *stack, int type)
 {
 	if(!stack||!stack->top)
+	{
+		debug("No stack given or stack empty");
 		return NULL;
+	}
 
 	Stack_Node *tmp = stack->top;
 	unsigned int count = stack->count;
@@ -85,22 +117,36 @@ static Stack_Node *stack_find_first_type(Stack *stack, int type)
 	return NULL;
 }
 
-void *stack_read_first_of_type(Stack *stack, int type)
+int stack_read_first_of_type(Stack *stack, int type, void **value)
 {
-	if(!stack||!stack->top)
-		return NULL;
+	if(!stack)
+	{
+		debug("No stack given");
+		return INTERNAL_ERROR;
+	}
+	if(!stack->top)
+	{
+		debug("Stack is empty");
+		return INTERNAL_ERROR;
+	}
 
 	Stack_Node *tmp = stack_find_first_type(stack, type);
 	if(tmp)
-		return tmp->value;
+	{
+		*value = (tmp->value);
+		return SUCCESS;
+	}
 	else
-		return NULL;
+		return INTERNAL_ERROR;
 }
 
-void stack_free(Stack *stack)
+int stack_free(Stack *stack)
 {
 	if(!stack)
-		return;
+	{
+		debug("No stack given");
+		return INTERNAL_ERROR;
+	}
 
 	Stack_Node *tmp;
 
@@ -111,6 +157,8 @@ void stack_free(Stack *stack)
 	}
 
 	stack_init(stack);
+
+	return SUCCESS;
 }
 
 

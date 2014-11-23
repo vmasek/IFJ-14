@@ -13,7 +13,7 @@
 
 #include "common.h"
 #include "cstring.h"
-
+#include "errors.h"
 
 
 typedef struct STACK_NODE {
@@ -40,15 +40,15 @@ enum Type {
 
 
 
-void   stack_init(Stack*);
-void   stack_free(Stack*);
+int    stack_init(Stack*);
+int    stack_free(Stack*);
 
 
-void   stack_pop(Stack*);
-void   stack_push(Stack*, int, void*);
-void   stack_top(Stack*, int*, void*);
+int    stack_pop(Stack*);
+int    stack_push(Stack*, int, void*);
+int    stack_top(Stack*, int*, void**);
 
-void * stack_read_first_of_type(Stack*, int);
+int    stack_read_first_of_type(Stack*, int, void**);
 
 
 void   stack_print(Stack*);
