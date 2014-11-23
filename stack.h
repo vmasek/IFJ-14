@@ -49,7 +49,7 @@ int    stack_push(Stack*, int, void*);
 int    stack_top(Stack*, int*, void**);
 
 int    stack_read_first_of_type(Stack*, int, void**);
-
+int    stack_insert(Stack *stack, int searched_type, int type, void *value);
 
 void   stack_print(Stack*);
 void   stack_print_node(int, void *);
