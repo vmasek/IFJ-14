@@ -17,6 +17,10 @@ int main(int argc, char *argv[])
 		{
 			test_stack();
 		}
+		if(!argc || !strcmp(argv[i], "tree"))
+		{
+			test_tree();
+		}
 		if(!argc || !strcmp(argv[i], "buildin"))
 			test_buildin(); ///test for buildin copy gives SIGSEGV
 	}

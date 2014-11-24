@@ -36,5 +36,9 @@ int test_kmp_substr(void);
 int test_stack(void);
 int test_stack_complex(void);
 
+///==================================TREE=====================================
+int test_tree(void);
+int test_tree_complex(void);
+
 
 #endif // __TESTS_H__

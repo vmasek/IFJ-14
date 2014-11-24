@@ -7,11 +7,13 @@ BIN="./test_ifj"
 TESTS=(	#this is array of keys to coded tests (will be used as argument for project)
 			"kmp"
 			"stack"
+			"tree"
 			"buildin"
 		)
 
 FILE_OUT_TESTS=(	#this is array of keys to tests that need file redirection
 					"stack"
+					"tree"
 				)
 
 
@@ -53,4 +55,4 @@ do
 	index=$((index+1))
 done
 
-rm test_ifj 
+#rm test_ifj 
