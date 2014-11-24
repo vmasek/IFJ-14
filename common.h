@@ -11,9 +11,9 @@
 #include "cstring.h"
 
 /**
- * Debbugin macro
- * Prints out message + info about file and line.
- * format DEBUG: file.c:line:[stack_push]:
+ * Debbuging macro
+ * Prints out message + info about file, line and the current function.
+ * format DEBUG: file.c:line:[function]: Message
  */
 #ifdef DEBUG
 #define debug(Message) fprintf(stderr, "DEBUG: %s:%d:[%s]:\t\t" Message "\n", __FILE__, __LINE__, __func__)
