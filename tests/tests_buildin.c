@@ -1,8 +1,4 @@
-#include <stdio.h>
-#include "tests_buildin.h"
-#include "tests_common.h"
-#include "../buildin.h"
-#include "../cstring.h"
+#include "tests.h"
 
 void test_buildin()
 {

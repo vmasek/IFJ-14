@@ -1,11 +1,56 @@
 #!/bin/bash
 # Test script
-# Albert Uchytil
+# Vojtech Mašek (xmasek15)
 
-make
-rm *.o
-rm .depend
-rm ../*.o
-rm ../.depend
-./test_ifj
-rm test_ifj
+BIN="./test_ifj"
+
+TESTS=(	#this is array of keys to coded tests (will be used as argument for project)
+			"kmp"
+			"stack"
+			"buildin"
+		)
+
+FILE_OUT_TESTS=(	#this is array of keys to tests that need file redirection
+					"stack"
+				)
+
+
+red='\e[0;31m'
+green='\e[0;32m'
+NC='\e[0m' # No Color
+
+make 1>/dev/null 2>/dev/null 
+rm *.o ../*.o .depend ../.depend 2>/dev/null
+
+
+
+index=0
+
+for test in "${TESTS[@]}"
+do
+	#if array contains element
+	if [[ "${FILE_OUT_TESTS[@]}" =~ "${test}" || "${FILE_OUT_TESTS[${#FILE_OUT_TESTS[@]}-1]}" == "${test}" ]]; then
+		#echo "*************************************contained*********************************************************"
+		"$BIN" "$test" 1>"$test".out 2>"$test".out
+		echo "*** Testing of $test ***"
+
+		if [[ "$(tail "$test".out)" =~ "OK. Everything is fine." ]]; then
+			echo -e "${green}OK.${NC} In $test is everything fine."
+			rm "$test".out
+		else
+			echo -e "${red}ERROR${NC} has occured during test of $test ! Have a look at "$test".out or try running \" $BIN $test \" ."
+		fi
+	else
+		result=$("$BIN" "$test" 2>&1)
+		echo "$result"
+		if [[ "$result" =~ "Result: Failed 0" ]]; then
+			echo -e "${green}OK.${NC} In $test is everything fine."
+		else
+			echo -e "${red}ERROR${NC} has occured during test of $test ! If needed try running \" $BIN $test \" ."
+		fi
+	fi
+
+	index=$((index+1))
+done
+
+rm test_ifj 

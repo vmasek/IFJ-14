@@ -1,23 +1,26 @@
 #########################################
-#				Makefile				#
-#	Autor:	Vojtech Mašek (xmasek15)	#
+#               Makefile                #
+#   Autor:  Vojtech Mašek (xmasek15)    #
 #########################################
 
 CC=gcc
 
 RM=rm -f
-CFLAGS= -std=gnu99 -pedantic -Wall -Wextra 
+STD= c99
+CFLAGS= -std=$(STD) -pedantic -Wall -Wextra $(FLAGS)
 
 #name of compiled binary
 BIN=test_ifj
 
 #adds source .c files from our project dir that have to be compiled
-SRCS=$(wildcard *.c ../*.c)
+ALL_SRCS=$(wildcard *.c ../*.c)
+#this filters out main.c that is containing another main
+SRCS=$(filter-out ../main.c,$(ALL_SRCS))
 
 #replacement of .c suffix of source files to .o suffix used for object files
 OBJS=$(subst .c,.o,$(SRCS))
 
-all: $(BIN)
+all: $(BIN) dist-clean
 
 $(BIN): $(OBJS)
 	$(CC) -o $(BIN) $(OBJS)

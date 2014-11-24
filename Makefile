@@ -1,6 +1,6 @@
 #########################################
-#				Makefile				#
-#	Autor:	Vojtech Mašek (xmasek15)	#
+#               Makefile                #
+#   Autor:  Vojtech Mašek (xmasek15)    #
 #########################################
 
 CC=gcc
@@ -18,7 +18,7 @@ SRCS=$(wildcard *.c)
 #replacement of .c suffix of source files to .o suffix used for object files
 OBJS=$(subst .c,.o,$(SRCS))
 
-all: $(BIN)
+all: $(BIN) dist-clean
 
 $(BIN): $(OBJS)
 	$(CC) -o $(BIN) $(OBJS)

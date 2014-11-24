@@ -1,11 +1,9 @@
-#include <stdio.h>
-#include "tests_ial.h"
-#include "tests_common.h"
-#include "../ial.h"
+
+#include "tests.h"
 
 /**
  * @brief Tests kmp_substr()
- * @ret   Number of failures
+ * @return   Number of failures
  */
 int test_kmp_substr()
 {
