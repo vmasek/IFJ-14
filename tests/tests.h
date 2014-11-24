@@ -17,19 +17,19 @@
 
 
 ///=================================BUILDIN===================================
-int test_length();
-int test_copy();
-int test_find();
-int test_sort();
-void test_buildin();
+int test_length(void);
+int test_copy(void);
+int test_find(void);
+int test_sort(void);
+void test_buildin(void);
 
 
 ///=================================COMMON====================================
-void print_result(int test_count, int failures);
+void print_result(int, int);
 
 
 ///==================================IAL======================================
-int test_kmp_substr();
+int test_kmp_substr(void);
 
 
 ///=================================STACK=====================================

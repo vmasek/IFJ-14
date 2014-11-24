@@ -19,8 +19,8 @@ int test_kmp_substr()
         printf("12456, 123\n");
         failures++;
     }
-    char a[] = "1234567";
-    char b[] = "34";
+    const char a[] = "1234567";
+    const char b[] = "34";
     if (kmp_substr(a, b) != 2) {
         printf("%s, %s\n", a, b);
         failures++;
