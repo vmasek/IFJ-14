@@ -412,36 +412,153 @@ printf("\n4. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	type = Type_CSTRING;
 	value = (void*)cstr1;
 	stack_push(&stack, type, value); 						///pushin cstring
+
 	///Deleting type and value leftover after assigning cstring.
 	type = 0;
 	value = (void*)NULL;
+
 	///checking new top (should be cstring)
 	stack_top(&stack, &type, &value);
 	printf("\n\n\t4. reading the NEW top of the stack:\n");
+
 	///readind top of stack by using direct stack access
-		if(stack.top->type == Type_CSTRING && (!strcmp(((cstring*)(stack.top->value))->str, "cstr of NEW top")))
-			printf("\t4.1. PUSH was OK. top is: [cstring]\n");
-		else
-		{
-			printf("\t4.1. ERROR: PUSH went wrong., type was %d and value was %s\n", stack.top->type, (char*)(stack.top->value));
-			break;
-		}
+	if(stack.top->type == Type_CSTRING && (!strcmp(((cstring*)(stack.top->value))->str, "cstr of NEW top")))
+		printf("\t4.1. PUSH was OK. top is: [cstring]\n");
+	else
+	{
+		printf("\t4.1. ERROR: PUSH went wrong., type was %d and value was %s\n", stack.top->type, (char*)(stack.top->value));
+		break;
+	}
 
-		///readind top of stack by using stack_top
-		stack_top(&stack, &type, &value);
+	///readind top of stack by using stack_top
+	stack_top(&stack, &type, &value);
+	if(type == Type_CSTRING && (!strcmp(((cstring*)(stack.top->value))->str, "cstr of NEW top")))
+		printf("\t4.1. TOP was OK. top is: [cstring]\n");
+	else
+	{
+		printf("\t4.2. ERROR: TOP went wrong., type was %d and value was %s\n", type, (char*)(value));
+		break;
+	}
 
-		if(type == Type_CSTRING && (!strcmp(((cstring*)(stack.top->value))->str, "cstr of NEW top")))
-			printf("\t4.1. TOP was OK. top is: [cstring]\n");
-		else
-		{
-			printf("\t4.2. ERROR: TOP went wrong., type was %d and value was %s\n", type, (char*)(value));
-			break;
-		}
 	stack_print_node(type, value);
 	stack_print(&stack);
 
-
 printf("\n5. ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+///---------------------------------------------------------------------------
+
+	int cislo = 10;
+	stack_push(&stack, Type_INT, (void*)&cislo);
+	stack_insert(&stack, Type_CSTRING, Type_STRING, (void*)"text");
+	int cislo2 = 100;
+	stack_insert(&stack, Type_STRING, Type_INT, (void*)&cislo2);
+	stack_print(&stack);
+	stack_uninsert(&stack, Type_STRING, &type, &value);
+
+	if(type == Type_CSTRING && !strcmp(((cstring*)(value))->str, "cstr of NEW top"))
+		printf("\t5. OK ret. value of UNINSERT, type was cstring and value was text\n");
+	else
+	{
+		printf("\t5. Ret valued of UNINSERT, type was %d and value was %s\n\t\t\t\t   should be cstring(5) and \"cstr of NEW top\"\n", type, (char*)(value));
+		break;
+	}
+
+	if(stack.count==3)
+		printf("\n\t5. OK. Stack count is after UINSERT\n");
+	else
+	{
+		printf("\n\t5. ERROR. Stack count is after UINSERT is %d should be 3\n", stack.count);
+		break;
+	}
+
+	stack_print(&stack);
+
+
+printf("\n6. ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+///---------------------------------------------------------------------------
+
+	printf("\t\n6. Test for calling UNINSERT when its only one node above searched_type\n");
+	char ch2 = '~';
+	stack_insert(&stack, Type_INT, Type_CHAR, (void*)&ch2);
+	stack_pop(&stack);
+
+	stack_print(&stack);
+
+	stack_uninsert(&stack, Type_STRING, &type, &value);
+
+	if(type == Type_CHAR && (*(char*)value)=='~')
+		printf("\t6. OK ret. value of UNINSERT, type was char and value was '~'.\n");
+	else
+	{
+		printf("\t6. Ret valued of UNINSERT, type was %d and value was %s\n\t\t\t\t   should be char and '~'\n", type, (char*)(value));
+		break;
+	}
+
+	if(stack.count==2)
+		printf("\n\t6. OK. Stack count is after UINSERT.\n");
+	else
+	{
+		printf("\n\t6. ERROR. Stack count is after UINSERT is %d should be 2.\n", stack.count);
+		break;
+	}
+
+
+	stack_print(&stack);
+
+printf("\n7. ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+///---------------------------------------------------------------------------
+
+
+
+	printf("\n\t7. Test for calling UNINSERT on empty stack, stack with just one node and not found type.\n");
+
+	if(stack_uninsert(&stack, Type_DOUBLE, &type, &value) == INTERNAL_ERROR)
+	{
+		printf("\t7.1. OK. UNINSERT failed because there is no searched type in the stack.\n");
+	}
+	else
+	{
+		printf("\t7.1. WRONG. UNINSERT not failed but there is no searched type in the stack.\n");
+		break;
+	}
+
+	printf("\n\t7. POPing one.\n");
+	stack_pop(&stack);
+
+	if(stack_uninsert(&stack, Type_INT, &type, &value) == INTERNAL_ERROR)
+	{
+		printf("\t7.2. OK. UNINSERT failed because there is only one node in the stack.\n");
+	}
+	else
+	{
+		printf("\t7.2. WRONG. UNINSERT not failed but it should (one node in the stack).\n");
+		break;
+	}
+
+	printf("\t7. POPing last node. Stack Should be empty.\n");
+	stack_pop(&stack);
+
+	if(stack.count==0)
+		printf("\n\t7. OK. Stack count is after last POP 0.\n");
+	else
+	{
+		printf("\n\t7. ERROR. Stack count is after \"last\" POP is %d should be 2.\n", stack.count);
+		break;
+	}
+
+	if(stack_uninsert(&stack, Type_INT, &type, &value) == INTERNAL_ERROR)
+	{
+		printf("\t7.3. OK. UNINSERT failed because the stack is empty.\n");
+	}
+	else
+	{
+		printf("\t7.3. WRONG. UNINSERT not failed but it should (stack is empty).\n");
+		break;
+	}
+
+	stack_print(&stack);
+
+
+printf("\n8. ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 ///---------------------------------------------------------------------------
 
 errors=0;
