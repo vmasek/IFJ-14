@@ -21,7 +21,7 @@
  * @param word char* String which is used for table construction.
  * @param _out int*  Table that is filled.
  */
-void kmp_table(char *word, int *_out)
+void kmp_table(const char *word, int *_out)
 {
     int length_word = strlen(word); /* String length. */
     int table_position = 2;         /* Position within partial match table. */
@@ -53,7 +53,7 @@ void kmp_table(char *word, int *_out)
  * @param  sub    Substring which we want to match.
  * @return int    On successful match returns beginning of a match, else -1.
  */
-int kmp_substr(char *string, char *sub)
+int kmp_substr(const char *string, const char *sub)
 {
     int sub_len = strlen(sub);
     int string_len = strlen(string);
@@ -152,6 +152,10 @@ void ms_swap(char **str1, char **str2)
 
 
 
+/**
+ * @brief Inicialize binary tree.
+ * @param tree to inicialize.
+ */
 void tree_init(Tree *tree)
 {
     if (tree)
@@ -159,7 +163,13 @@ void tree_init(Tree *tree)
 }
 
 
-void tree_node_free(Tree_Node *node)
+/**
+ * @brief Function to free every node of tree.
+ * @param node pointer to actual node
+ *
+ * Function recursiveli frees all nodes of binary tree.
+ */
+static void tree_node_free(Tree_Node *node)
 {
     debug("free");
     if (!node) {
@@ -181,6 +191,13 @@ void tree_node_free(Tree_Node *node)
     free(node);
 }
 
+
+/**
+ * @brief Frees whole binary tree.
+ * @param tree to be freed.
+ *
+ * Calls function @see tree_node_free() that frees every node of binary tree.
+ */
 void tree_free(Tree *tree)
 {
     if (!tree || !tree->root)
@@ -287,6 +304,15 @@ static inline void tree_create_right(Tree *tree, Tree_Node *tmp, cstring *key, v
 }
 
 
+/**
+ * @brief Inerts node to tree.
+ * @param tree where to insert.
+ * @param key of node to search/insert.
+ * @param data
+ * @returns
+ *
+ *
+ */
 int tree_insert(Tree *tree, cstring *key, void *data)
 {
     if (!tree->root) {
@@ -332,6 +358,53 @@ int tree_insert(Tree *tree, cstring *key, void *data)
     }
     return 0;
 }
+
+
+static void tree_print_nodes(Tree_Node *node, const char *sufix, const char fromdir)
+{
+    if (node != NULL) {
+        char *suf2 = (char *) malloc(strlen(sufix) + 4);
+        strcpy(suf2, sufix);
+        if (fromdir == 'L') {
+            suf2 = strcat(suf2, "  |");
+            printf("%s\n", suf2);
+        } else
+            suf2 = strcat(suf2, "   ");
+
+        tree_print_nodes(node->right, suf2, 'R');
+        printf("%s  +-[%s]\n", sufix, node->key->str);
+        strcpy(suf2, sufix);
+        if (fromdir == 'R')
+            suf2 = strcat(suf2, "  |");
+        else
+            suf2 = strcat(suf2, "   ");
+        tree_print_nodes(node->left, suf2, 'L');
+        if (fromdir == 'R') printf("%s\n", suf2);
+        free(suf2);
+    }
+}
+
+
+/**
+ * @brief Prints pretty scheme of binary tree.
+ * @param tree to be printed.
+ *
+ * Used function of pretty print implemented in ial2 homework.
+ * @see tree_print_nodes()
+ */
+void tree_print(Tree *tree)
+{
+    printf("\n");
+    if (tree != NULL)
+        tree_print_nodes(tree->root, "", 'X');
+    else
+        fprintf(stderr, "Tree uninicialized\n");
+    printf("\n");
+}
+
+
+
+
 
 /*
 static void pre(Tree_Node *root)
@@ -407,45 +480,5 @@ void tree_print(Tree *tree)
     printf("POSTORDEN\n");
     post_orden(tree);
 }*/
-
-
-static void tree_print_nodes(Tree_Node *node, const char *sufix, const char fromdir)
-{
-    if (node != NULL) {
-        char *suf2 = (char *) malloc(strlen(sufix) + 4);
-        strcpy(suf2, sufix);
-        if (fromdir == 'L') {
-            suf2 = strcat(suf2, "  |");
-            printf("%s\n", suf2);
-        } else
-            suf2 = strcat(suf2, "   ");
-
-        tree_print_nodes(node->right, suf2, 'R');
-        printf("%s  +-[%s]\n", sufix, node->key->str);
-        strcpy(suf2, sufix);
-        if (fromdir == 'R')
-            suf2 = strcat(suf2, "  |");
-        else
-            suf2 = strcat(suf2, "   ");
-        tree_print_nodes(node->left, suf2, 'L');
-        if (fromdir == 'R') printf("%s\n", suf2);
-        free(suf2);
-    }
-}
-
-void tree_print(Tree *tree)
-{
-    printf("\n");
-    if (tree != NULL)
-        tree_print_nodes(tree->root, "", 'X');
-    else
-        fprintf(stderr, "Tree uninicialized\n");
-    printf("\n");
-}
-
-
-
-
-
 
 

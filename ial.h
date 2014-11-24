@@ -31,10 +31,10 @@ typedef struct {
 /**
  * @brief Creates Partial match table for Knuth–Morris–Pratt algorithm.
  *
- * @param word char* String which is used for table construction.
+ * @param word const char* String which is used for table construction.
  * @param _out int*  Table that is filled.
  */
-void kmp_table(char *word, int *_out);
+void kmp_table(const char *word, int *_out);
 
 /**
  * @brief Knuth–Morris–Pratt algorithm that searches for occurances of substring.
@@ -43,7 +43,7 @@ void kmp_table(char *word, int *_out);
  * @param  sub    Substring which we want to match.
  * @return int    On successful match returns beginning of a match, else -1.
  */
-int kmp_substr(char *string, char *sub);
+int kmp_substr(const char *string, const char *sub);
 
 /**
  * @brief Merging function for merge-sort.
