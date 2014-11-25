@@ -7,6 +7,7 @@
 #include "ial.h"
 #include "cstring.h"
 #include "buildin.h"
+#include "errors.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -33,9 +34,9 @@ int length(cstring *s)
  */
 cstring *copy(const cstring *s, int i, int n)
 {
-    char *string = calloc((n - i) + 1, 1);
-    strncpy(string, &s->str[i - 1], n);
 
+    char *string = calloc(n + 1, 1);
+    strncpy(string, &s->str[i - 1], n);
     return cstr_create_str(string);
 }
 
