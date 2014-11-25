@@ -29,7 +29,7 @@ void *gc_calloc(const char *tag, size_t number, size_t size)
 
 void gc_free(const char *tag)
 {
-    gc_malloc(tag, 0);
+    allocate(tag, 0);
 }
 
 void *gc_malloc(const char *tag, size_t size)
