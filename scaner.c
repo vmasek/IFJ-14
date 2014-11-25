@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #define TOKEN_IDENTIFIER_MAX_LENGTH 127
 
@@ -20,6 +21,30 @@
 /*
  * Get a keyword code from it's string representation.
  */
+
+static bool token_register(Token *token, bool set)
+{
+    static Token saved_token;
+    static bool saved = false;
+
+    if (token == NULL)
+        return false;
+
+    if (set) {
+        saved_token = *token;
+        saved = true;
+        return true;
+    }
+
+    if (!saved)
+        return false;
+
+    *token = saved_token;
+    saved = false;
+
+    return true;
+}
+
 static enum token_keyword _get_keyword(char *name) {
     // lowercase it before
     for(int i = 0; name[i]; i++){
@@ -141,6 +166,9 @@ void get_token(Token *token, FILE *input) {
     enum token_keyword keyword;
 
     char buffer[100] = "";
+
+    if (token_register(token, false))
+        return;
 
     while (1) {
         symbol = getc(input);
@@ -435,6 +463,11 @@ void get_token(Token *token, FILE *input) {
             break;
         }
     }
+}
+
+void unget_token(Token *token)
+{
+    token_register(token, true);
 }
 
 /* 
