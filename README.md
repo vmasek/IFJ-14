@@ -36,6 +36,13 @@ Tests:
 		All tests are made automatic. 
 		Output of tests is coloured to easily spot the error.
 		Run `./test` in Bash
+		
+		Advanced testing:
+		
+			Use script arguments to specify test:
+			
+			mem	- test memory allocation/deallocation (valgrind and advanced valgrind)
+			debug	- tests will be runned with debugging macros turned on
 
 		Adding tests to script:
 			If you want to add new test that you just implemented:

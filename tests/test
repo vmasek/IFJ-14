@@ -2,6 +2,26 @@
 # Test script
 # Vojtech Mašek (xmasek15)
 
+MAKE="make -B FLAGS='-g -Wstrict-prototypes -Wstrict-overflow=5 -Wwrite-strings -Wunreachable-code -Winit-self -Werror-implicit-function-declaration'"
+mem_check=false
+
+if [ $# -gt 0 ]; then
+
+	for arg in "${@}"
+	do
+		if [[ "debug" == "$arg" ]]; then
+			MAKE="make -B FLAGS='-DDEBUG -g -Wstrict-prototypes -Wstrict-overflow=5 -Wwrite-strings -Wunreachable-code -Winit-self -Werror-implicit-function-declaration'"
+		fi
+
+		if [[ "mem" == "$arg"  ]]; then
+			mem_check=true
+		fi
+	done
+fi
+
+
+
+
 BIN="./test_ifj"
 
 TESTS=(	#this is array of keys to coded tests (will be used as argument for project)
@@ -16,15 +36,17 @@ FILE_OUT_TESTS=(	#this is array of keys to tests that need file redirection
 					"tree"
 				)
 
-
 red='\e[0;31m'
 green='\e[0;32m'
 NC='\e[0m' # No Color
 
-make 1>/dev/null 2>/dev/null 
-rm *.o ../*.o .depend ../.depend 2>/dev/null
+echo "$MAKE"
 
 
+"$MAKE" 1>/dev/null 2>/dev/null 
+rm ./*.o ../*.o .depend ../.depend 2>/dev/null
+
+valgrind_additonal_opt="--verbose --track-origins=yes --leak-check=full --malloc-fill=0xFF --free-fill=0xFF"
 
 index=0
 
@@ -40,7 +62,7 @@ do
 			echo -e "${green}OK.${NC} In $test is everything fine."
 			rm "$test".out
 		else
-			echo -e "${red}ERROR${NC} has occured during test of $test ! Have a look at "$test".out or try running \" $BIN $test \" ."
+			echo -e "${red}ERROR${NC} has occured during test of $test ! LOG: \"$test.out\"  Try running \"$BIN $test\" ."
 		fi
 	else
 		result=$("$BIN" "$test" 2>&1)
@@ -48,8 +70,26 @@ do
 		if [[ "$result" =~ "Result: Failed 0" ]]; then
 			echo -e "${green}OK.${NC} In $test is everything fine."
 		else
-			echo -e "${red}ERROR${NC} has occured during test of $test ! If needed try running \" $BIN $test \" ."
+			echo -e "${red}ERROR${NC} has occured during test of $test ! If needed try running \"$BIN $test\" ."
 		fi
+	fi
+
+	if [[ $mem_check == true ]]; then
+
+		valgrind --log-file=valgrind."$test".out "$BIN" "$test" 1>/dev/null 2>/dev/null
+		if [[ $(tail -n 1 valgrind."$test".out) =~ "ERROR SUMMARY: 0 errors" ]]; then
+			echo -e "${green}OK.${NC} valgrind of $test is error free."
+			valgrind "$valgrind_additonal_opt" --log-file=valgrind."$test".out  "$BIN" "$test" 1>/dev/null 2>/dev/null
+			if [[ $(tail -n 1 valgrind."$test".out) =~ "ERROR SUMMARY: 0 errors" ]]; then
+				echo -e "${green}OK.${NC} Advanced valgrind of $test is error free."
+				rm valgrind."$test".out
+			else
+				echo -e "${red}ERROR${NC} has occured in valgrind of $test ! LOG: \"valgrind.$test.out\" Try running \"valgrind $valgrind_additonal_opt $BIN $test\" . "
+			fi
+		else
+			echo -e "${red}ERROR${NC} has occured in valgrind of $test ! LOG: \"valgrind.$test.out\" Try running \"valgrind $BIN $test\" . "
+		fi
+
 	fi
 
 	index=$((index+1))
