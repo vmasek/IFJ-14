@@ -24,6 +24,7 @@ enum msgs {
     RUNTIME_DIV_BY_ZERO,    /** Behova chyba pri deleni nulou */
     RUNTIME_OTHER,          /** Ostatni behove chyby */
     INTERNAL_ERROR = 99,    /** Interni chyba interpretu */
+    RETURNING = 1000,       /** Nedošlo k chybe, ale je potreba navratit se do volajici funkce */
 };
 
 

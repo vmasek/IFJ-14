@@ -116,5 +116,7 @@ enum lexer_state {
 /* Get a token */
 void get_token(Token *token, FILE *input);
 
+/* Unget a token */
+void unget_token(Token *token);
 
 #endif //__SCANER_H__
