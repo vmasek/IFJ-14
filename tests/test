@@ -2,7 +2,7 @@
 # Test script
 # Vojtech Mašek (xmasek15)
 
-MAKE="make -B FLAGS='-g -Wstrict-prototypes -Wstrict-overflow=5 -Wwrite-strings -Wunreachable-code -Winit-self -Werror-implicit-function-declaration'"
+MAKE=(make -B FLAGS='-g -Wstrict-prototypes -Wstrict-overflow=5 -Wwrite-strings -Wunreachable-code -Winit-self -Werror-implicit-function-declaration')
 mem_check=false
 
 if [ $# -gt 0 ]; then
@@ -10,7 +10,7 @@ if [ $# -gt 0 ]; then
 	for arg in "${@}"
 	do
 		if [[ "debug" == "$arg" ]]; then
-			MAKE="make -B FLAGS='-DDEBUG -g -Wstrict-prototypes -Wstrict-overflow=5 -Wwrite-strings -Wunreachable-code -Winit-self -Werror-implicit-function-declaration'"
+			MAKE=(make -B FLAGS='''-DDEBUG -g -Wstrict-prototypes -Wstrict-overflow=5 -Wwrite-strings -Wunreachable-code -Winit-self -Werror-implicit-function-declaration\')
 		fi
 
 		if [[ "mem" == "$arg"  ]]; then
@@ -19,6 +19,7 @@ if [ $# -gt 0 ]; then
 	done
 fi
 
+rm ./*.out 2>/dev/null
 
 
 
@@ -42,10 +43,10 @@ red='\e[0;31m'
 green='\e[0;32m'
 NC='\e[0m' # No Color
 
-echo "$MAKE"
+#echo "${MAKE[@]}"
 
+"${MAKE[@]}" 1>/dev/null 2>/dev/null 
 
-"$MAKE" 1>/dev/null 2>/dev/null 
 rm ./*.o ../*.o .depend ../.depend 2>/dev/null
 
 valgrind_additonal_opt="--verbose --track-origins=yes --leak-check=full --malloc-fill=0xFF --free-fill=0xFF"
