@@ -4,6 +4,7 @@
 #include "ial.h"
 #include "scaner.h"
 
+/*
 struct var_record {
     Value value;
     int inited;
@@ -75,7 +76,7 @@ int nt_var(FILE *input, Tree vars, bool eps)
 {
     int ret;
     Token token;
-    
+
     get_token(input, &token);
     if (token.type == TOKEN_ID) {
         free_token(&token);
@@ -119,7 +120,7 @@ int nt_type(FILE *input, Tree vars)
     return (ret) ? SUCCESS : SYNTAX_ERROR;
 }
 
-int nt_func_section(FILE *input, Tree functions) 
+int nt_func_section(FILE *input, Tree functions)
 {
     int ret;
     CHECK_VALUE(nt_func(input, functions), ret);
@@ -234,7 +235,7 @@ int nt_cmd(FILE *input, Tree functions)
         if (token.value.value_keyword == KEYWORD_READLN) {
 
         } else if (token.value.value_keyword == KEYWORD_WRITELN) {
-        
+
         } else if (token.value.value_keyword == KEYWORD_IF) {
 
         } else if (token.value.value_keyword == KEYWORD_WHILE) {
@@ -255,3 +256,4 @@ int nt_main(FILE *input, Tree functions)
     CHECK_VALUE(nt_comp_cmd(input, functions));
     CHECK_VALUE(t_symbol(input, DOT));
 }
+*/

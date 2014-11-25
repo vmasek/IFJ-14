@@ -7,6 +7,7 @@
 
 #include    "errors.h"
 #include    "cstring.h"
+#include    "common.h"
 #include    <string.h>
 #include    <stdlib.h>
 
@@ -246,7 +247,7 @@ void cstr_clear(cstring *s)
 	if(!s)
 	{
 		debug("cstirng to clear not given.");
-		return NULL;
+		return;
 	}
     s->str[0] = '\0';
     s->size = 0;
@@ -287,7 +288,6 @@ int cstr_cmp(cstring const *s1, cstring const *s2)
 	if(!s1||!s2)
 	{
 		debug("one of cstirngs to compare not given.");
-		return NULL;
 	}
 
     return strcmp(s1->str, s2->str);
@@ -305,7 +305,7 @@ void print_cstr_all(cstring const *s)
 	if(!s)
 	{
 		debug("cstirng to print not given.");
-		return NULL;
+		return;
 	}
     printf("\t%lu / %lu - [ %s ]\n", s->size, s->tab_size, s->str);
     for (unsigned int i = 0; i < s->size; i++) {
