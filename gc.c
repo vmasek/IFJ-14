@@ -17,9 +17,15 @@ struct branch {
     struct branch *next;
 };
 
+static void *allocate(const char *tag, size_t size);
 static struct branch *create_branch(const char *tag);
 static void free_branch(struct branch **branch_ptr, const char *tag);
 static void *realloc_branch(struct branch *branch, size_t size);
+
+void *gc_calloc(const char *tag, size_t number, size_t size)
+{
+    return (number && size) ? allocate(tag, number * size) : NULL;
+}
 
 void gc_free(const char *tag)
 {
@@ -27,6 +33,27 @@ void gc_free(const char *tag)
 }
 
 void *gc_malloc(const char *tag, size_t size)
+{
+    return size ? allocate(tag, size) : NULL;
+}
+
+void *gc_realloc(const char *tag, void *pointer, size_t size)
+{
+    void *new_pointer;
+
+    if (!size)
+        return NULL;
+
+    if ((new_pointer = allocate(tag, size)) == NULL)
+        return NULL;
+
+    if (pointer != NULL)
+        memcpy(new_pointer, pointer, size);
+
+    return new_pointer;
+}
+
+static void *allocate(const char *tag, size_t size)
 {
     static struct branch *first;
     struct branch **branch_ptr = &first;

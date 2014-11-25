@@ -10,8 +10,10 @@
 
 #include <stdlib.h>
 
-void *gc_malloc(const char *tag, size_t size);
+void *gc_calloc(const char *tag, size_t number, size_t size);
 void gc_free(const char *tag);
+void *gc_malloc(const char *tag, size_t size);
+void *gc_realloc(const char *tag, void *pointer, size_t size);
 
 /*  USAGE EXAMPLE:
 
