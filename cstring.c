@@ -160,12 +160,17 @@ cstring *cstr_assign_cstr(cstring *s, cstring const *cstr)
  */
 cstring *cstr_create_str(char const *str)
 {
+	if(!str)
+	{
+		debug("str not given.");
+		return NULL;
+	}
     cstring *s = calloc(1, sizeof(*s));
 
     if (s)
         return cstr_append_str(s, str);
 
-    fprintf(stderr, "Memory allocation failed.\n");
+    fprintf(stderr, "Memory allocation for cstrig has failed.\n");
     return NULL;
 }
 
@@ -179,12 +184,18 @@ cstring *cstr_create_str(char const *str)
  */
 cstring *cstr_create_cstr(cstring const *cstr)
 {
+	if(!cstr)
+	{
+		debug("cstr not given.");
+		return NULL;
+	}
+
     cstring *s = calloc(1, sizeof(*s));
 
     if (s)
         return cstr_append_cstr(s, cstr);
 
-    fprintf(stderr, "Memory allocation failed.\n");
+    fprintf(stderr, "Memory allocation for cstrig has failed.\n");
     return NULL;
 }
 
@@ -232,6 +243,11 @@ int cstr_resize(cstring *s, unsigned long size)
  */
 void cstr_clear(cstring *s)
 {
+	if(!s)
+	{
+		debug("cstirng to clear not given.");
+		return NULL;
+	}
     s->str[0] = '\0';
     s->size = 0;
 }
@@ -268,6 +284,12 @@ void print_cstr(cstring const *s)
  */
 int cstr_cmp(cstring const *s1, cstring const *s2)
 {
+	if(!s1||!s2)
+	{
+		debug("one of cstirngs to compare not given.");
+		return NULL;
+	}
+
     return strcmp(s1->str, s2->str);
 }
 
@@ -280,84 +302,13 @@ int cstr_cmp(cstring const *s1, cstring const *s2)
  */
 void print_cstr_all(cstring const *s)
 {
+	if(!s)
+	{
+		debug("cstirng to print not given.");
+		return NULL;
+	}
     printf("\t%lu / %lu - [ %s ]\n", s->size, s->tab_size, s->str);
     for (unsigned int i = 0; i < s->size; i++) {
         printf("\t%d\t=\t%c\n", s->str[i], s->str[i]);
     }
 }
-
-
-/*
-//----------------------------Testovaci-main----------------------------------
-int main(void)
-{
-    cstring*  str = cstr_create_str("Blablla");
-    print_cstr_all(str);                                                // { 7 / 16 - [ Blablla ]   }
-    print_cstr_all(cstr_assign_str(str, "LEET"));                       // { 4 / 16 - [ LEET ]  }
-    print_cstr_all(cstr_append_str(str, " 1337"));                      // { 9 / 16 - [ LEET 1337 ] }
-    cstr_clear(str);
-    print_cstr_all(cstr_append_str(str, "@+!\t5%^*#42=answ2' '"));      // { 20 / 32 - [ @+! 5%^*#42=answ2' ' ] }
-
-    cstring*  ch_str = cstr_create_str("11111111111");
-    print_cstr_all(ch_str);
-    cstr_clear(ch_str);
-    print_cstr_all(ch_str);
-
-    for (uint i=0; i<20; i++)
-    {
-        print_cstr_all(cstr_append_chr(ch_str, 'A'));
-        printf("\n");
-    }
-
-
-    cstring*  str1;
-    cstring*  str2;
-
-    printf("\n\n\n");
-    //  {   131 / 144 - [ ... ] }
-    //  {   131 / 144 - [ ... ] }
-    //  {   626 / 720 - [ ... ] }
-    //  {   757 / 864 - [ ... ] }
-
-    print_cstr_all(str1 = cstr_create_str("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean et est a dui semper facilisis. Pellentesque placerat elit a nunc."));
-    printf("\n\n");
-    print_cstr_all(str2 = cstr_create_cstr(str1));
-    printf("\n\n");
-    print_cstr_all(cstr_assign_str(str1, "Nullam tortor odio, rutrum quis, egestas ut, posuere sed, felis. Vestibulum placerat feugiat nisl. Suspendisse lacinia, odio non feugiat vestibulum, sem erat blandit metus, ac nonummy magna odio pharetra felis. Vivamus vehicula velit non metus faucibus auctor. Nam sed augue. Donec orci. Cras eget diam et dolor dapibus sollicitudin. In lacinia, tellus vitae laoreet ultrices, lectus ligula dictum dui, eget condimentum velit dui vitae ante. Nulla nonummy augue nec pede. Pellentesque ut nulla. Donec at libero. Pellentesque at nisl ac nisi fermentum viverra. Praesent odio. Phasellus tincidunt diam ut ipsum. Donec eget est."));
-
-    printf("\n\n");
-    print_cstr_all(cstr_append_cstr(str2, str1));
-    printf("\n\n");
-    print_cstr_all(cstr_assign_str(str1, " & "));
-
-
-	if(cstr_cmp(str, str1))
-	{
-		printf("\n1. compare ok\n");
-	}
-	else
-	{
-		printf("\n1. compare fail\n");
-	}
-
-	print_cstr_all(str = cstr_assign_str(str, "aaaaaaaaaaaaaaaaaaaaaaa\n"));
-	print_cstr_all(str = cstr_assign_cstr(str, str1));
-
-	if(!cstr_cmp(str, str1))
-	{
-		printf("\n2. compare ok\n");
-	}
-	else
-	{
-		printf("\n2. compare fail\n");
-	}
-
-    cstr_free(str);
-    cstr_free(ch_str);
-    cstr_free(str1);
-    cstr_free(str2);
-
-
-    return SUCCESS;
-}
-*/
