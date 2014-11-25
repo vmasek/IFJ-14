@@ -26,12 +26,14 @@ BIN="./test_ifj"
 
 TESTS=(	#this is array of keys to coded tests (will be used as argument for project)
 			"kmp"
+			"cstring"
 			"stack"
 			"tree"
 			"buildin"
 		)
 
 FILE_OUT_TESTS=(	#this is array of keys to tests that need file redirection
+					"cstring"
 					"stack"
 					"tree"
 				)

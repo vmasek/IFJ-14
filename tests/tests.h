@@ -14,6 +14,7 @@
 #include "../stack.h"
 #include "../ial.h"
 #include "../buildin.h"
+#include "../common.h"
 
 
 ///=================================BUILDIN===================================
@@ -40,5 +41,8 @@ int test_stack_complex(void);
 int test_tree(void);
 int test_tree_complex(void);
 
+///=================================CSTRING====================================
+int test_cstring(void);
+int test_tree_cstring(void);
 
 #endif // __TESTS_H__
