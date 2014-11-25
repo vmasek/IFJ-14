@@ -25,7 +25,14 @@ int main(int argc, char *argv[])
 		{
 			test_cstring();
 		}
+		if(!argc || !strcmp(argv[i], "gc"))
+		{
+			test_gc();
+		}
 		if(!argc || !strcmp(argv[i], "buildin"))
 			test_buildin(); ///test for buildin copy gives SIGSEGV
+
 	}
+
+	cstr_gc_free_all();
 }

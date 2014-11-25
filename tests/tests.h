@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "../gc.h"
 #include "../errors.h"
 #include "../cstring.h"
 #include "../stack.h"
@@ -37,12 +38,19 @@ int test_kmp_substr(void);
 int test_stack(void);
 int test_stack_complex(void);
 
+
 ///==================================TREE=====================================
 int test_tree(void);
 int test_tree_complex(void);
 
-///=================================CSTRING====================================
+
+///=================================CSTRING===================================
 int test_cstring(void);
 int test_tree_cstring(void);
+
+
+///===================================GC======================================
+int test_gc(void);
+int test_gc_complex(void);
 
 #endif // __TESTS_H__
