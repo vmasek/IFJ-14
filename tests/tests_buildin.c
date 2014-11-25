@@ -16,34 +16,29 @@ int test_length()
     cstring *Vojto = cstr_create_str("Ahoj Karle");
     printf("\n*** Testing buildin length ***\n");
 
-    if (length(Vojto) != 10)
-    {
+    if (length(Vojto) != 10) {
         print_cstr(Vojto);
         failures++;
     }
 
     cstr_append_str(Vojto, "1234");
 
-    if (length(Vojto) != 14)
-    {
+    if (length(Vojto) != 14) {
         print_cstr(Vojto);
         failures++;
     }
 
-    cstr_clear(Vojto);
-    cstr_append_str(Vojto, "Your penis smells like shit.");
+    cstr_assign_str(Vojto, "Your penis smells like shit.");
 
-    if (length(Vojto) != 28)
-    {
+
+    if (length(Vojto) != 28) {
         print_cstr(Vojto);
         failures++;
     }
 
-    cstr_clear(Vojto);
-    cstr_append_str(Vojto, "");
+    cstr_assign_str(Vojto, "");
 
-    if (length(Vojto) != 0)
-    {
+    if (length(Vojto) != 0) {
         print_cstr(Vojto);
         failures++;
     }
@@ -63,8 +58,7 @@ int test_copy()
 
     printf("\n*** Testing buildin copy ***\n");
 
-    if (strcmp(Albert->str, "hoj Ka") != 0)
-    {
+    if (strcmp(Albert->str, "hoj Ka") != 0) {
         print_cstr(Albert);
         failures++;
     }
@@ -72,17 +66,15 @@ int test_copy()
     cstr_clear(Albert);
     Albert = copy(Vojto, 1, 2);
 
-    if (strcmp(Albert->str, "Ah") != 0)
-    {
+    if (strcmp(Albert->str, "Ah") != 0) {
         print_cstr(Albert);
         failures++;
     }
 
     cstr_clear(Albert);
-    Albert = copy(Vojto, 1, 4); //sigsegv when copy(Vojto, 4, 2); WHAT THE FUCK, why?
+    Albert = copy(Vojto, 6, 2);
 
-    if (strcmp(Albert->str, "Ahoj") != 0)
-    {
+    if (strcmp(Albert->str, "Ka") != 0) {
         print_cstr(Albert);
         failures++;
     }
@@ -90,8 +82,7 @@ int test_copy()
     cstr_clear(Vojto);
     cstr_clear(Albert);
     Albert = copy(Vojto, 1, 10);
-    if (strcmp(Albert->str, "") != 0)
-    {
+    if (strcmp(Albert->str, "") != 0) {
         print_cstr(Albert);
         failures++;
     }
@@ -103,6 +94,8 @@ int test_copy()
 
 }
 
+//Mem leaks in kmp_substring
+
 int test_find()
 {
     int failures = 0;
@@ -112,38 +105,39 @@ int test_find()
     cstring *Vojto = cstr_create_str("Ahoj Karle      1");
     cstring *Albert = cstr_create_str("le");
 
-    if (find(Vojto, Albert) != 9)
-    {
+    if (find(Vojto, Albert) != 9) {
         print_cstr(Albert);
         failures++;
     }
 
-    cstr_clear(Albert);
-    cstr_append_str(Albert, " ");
+    debug("\n*** za prvym ***\n");
+    cstr_assign_str(Albert, " ");
 
-    if (find(Vojto, Albert) != 5)
-    {
+    print_cstr(Albert);
+    if (find(Vojto, Albert) != 5) {
         print_cstr(Albert);
         failures++;
     }
 
-    cstr_clear(Albert);
-    cstr_append_str(Albert, "1");
+    debug("\n*** za druhym ***\n");
 
-    if (find(Vojto, Albert) != 17)
-    {
+    cstr_assign_str(Albert, "1");
+
+    if (find(Vojto, Albert) != 17) {
         print_cstr(Albert);
         failures++;
     }
 
-    cstr_clear(Vojto);
-    cstr_append_str(Vojto, "");
+    debug("\n*** za tretim ***\n");
 
-    if (find(Vojto, Albert) != 1)
-    {
+    cstr_assign_str(Vojto, "");
+
+    if (find(Vojto, Albert) != 1) {
         print_cstr(Albert);
         failures++;
     }
+
+    debug("\n*** za stvrtym ***\n");
 
     print_result(test_count, failures);
     cstr_free(Vojto);
@@ -160,8 +154,7 @@ int test_sort()
 
     cstring *Albert = sort(Vojto);
 
-    if (strcmp(Albert->str, "ABCDEFabcdef") != 0)
-    {
+    if (strcmp(Albert->str, "ABCDEFabcdef") != 0) {
         print_cstr(Vojto);
         failures++;
     }
@@ -170,8 +163,7 @@ int test_sort()
     cstr_append_str(Vojto, "123987");
     cstring *Pavel = sort(Vojto);
 
-    if ((strcmp(Pavel->str, "123789") != 0))
-    {
+    if ((strcmp(Pavel->str, "123789") != 0)) {
         print_cstr(Vojto);
         failures++;
     }
@@ -180,13 +172,13 @@ int test_sort()
     cstr_append_str(Vojto, "1234abCDefGH");
     cstring *Adam = sort(Vojto);
 
-    if ((strcmp(Adam->str, "1234CDGHabef") != 0))
-    {
+    if ((strcmp(Adam->str, "1234CDGHabef") != 0)) {
         print_cstr(Vojto);
         failures++;
     }
 
     print_result(test_count, failures);
     cstr_free(Vojto);
+
     return failures;
 }
