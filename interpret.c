@@ -43,24 +43,23 @@ typedef struct
 
 typedef enum
 {
-    I_WHILE,
-    I_WRITE,
-    I_READLN,
-    I_ASSIGN, // :=
-    I_ADD,
-    I_SUB,
-    I_MULTIPLY,
-    I_DIV,
-    I_LESS,
-    I_GREATER,
-    I_LESS_EQUAL,
-    I_GREATER_EQUAL,
-    I_EQUAL,
-    I_NOT_EQUAL,
-    I_LEN,
-    I_COPY,
-    I_FIND,
-    I_SORT,
+    I_WRITE,    // printf
+    I_READLN,   // scanf
+    I_ASSIGN,   // :=
+    I_ADD,      // +
+    I_SUB,      // -
+    I_MULTIPLY, // *
+    I_DIV,      // /
+    I_LESS,     // <
+    I_GREATER,  // >
+    I_LESS_EQUAL,   // <=
+    I_GREATER_EQUAL,    // >=
+    I_EQUAL,    // ==
+    I_NOT_EQUAL,    // !=
+    I_LEN,  // length
+    I_COPY, // copy
+    I_FIND, // find
+    I_SORT, // sort
 } Instruction_type;
 
 typedef struct
@@ -82,7 +81,9 @@ bool f_less(T_ITEM *item)
         return ((item->op1->data.d) < (item->op2->data.d));
     else if ((item->op1->type == Type_STRING) && (item->op2->type == Type_STRING))
         return ((item->op1->data.s.str) < (item->op2->data.s.str));
-    return false;
+    else if ((item->op1->type == Type_BOOL) && (item->op2->type == Type_BOOL))
+        return ((item->op1->data.b) < (item->op2->data.b));
+    return print_error(INCOMPATIBLE_TYPE);
 }
 
 bool f_greater(T_ITEM *item)
@@ -93,6 +94,8 @@ bool f_greater(T_ITEM *item)
         return ((item->op1->data.d) > (item->op2->data.d));
     else if ((item->op1->type == Type_STRING) && (item->op2->type == Type_STRING))
         return ((item->op1->data.s.str) > (item->op2->data.s.str));
+    else if ((item->op1->type == Type_BOOL) && (item->op2->type == Type_BOOL))
+        return ((item->op1->data.b) > (item->op2->data.b));
     return print_error(INCOMPATIBLE_TYPE);
 }
 
@@ -104,8 +107,10 @@ bool f_less_equal(T_ITEM *item)
         return ((item->op1->data.d) <= (item->op2->data.d));
     else if ((item->op1->type == Type_STRING) && (item->op2->type == Type_STRING))
         return ((item->op1->data.s.str) <= (item->op2->data.s.str));
-    else
-        return print_error(INCOMPATIBLE_TYPE);
+    else if ((item->op1->type == Type_BOOL) && (item->op2->type == Type_BOOL))
+        return ((item->op1->data.b) <= (item->op2->data.b));
+
+    return print_error(INCOMPATIBLE_TYPE);
 }
 
 bool f_greater_equal(T_ITEM *item)
@@ -116,8 +121,9 @@ bool f_greater_equal(T_ITEM *item)
         return ((item->op1->data.d) >= (item->op2->data.d));
     else if ((item->op1->type == Type_STRING) && (item->op2->type == Type_STRING))
         return ((item->op1->data.s.str) >= (item->op2->data.s.str));
-    else
-        return print_error(INCOMPATIBLE_TYPE);
+    else if ((item->op1->type == Type_BOOL) && (item->op2->type == Type_BOOL))
+        return ((item->op1->data.b) >= (item->op2->data.b));
+    return print_error(INCOMPATIBLE_TYPE);
 }
 
 bool f_equal(T_ITEM *item)
@@ -128,8 +134,9 @@ bool f_equal(T_ITEM *item)
         return ((item->op1->data.d) == (item->op2->data.d));
     else if ((item->op1->type == Type_STRING) && (item->op2->type == Type_STRING))
         return strcmp(item->op1->data.s.str, item->op2->data.s.str); //is this correct for equal / not equal?
-    else
-        return print_error(INCOMPATIBLE_TYPE);
+    else if ((item->op1->type == Type_BOOL) && (item->op2->type == Type_BOOL))
+        return ((item->op1->data.b) == (item->op2->data.b));
+    return print_error(INCOMPATIBLE_TYPE);
 }
 
 bool f_not_equal(T_ITEM *item)
@@ -139,9 +146,10 @@ bool f_not_equal(T_ITEM *item)
     else if ((item->op1->type == Type_DOUBLE) && (item->op2->type == Type_DOUBLE))
         return ((item->op1->data.d) != (item->op2->data.d));
     else if ((item->op1->type == Type_STRING) && (item->op2->type == Type_STRING))
-        return strcmp(item->op1->data.s.str, item->op2->data.s.str);
-    else
-        return print_error(INCOMPATIBLE_TYPE);
+        return strcmp(item->op1->data.s.str, item->op2->data.s.str); // is this correct for equal/notequal?
+    else if ((item->op1->type == Type_BOOL) && (item->op2->type == Type_BOOL))
+        return ((item->op1->data.b) != (item->op2->data.b));
+    return print_error(INCOMPATIBLE_TYPE);
 }
 
 //TODO: ERROR CODES
@@ -243,8 +251,8 @@ int interpret(T_ITEM *testValue)
             testValue->result->data.b = f_less(&*testValue);
         else if ((testValue->op1->type == Type_STRING) && (testValue->op2->type == Type_STRING))
             testValue->result->data.b = f_less(&*testValue);
-        else if (testValue->op1->type == Type_BOOL)
-            printf("I_LESS - bool\n");
+        else if ((testValue->op1->type == Type_BOOL) && (testValue->op2->type == Type_BOOL))
+            testValue->result->data.b = f_less(&*testValue);
         break;
 
     case I_GREATER:
@@ -258,11 +266,13 @@ int interpret(T_ITEM *testValue)
             testValue->result->data.b = f_greater(&*testValue);
             debug("I_GREATER - integer\n");
         }
-
-        else if (testValue->op1->type == Type_STRING)
-            printf("I_GREATER - string\n");
-        else if (testValue->op1->type == Type_BOOL)
-            printf("I_GREATER - bool\n");
+        else if ((testValue->op1->type == Type_STRING) && (testValue->op2->type == Type_STRING))
+        {
+            testValue->result->data.b = f_greater(&*testValue);
+            debug("I_GREATER - string\n");
+        }
+        else if ((testValue->op1->type == Type_BOOL) && (testValue->op2->type == Type_BOOL))
+            testValue->result->data.b = f_greater(&*testValue);
         break;
 
     case I_LESS_EQUAL:
@@ -276,11 +286,13 @@ int interpret(T_ITEM *testValue)
             testValue->result->data.b = f_less_equal(&*testValue);
             debug("I_LESS_EQUAL - double\n");
         }
-
-        else if (testValue->op1->type == Type_STRING)
-            printf("I_LESS_EQUAL - string\n");
-        else if (testValue->op1->type == Type_BOOL)
-            printf("I_LESS_EQUAL - bool\n");
+        else if ((testValue->op1->type == Type_STRING) && (testValue->op2->type == Type_STRING))
+        {
+            testValue->result->data.b = f_less_equal(&*testValue);
+            debug("I_GREATER - string\n");
+        }
+        else if ((testValue->op1->type == Type_BOOL) && (testValue->op2->type == Type_BOOL))
+            testValue->result->data.b = f_less_equal(&*testValue);
         break;
 
     case I_GREATER_EQUAL:
@@ -294,11 +306,13 @@ int interpret(T_ITEM *testValue)
             testValue->result->data.b = f_greater_equal(&*testValue);
             debug("I_GREATER_EQUAL - double\n");
         }
-
-        else if (testValue->op1->type == Type_STRING)
-            printf("I_GREATER_EQUAL - string\n");
-        else if (testValue->op1->type == Type_BOOL)
-            printf("I_GREATER_EQUAL - bool\n");
+        else if ((testValue->op1->type == Type_STRING) && (testValue->op2->type == Type_STRING))
+        {
+            testValue->result->data.b = f_greater_equal(&*testValue);
+            debug("I_GREATER - string\n");
+        }
+        else if ((testValue->op1->type == Type_BOOL) && (testValue->op2->type == Type_BOOL))
+            testValue->result->data.b = f_greater_equal(&*testValue);
         break;
 
     case I_EQUAL:
@@ -312,11 +326,10 @@ int interpret(T_ITEM *testValue)
             testValue->result->data.b = f_equal(&*testValue);
             debug("I_EQUAL - double\n");
         }
-
-        else if (testValue->op1->type == Type_STRING)
-            printf("I_EQUAL - string\n");
-        else if (testValue->op1->type == Type_BOOL)
-            printf("I_EQUAL - bool\n");
+        else if ((testValue->op1->type == Type_STRING) && (testValue->op2->type == Type_STRING))
+            testValue->result->data.b = f_greater_equal(&*testValue);
+        else if ((testValue->op1->type == Type_BOOL) && (testValue->op2->type == Type_BOOL))
+            testValue->result->data.b = f_greater_equal(&*testValue);
         break;
 
     case I_NOT_EQUAL:
@@ -330,11 +343,10 @@ int interpret(T_ITEM *testValue)
             testValue->result->data.b = f_not_equal(&*testValue);
             debug("I_NOT_EQUAL - double\n");
         }
-
-        else if (testValue->op1->type == Type_STRING)
-            printf("I_NOT_EQUAL - string\n");
-        else if (testValue->op1->type == Type_BOOL)
-            printf("I_NOT_EQUAL - bool\n");
+        else if ((testValue->op1->type == Type_STRING) && (testValue->op2->type == Type_STRING))
+            testValue->result->data.b = f_not_equal(&*testValue);
+        else if ((testValue->op1->type == Type_BOOL) && (testValue->op2->type == Type_BOOL))
+            testValue->result->data.b = f_not_equal(&*testValue);
         break;
     //works fine
     case I_LEN:
@@ -440,10 +452,10 @@ item.result->data.i = 0.0; */
 */
 
 /*
-interpret(&item);
+    interpret(&item);
 
-printf("hodnota: %d", (item.result->data.i));
+    printf("hodnota: %d", (item.result->data.i));
 
-return 0;
-}
-*/
+    return 0;
+}*/
+
