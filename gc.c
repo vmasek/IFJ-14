@@ -32,7 +32,7 @@ void *gc_calloc(const char *tag, size_t number, size_t size)
     if ((new_pointer = allocate(tag, number * size)) == NULL)
         return NULL;
 
-    memset(new_pointer, number * size, 0);
+    memset(new_pointer, 0, number * size);
 
     return new_pointer;
 }
