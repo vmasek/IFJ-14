@@ -24,7 +24,17 @@ static void *realloc_branch(struct branch *branch, size_t size);
 
 void *gc_calloc(const char *tag, size_t number, size_t size)
 {
-    return (number && size) ? allocate(tag, number * size) : NULL;
+    void *new_pointer;
+
+    if (!number || !size)
+        return NULL;
+
+    if ((new_pointer = allocate(tag, number * size)) == NULL)
+        return NULL;
+
+    memset(new_pointer, number * size, 0);
+
+    return new_pointer;
 }
 
 void gc_free(const char *tag)
