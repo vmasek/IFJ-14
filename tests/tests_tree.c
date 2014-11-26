@@ -124,19 +124,6 @@ printf("\n---------------------------------\n");
 
 
 
-	tree_free(&tree);
-
-	for(int i=0; i<_N_-1; i++)
-	{
-		cstr_free(cstr[i]);
-	}
-
-	cstr_free(cstr0);
-	cstr_free(cstr1);
-	cstr_free(cstr2);
-	cstr_free(cstr3);
-	cstr_free(cstr4);
-	cstr_free(cstr5);
 
 
 errors=0;

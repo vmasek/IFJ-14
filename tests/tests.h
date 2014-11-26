@@ -46,7 +46,7 @@ int test_tree_complex(void);
 
 ///=================================CSTRING===================================
 int test_cstring(void);
-int test_tree_cstring(void);
+int test_cstring_complex(void);
 
 
 ///===================================GC======================================

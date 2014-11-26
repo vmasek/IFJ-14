@@ -39,6 +39,14 @@ cleanup:
     gc_free("karlik");  // ( TRYING TO DEALLOCATE NEVER-ALLOCATED OR ALREADY
     gc_free("jarda");   //   DEALLOCATED MEMORY DOESN'T DO HARM )
 
+    cstring *cstr = gc_malloc("test_vojto", sizeof(cstring));
+    cstr->str = (char*)"0123";
+    cstr->size = cstr->tab_size = strlen(cstr->str);
+    gc_free("test_vojto");
+
+    cstring *cstr1 = cstr_create_str("0123");
+    print_cstr(cstr1);
+
 
 errors=0;
 }while(0);

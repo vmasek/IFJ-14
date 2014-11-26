@@ -24,7 +24,6 @@
  */
 static cstring *append(cstring *s, char const *str, unsigned long size)
 {
-
 	/*
 	if(!s)
 	{
@@ -116,7 +115,6 @@ cstring *cstr_append_chr(cstring *s, char c)
  */
 cstring *cstr_append_str(cstring *s, char const *str)
 {
-	printf("s->size: %d\nstrlen(str): %d\n", (int)s->size, (int)strlen(str));
     return append(s, str, s->size + strlen(str));
 }
 
@@ -242,7 +240,7 @@ int cstr_resize(cstring *s, unsigned long size)
 {
     /** If cstring is empty size will be set to default value,
         else is new_size set as size of new requied lenght */
-    unsigned long new_size = s->tab_size ? s->tab_size : CSTRING_START_SIZE;
+    unsigned long new_size = s->tab_size ? size : CSTRING_START_SIZE;
     char  *tmp;
 
     new_size *= (size + 1) / new_size + 1; /** zmensi alebo zvecsi new_size na potrebnu hodnotu */

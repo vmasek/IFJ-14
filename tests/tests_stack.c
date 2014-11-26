@@ -568,8 +568,7 @@ errors=0;
 	stack_free(&stack);
 	stack_print(&stack);	//This print should print nothing
 
-	cstr_free(cstr1);
-	cstr_free(cstr);
+
 
 	if(errors)
 	{

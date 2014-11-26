@@ -44,7 +44,7 @@ int test_length()
     }
 
     print_result(test_count, failures);
-    cstr_free(Vojto);
+
     return failures;
 }
 
@@ -88,8 +88,7 @@ int test_copy()
     }
 
     print_result(test_count, failures);
-    cstr_free(Vojto);
-    cstr_free(Albert);
+
     return failures;
 
 }
@@ -140,8 +139,7 @@ int test_find()
     debug("\n*** za stvrtym ***\n");
 
     print_result(test_count, failures);
-    cstr_free(Vojto);
-    cstr_free(Albert);
+
     return failures;
 }
 
@@ -178,7 +176,7 @@ int test_sort()
     }
 
     print_result(test_count, failures);
-    cstr_free(Vojto);
+
 
     return failures;
 }
