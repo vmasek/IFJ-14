@@ -46,6 +46,6 @@ cstring     *cstr_append_cstr(cstring *, cstring const *);
 
 /* Clean and Free */
 void        cstr_clear(cstring *);
-void        cstr_free(cstring *);
+void        cstr_gc_free_all(void);
 
 #endif //__CSTRING_H__

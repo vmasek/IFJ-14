@@ -6,6 +6,7 @@
  ****************************************************************************/
 
 #include    "errors.h"
+#include    "gc.h"
 #include    "cstring.h"
 #include    "common.h"
 #include    <string.h>
@@ -23,14 +24,28 @@
  */
 static cstring *append(cstring *s, char const *str, unsigned long size)
 {
+
+	/*
+	if(!s)
+	{
+		debug("cstring not given.");
+		return NULL;
+	}
+
+	if(!str)
+	{
+		debug("str not given.");
+		return NULL;
+	}*/
+
     /**If size will be exceeded, resize will be called, only if both statements
      * are true (needed size is bigger and enlargement fails) NULL will be returned.
      * @code
      * if (size >= s->tab_size && cstr_resize(s, size))
      *     return NULL; @endcode
      */
-    if (size >= s->tab_size && cstr_resize(s, size))
-        return NULL;
+	if (size >= s->tab_size && cstr_resize(s, size))
+		return NULL;
 
     if (s->size == 0) // ak je retazec cstring prazdny
         strcpy(s->str, str); // tak sa str prekopiruje
@@ -59,7 +74,7 @@ static int cstr_quick_resize(cstring *s)
     unsigned long new_size = s->tab_size * 2;
     char *tmp;
     //bude prealokovane na dvojnasobok aktualnej velkosti
-    if (!(tmp = realloc(s->str, new_size)))
+    if (!(tmp = gc_realloc("cstring", s->str, new_size)))
         return -1;
     s->str = tmp;
     s->tab_size = new_size;
@@ -101,6 +116,7 @@ cstring *cstr_append_chr(cstring *s, char c)
  */
 cstring *cstr_append_str(cstring *s, char const *str)
 {
+	printf("s->size: %d\nstrlen(str): %d\n", (int)s->size, (int)strlen(str));
     return append(s, str, s->size + strlen(str));
 }
 
@@ -161,12 +177,14 @@ cstring *cstr_assign_cstr(cstring *s, cstring const *cstr)
  */
 cstring *cstr_create_str(char const *str)
 {
+    cstring *s = gc_calloc("cstring", 1, sizeof(*s));
+
 	if(!str)
 	{
 		debug("str not given.");
-		return NULL;
+		return s;
 	}
-    cstring *s = calloc(1, sizeof(*s));
+
 
     if (s)
         return cstr_append_str(s, str);
@@ -185,13 +203,13 @@ cstring *cstr_create_str(char const *str)
  */
 cstring *cstr_create_cstr(cstring const *cstr)
 {
+    cstring *s = gc_calloc("cstring", 1, sizeof(*s));
+
 	if(!cstr)
 	{
-		debug("cstr not given.");
-		return NULL;
+		debug("str not given.");
+		return s;
 	}
-
-    cstring *s = calloc(1, sizeof(*s));
 
     if (s)
         return cstr_append_cstr(s, cstr);
@@ -228,7 +246,7 @@ int cstr_resize(cstring *s, unsigned long size)
     char  *tmp;
 
     new_size *= (size + 1) / new_size + 1; /** zmensi alebo zvecsi new_size na potrebnu hodnotu */
-    if (!(tmp = realloc(s->str, new_size)))
+    if (!(tmp = gc_realloc("cstring", s->str, new_size)))
         return -1;
     s->str = tmp;
     s->tab_size = new_size;
@@ -258,10 +276,9 @@ void cstr_clear(cstring *s)
  * @brief Frees memory alocated for cstring.
  * @param s pointer to cstring.
  */
-void cstr_free(cstring *s)
+void cstr_gc_free_all(void)
 {
-    free(s->str);
-    free(s);
+    gc_free("cstring");
 }
 
 
