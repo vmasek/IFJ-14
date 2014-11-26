@@ -46,6 +46,7 @@ typedef enum
     I_WHILE,
     I_WRITE,
     I_READLN,
+    I_ASSIGN, // :=
     I_ADD,
     I_SUB,
     I_MULTIPLY,
@@ -170,6 +171,16 @@ int interpret(T_ITEM *testValue)
             printf("I_READLN - integer\n");
         else print_error(INCOMPATIBLE_TYPE);
         break;
+
+    // can be string := string ?
+    case I_ASSIGN:
+        if (testValue->op1->type == Type_INT)
+            testValue->result->data.i = testValue->op1->data.i;
+        else if (testValue->op1->type == Type_DOUBLE)
+            testValue->result->data.d = testValue->op1->data.d;
+        else print_error(INCOMPATIBLE_TYPE);
+        break;
+
 
     //TODO: Strings --- Do we need this for bool? I dont think so.----
     //Is it concat for strings?
@@ -382,22 +393,22 @@ int main(void)
 
 
     T_ITEM item;
-    item.instruction = I_FIND; //instruction type
+    item.instruction = I_ASSIGN; //instruction type
+
+
+
+    //if you want to test INT
+    item.op1 = malloc(sizeof(int));
+    item.op2 = malloc(sizeof(int));
+    item.result = malloc(sizeof(int));
+
+    item.op1->type = Type_INT;
+    item.op2->type = Type_INT;
+    item.result->type = item.op1->type;
+    item.op1->data.i = 10;
+    item.op2->data.i = 4;
 
 */
-
-/* if you want to test INT
-item.op1 = malloc(sizeof(int));
-item.op2 = malloc(sizeof(int));
-item.result = malloc(sizeof(int));
-
-item.op1->type = Type_INT;
-item.op2->type = Type_INT;
-
-item.op1->data.i = 10;
-item.op2->data.i = 4;
-*/
-
 /*if you want to test Double remove
 item.op1 = malloc(sizeof(double));
 item.op2 = malloc(sizeof(double));
@@ -412,28 +423,27 @@ item.op2->data.d = 4.00;
 item.result->type = item.op1->type;
 item.result->data.i = 0.0; */
 
+
+/* item.op1 = malloc(sizeof(cstring));
+ item.op2 = malloc(sizeof(cstring));
+ item.result = malloc(sizeof(int));
+ item.result->type = Type_INT;
+
+ item.op1->type = Type_STRING;
+ item.op2->type = Type_STRING;
+ item.result->type = Type_INT;
+
+ cstr_append_str(&(item.op1->data.s), "ahoj vojto ako sa mas");
+ cstr_append_str(&(item.op2->data.s), "to");
+ item.start = 1;
+ item.count = 2;
+*/
+
 /*
-    item.op1 = malloc(sizeof(cstring));
-    item.op2 = malloc(sizeof(cstring));
-    item.result = malloc(sizeof(int));
-    item.result->type = Type_INT;
+interpret(&item);
 
-    item.op1->type = Type_STRING;
-    item.op2->type = Type_STRING;
-    item.result->type = Type_INT;
+printf("hodnota: %d", (item.result->data.i));
 
-    cstr_append_str(&(item.op1->data.s), "ahoj vojto ako sa mas");
-    cstr_append_str(&(item.op2->data.s), "to");
-    item.start = 1;
-    item.count = 2;
-
-
-
-    interpret(&item);
-
-    printf("hodnota: %d", (item.result->data.i));
-
-    return 0;
+return 0;
 }
-
 */
