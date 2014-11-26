@@ -189,7 +189,6 @@ int interpret(T_ITEM *testValue)
         else print_error(INCOMPATIBLE_TYPE);
         break;
 
-
     //TODO: Strings --- Do we need this for bool? I dont think so.----
     //Is it concat for strings?
     case I_ADD:
@@ -253,6 +252,7 @@ int interpret(T_ITEM *testValue)
             testValue->result->data.b = f_less(&*testValue);
         else if ((testValue->op1->type == Type_BOOL) && (testValue->op2->type == Type_BOOL))
             testValue->result->data.b = f_less(&*testValue);
+        else print_error(INCOMPATIBLE_TYPE);
         break;
 
     case I_GREATER:
@@ -273,6 +273,7 @@ int interpret(T_ITEM *testValue)
         }
         else if ((testValue->op1->type == Type_BOOL) && (testValue->op2->type == Type_BOOL))
             testValue->result->data.b = f_greater(&*testValue);
+        else print_error(INCOMPATIBLE_TYPE);
         break;
 
     case I_LESS_EQUAL:
@@ -293,6 +294,7 @@ int interpret(T_ITEM *testValue)
         }
         else if ((testValue->op1->type == Type_BOOL) && (testValue->op2->type == Type_BOOL))
             testValue->result->data.b = f_less_equal(&*testValue);
+        else print_error(INCOMPATIBLE_TYPE);
         break;
 
     case I_GREATER_EQUAL:
@@ -313,6 +315,7 @@ int interpret(T_ITEM *testValue)
         }
         else if ((testValue->op1->type == Type_BOOL) && (testValue->op2->type == Type_BOOL))
             testValue->result->data.b = f_greater_equal(&*testValue);
+        else print_error(INCOMPATIBLE_TYPE);
         break;
 
     case I_EQUAL:
@@ -330,6 +333,7 @@ int interpret(T_ITEM *testValue)
             testValue->result->data.b = f_greater_equal(&*testValue);
         else if ((testValue->op1->type == Type_BOOL) && (testValue->op2->type == Type_BOOL))
             testValue->result->data.b = f_greater_equal(&*testValue);
+        else print_error(INCOMPATIBLE_TYPE);
         break;
 
     case I_NOT_EQUAL:
@@ -347,6 +351,7 @@ int interpret(T_ITEM *testValue)
             testValue->result->data.b = f_not_equal(&*testValue);
         else if ((testValue->op1->type == Type_BOOL) && (testValue->op2->type == Type_BOOL))
             testValue->result->data.b = f_not_equal(&*testValue);
+        else print_error(INCOMPATIBLE_TYPE);
         break;
     //works fine
     case I_LEN:
@@ -356,7 +361,7 @@ int interpret(T_ITEM *testValue)
             debug("I_LEN - string\n");
         }
         else
-            return print_error(RUNTIME_OTHER);
+            return print_error(INCOMPATIBLE_TYPE);
         break;
 
     case I_COPY:
@@ -367,7 +372,7 @@ int interpret(T_ITEM *testValue)
             debug("I_COPY - string\n");
         }
         else
-            return print_error(RUNTIME_OTHER);
+            return print_error(INCOMPATIBLE_TYPE);
         break;
 
     //works fine
@@ -378,7 +383,7 @@ int interpret(T_ITEM *testValue)
             debug("I_FIND - string\n");
         }
         else
-            return print_error(RUNTIME_OTHER);
+            return print_error(INCOMPATIBLE_TYPE);
         break;
 
     // FIX for mastermind Vojtisek
@@ -389,25 +394,22 @@ int interpret(T_ITEM *testValue)
             debug("I_FIND - string\n");
         }
         else
-            return print_error(RUNTIME_OTHER);
+            return print_error(INCOMPATIBLE_TYPE);
         break;
-    default: break;
+
+    default:
+        return print_error(RUNTIME_OTHER);
+        break;
     }
     return 0;
 }
-
-
 
 // TESTING PURPOSES
 /*
 int main(void)
 {
-
-
     T_ITEM item;
     item.instruction = I_ASSIGN; //instruction type
-
-
 
     //if you want to test INT
     item.op1 = malloc(sizeof(int));
