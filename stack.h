@@ -17,7 +17,7 @@
 
 
 typedef struct STACK_NODE {
-	Type type;
+	int type;
 	void *value;
 	struct STACK_NODE *next;
 }Stack_Node;
@@ -37,19 +37,19 @@ int    stack_free(Stack*);
 
 /* Basic operations */
 int    stack_pop(Stack*);
-int    stack_push(Stack*, Type, void*);
-int    stack_top(Stack*, Type*, void**);
+int    stack_push(Stack*, int, void*);
+int    stack_top(Stack*, int*, void**);
 
 
 /* Advanced operations */
-int    stack_read_first_of_type(Stack*, Type, void**);
-int    stack_insert(Stack*, Type, Type, void*);
-int    stack_uninsert(Stack*, Type, Type*, void**);
+int    stack_read_first_of_type(Stack*, int, void**);
+int    stack_insert(Stack*, int, int, void*);
+int    stack_uninsert(Stack*, int, int*, void**);
 
 
 /* Printing */
 void   stack_print(Stack*);
-void   stack_print_node(Type, void *);
+void   stack_print_node(int, void *);
 
 
 
