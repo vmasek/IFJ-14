@@ -25,7 +25,7 @@ int stack_init(Stack *stack)
 	return SUCCESS;
 }
 
-int stack_push(Stack *stack, int type, void *value)
+int stack_push(Stack *stack, Type type, void *value)
 {
 	if(!stack)
 	{
@@ -53,7 +53,7 @@ int stack_push(Stack *stack, int type, void *value)
 	return SUCCESS;
 }
 
-int stack_top(Stack *stack, int *type, void **value)
+int stack_top(Stack *stack, Type *type, void **value)
 {
 	if(!stack)
 	{
@@ -95,7 +95,7 @@ int stack_pop(Stack *stack)
 	return SUCCESS;
 }
 
-static Stack_Node *stack_find_first_type(Stack *stack, int type)
+static Stack_Node *stack_find_first_type(Stack *stack, Type type)
 {
 	if(!stack||!stack->top)
 	{
@@ -117,7 +117,7 @@ static Stack_Node *stack_find_first_type(Stack *stack, int type)
 	return NULL;
 }
 
-int stack_read_first_of_type(Stack *stack, int type, void **value)
+int stack_read_first_of_type(Stack *stack, Type type, void **value)
 {
 	if(!stack)
 	{
@@ -140,7 +140,7 @@ int stack_read_first_of_type(Stack *stack, int type, void **value)
 		return INTERNAL_ERROR;
 }
 
-int stack_insert(Stack *stack, int searched_type, int type, void *value)
+int stack_insert(Stack *stack, Type searched_type, Type type, void *value)
 {
     Stack_Node **found_ptr = &stack->top;
     Stack_Node *new_node;
@@ -165,7 +165,7 @@ int stack_insert(Stack *stack, int searched_type, int type, void *value)
 }
 
 
-int stack_uninsert(Stack *stack, int searched_type, int *type, void **value)
+int stack_uninsert(Stack *stack, Type searched_type, Type *type, void **value)
 {
 	if(!stack)
 	{
@@ -276,7 +276,7 @@ int stack_free(Stack *stack)
 
 
 
-inline void stack_print_node(int type, void *value)
+inline void stack_print_node(Type type, void *value)
 {
 	printf("\n\t_________________________________________________________________\n");
 	//printf("\t|\ttype:  %d\n", type);
