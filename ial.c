@@ -380,7 +380,6 @@ static void tree_print_nodes(Tree_Node *node, const char *sufix, const char from
             suf2 = strcat(suf2, "   ");
         tree_print_nodes(node->left, suf2, 'L');
         if (fromdir == 'R') printf("%s\n", suf2);
-        free(suf2);
     }
 }
 
