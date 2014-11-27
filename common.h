@@ -44,6 +44,7 @@
  */
 #define CHECK_VALUE(val, ret) if (((ret) = (val)) != SUCCESS) return (ret);
 
+
 /**
  * Union representing value of any type
  */
@@ -53,6 +54,27 @@ typedef union {
     cstring string;
     bool boolean;
 } Value;
+
+
+typedef enum
+{
+    Type_OTHER = 0,  //  --
+    Type_INT,        //  value_int
+    Type_DOUBLE,     //  value_double
+    Type_CHAR,       //  value_char
+    Type_STRING,     //  value_char*
+    Type_CSTRING,    //  value_cstring
+    Type_BOOL,       // value bool
+} Type;
+
+
+typedef struct
+{
+    Value data;
+    Type type;
+} My_value;
+
+
 
 /**
  * @brief Function converts char to int.
