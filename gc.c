@@ -18,10 +18,10 @@ struct branch {
     struct branch *next;
 };
 
-static void *allocate(const char *tag, size_t size);
+static void *allocate(const char *tag, size_t size, void *old_pointer);
 static struct branch *create_branch(const char *tag);
 static void free_branch(struct branch **branch_ptr, const char *tag);
-static void *realloc_branch(struct branch *branch, size_t size);
+static void *realloc_branch(struct branch *branch, size_t size, void *old_pointer);
 
 void *gc_calloc(const char *tag, size_t number, size_t size)
 {
@@ -30,7 +30,7 @@ void *gc_calloc(const char *tag, size_t number, size_t size)
     if (!number || !size)
         return NULL;
 
-    if ((new_pointer = allocate(tag, number * size)) == NULL)
+    if ((new_pointer = allocate(tag, number * size, NULL)) == NULL)
         return NULL;
 
     memset(new_pointer, 0, number * size);
@@ -40,12 +40,12 @@ void *gc_calloc(const char *tag, size_t number, size_t size)
 
 void gc_free(const char *tag)
 {
-    allocate(tag, 0);
+    allocate(tag, 0, NULL);
 }
 
 void *gc_malloc(const char *tag, size_t size)
 {
-    return size ? allocate(tag, size) : NULL;
+    return size ? allocate(tag, size, NULL) : NULL;
 }
 
 void *gc_realloc(const char *tag, void *pointer, size_t size)
@@ -55,19 +55,13 @@ void *gc_realloc(const char *tag, void *pointer, size_t size)
     if (!size)
         return NULL;
 
-    if ((new_pointer = allocate(tag, size)) == NULL)
+    if ((new_pointer = allocate(tag, size, pointer)) == NULL)
         return NULL;
-
-    if (pointer != NULL)
-    {
-		debug("memcpy printof: new %p\told %p\tsize %u\t diff %u\n", new_pointer, pointer, size, (long)new_pointer - (long)pointer);
-		memcpy(new_pointer, pointer, size);
-	}
 
     return new_pointer;
 }
 
-static void *allocate(const char *tag, size_t size)
+static void *allocate(const char *tag, size_t size, void *old_pointer)
 {
     static struct branch *first;
     struct branch **branch_ptr = &first;
@@ -91,7 +85,7 @@ static void *allocate(const char *tag, size_t size)
             return NULL;
     }
 
-    return realloc_branch(*branch_ptr, size);
+    return realloc_branch(*branch_ptr, size, old_pointer);
 }
 
 static struct branch *create_branch(const char *tag)
@@ -138,23 +132,36 @@ static void free_branch(struct branch **branch_ptr, const char *tag)
     free(branch);
 }
 
-static void *realloc_branch(struct branch *branch, size_t size)
+static void *realloc_branch(struct branch *branch, size_t size, void *old_pointer)
 {
-    void *pointer;
+    void **pointer_ptr = NULL;
     void **temp_data;
+    void *temp_pointer;
 
-    if ((pointer = malloc(size)) == NULL)
-        return NULL;
-
-    if ((temp_data = realloc(branch->data, (branch->length + 1) * sizeof(void *)))
-        == NULL) {
-        free(pointer);
-        return NULL;
+    if (old_pointer != NULL) {
+        for (unsigned i = 0; i < branch->length; i++) {
+            if (branch->data[i] == old_pointer) {
+                pointer_ptr = &branch->data[i];
+                break;
+            }
+        }
+        if (pointer_ptr == NULL)
+            return NULL;
+    } else {
+        if ((temp_data = realloc(branch->data,
+                                 (branch->length + 1) * sizeof(void *)))
+            == NULL)
+            return NULL;
+        branch->data = temp_data;
+        branch->data[branch->length] = NULL;
+        pointer_ptr = &branch->data[branch->length];
+        branch->length++;
     }
 
-    branch->data = temp_data;
-    branch->data[branch->length] = pointer;
-    branch->length++;
+    if ((temp_pointer = realloc(*pointer_ptr, size)) == NULL)
+        return NULL;
 
-    return pointer;
+    *pointer_ptr = temp_pointer;
+
+    return *pointer_ptr;
 }
