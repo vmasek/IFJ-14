@@ -47,12 +47,11 @@ NC='\e[0m' # No Color
 
 
 if [[ $DEBUG == true ]]; then
-	make -B FLAGS='-DDEBUG -g -Wstrict-prototypes -Wstrict-overflow=5 -Wwrite-strings -Wunreachable-code -Winit-self -Werror-implicit-function-declaration'
+	make -B FLAGS='-DDEBUG -g -Wstrict-prototypes -Wstrict-overflow=5 -Wwrite-strings -Wunreachable-code -Winit-self -Werror-implicit-function-declaration' &>"$test".out
 else
-	make -B FLAGS='-g -Wstrict-prototypes -Wstrict-overflow=5 -Wwrite-strings -Wunreachable-code -Winit-self -Werror-implicit-function-declaration'
+	make -B FLAGS='-g -Wstrict-prototypes -Wstrict-overflow=5 -Wwrite-strings -Wunreachable-code -Winit-self -Werror-implicit-function-declaration' &>"$test".out
 fi
 
- #1>/dev/null 2>/dev/null 
 
 rm ./*.o ../*.o .depend ../.depend 2>/dev/null
 
