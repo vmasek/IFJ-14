@@ -9,6 +9,7 @@
 
 #include    "cstring.h"
 #include    "common.h"
+#include    "gc.h"
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 

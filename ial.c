@@ -171,7 +171,7 @@ void tree_init(Tree *tree)
  */
 static void tree_node_free(Tree_Node *node)
 {
-    debug("free");
+    debug("free\n");
     if (!node) {
         debug("not node\n");
         return;
@@ -243,10 +243,10 @@ Tree_Node *tree_node_find(Tree_Node *node, char *key)
         fprintf(stderr, "FOUND:\t\t#\tkey: %s\tNode: %s\n\n\n", key, node->key->str);
 #endif
         if ( (result = string_cmp( key, node->key->str )) < 0 ) { ///here was string_cmp replaced by classic strcmp that is fully functioning, string_cmp did not work
-            debug("right search");
+            debug("right search\n");
             node = node->right;
         } else if ( result > 0 ) {
-            debug("left search");
+            debug("left search\n");
             node = node->left;
         } else /// node with same key as parameter key was found and will be returned
             return node;
@@ -270,7 +270,7 @@ Tree_Node *tree_find_key_ch(Tree *tree, char *key)
 static inline void tree_create_root(Tree *tree, cstring *key, void *data)
 {
     debug("root insert\n");
-    if (!(tree->root = malloc(sizeof(Tree_Node)))) {
+    if (!(tree->root = gc_malloc("tree", sizeof(Tree_Node)))) {
         debug("malloc fail\n");
     }
     tree->root->key = key;
@@ -282,7 +282,7 @@ static inline void tree_create_root(Tree *tree, cstring *key, void *data)
 static inline void tree_create_left(Tree *tree, Tree_Node *tmp, cstring *key, void *data)
 {
     debug("left insert\n");
-    if (!(tmp->left = malloc(sizeof(Tree_Node)))) {
+    if (!(tmp->left = gc_malloc("tree", sizeof(Tree_Node)))) {
         debug("malloc fail\n");
     }
     tmp->left->key = key;
@@ -294,7 +294,7 @@ static inline void tree_create_left(Tree *tree, Tree_Node *tmp, cstring *key, vo
 static inline void tree_create_right(Tree *tree, Tree_Node *tmp, cstring *key, void *data)
 {
     debug("right insert\n");
-    if (!(tmp->right = malloc(sizeof(Tree_Node)))) {
+    if (!(tmp->right = gc_malloc("tree", sizeof(Tree_Node)))) {
         debug("malloc fail\n");
     }
     tmp->right->key = key;
@@ -329,14 +329,14 @@ int tree_insert(Tree *tree, cstring *key, void *data)
         result = strlen(tmp->key->str);
 
         if (key_size < result) {
-            debug("left shift");
+            debug("left shift\n");
             if (!tmp->left) {
                 tree_create_left(tree, tmp, key, data);
                 return 0;
             } else
                 tmp = tmp->left;
         } else if (key_size > result) {
-            debug("right shift");
+            debug("right shift\n");
             if (!tmp->right) {
                 tree_create_right(tree, tmp, key, data);
                 return 0;
@@ -348,7 +348,7 @@ int tree_insert(Tree *tree, cstring *key, void *data)
                 tree->last = tmp;
                 return 0;
             }
-            debug("right shift");
+            debug("right shift\n");
             if (!tmp->right) {
                 tree_create_right(tree, tmp, key, data);
                 return 0;
@@ -363,7 +363,7 @@ int tree_insert(Tree *tree, cstring *key, void *data)
 static void tree_print_nodes(Tree_Node *node, const char *sufix, const char fromdir)
 {
     if (node != NULL) {
-        char *suf2 = (char *) malloc(strlen(sufix) + 4);
+        char *suf2 = (char *) gc_malloc("tree", strlen(sufix) + 4);
         strcpy(suf2, sufix);
         if (fromdir == 'L') {
             suf2 = strcat(suf2, "  |");
