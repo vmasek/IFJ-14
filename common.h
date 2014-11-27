@@ -8,6 +8,10 @@
 #define __COMMON_H__
 
 #include <stdbool.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "cstring.h"
 
 /**
@@ -16,17 +20,29 @@
  * format DEBUG: file.c:line:[function]: Message
  */
 #ifdef DEBUG
-#define debug(Message) fprintf(stderr, "DEBUG: %s:%d:[%s]:\t\t" Message "\n", __FILE__, __LINE__, __func__)
+
+
+
+/*
+#define debug(...)                                                            \
+    sprintf(msg_buff, __VA_ARGS__);                                           \
+    fprintf(stderr, "DEBUG: %s:%d:[%s]:\t\t%s", __FILE__, __LINE__, __func__, msg_buff)\
+*/
+
+#define debug(...) debug_printf(__FILE__, __LINE__, __func__, __VA_ARGS__)
+
 #else
-#define debug(Message)
+
+#define debug(...)
 
 #endif
+
+
 
 /**
  * Value checking macro
  */
-#define CHECK_VALUE(val, ret) if (((ret) = (val)) != SUCCESS) return (ret)
-#define CATCH_VALUE(val, ret) if (((ret) = (val)) != SUCCESS || (ret) != RETURNING) return (ret)
+#define CHECK_VALUE(val, ret) if (((ret) = (val)) != SUCCESS) return (ret);
 
 /**
  * Union representing value of any type
@@ -46,6 +62,8 @@ typedef union {
  * Function converts char to numeric value represented by the char.
  * Returns 0 when the char is not a digit.
  */
-int char_to_int(char c);
+extern int char_to_int(char c);
+
+extern void debug_printf(const char* file, const int line, const char* func, const char *fmt, ...);
 
 #endif //__COMMON_H__
