@@ -51,7 +51,7 @@
 typedef union {
     int integer;
     double real;
-    cstring string;
+    cstring *string;
     bool boolean;
 } Value;
 
