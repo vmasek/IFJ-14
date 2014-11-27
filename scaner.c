@@ -239,6 +239,11 @@ void get_token(Token *token, FILE *input) {
                 state = LEXER_MAYBE_DOUBLE_DOT;
                 break; // can be '..' or '.'
 
+            case ',':
+                token->type = TOKEN_SYMBOL;
+                token->value.value_symbol = COMMA;
+                return;
+
             case '(':
                 token->type = TOKEN_SYMBOL;
                 token->value.value_symbol = PARENTHESIS_L;

@@ -55,6 +55,7 @@ enum token_symbol {
     ASSIGNMENT,     // :=
     SEMICOLON,      // ;
     DOT,            // .
+    COMMA,          // ,
     DOUBLE_DOT,     // ..
     COLON,          // :
     PARENTHESIS_L,  // (
