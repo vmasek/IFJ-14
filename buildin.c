@@ -20,7 +20,7 @@
  */
 int length(cstring *s)
 {
-    return strlen(s->str);
+    return (s->size);
 }
 
 /**
@@ -48,10 +48,13 @@ cstring *copy(const cstring *s, int i, int n)
  * @param  search   cstring    Substring which is searched for.
  * @return          int        Returns index where ẃas first occurence of substring found.
  *                             If searched substring is empty, returns position 1.
+ *                             If string where to search is empty returns 0.
  */
 int find(cstring *s, cstring *search)
 {
-    if (strcmp(s->str, "") == 0)
+	if (strcmp(s->str, "") == 0)
+        return 0;
+    else if (strcmp(search->str, "") == 0)
         return 1;
     else
         return (kmp_substr(s->str, search->str) + 1);
