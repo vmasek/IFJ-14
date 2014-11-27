@@ -1,114 +1,50 @@
 /**
  * @file    interpret.c
- * @name    Implementation of interpret
- * @author  Tomas Paulus (xpaulu01)
+ * @brief   Implementation of interpret
+ * @author  Tomas Paulus (xpaulu01), Vojtech Mašek (xmasek15)
  *******************************************************************/
 
-#include "ial.h"
-#include "errors.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-#include "cstring.h"
-#include "buildin.h"
+#include "interpret.h"
 
-// TESTING PURPOSES
-// T for Type of variable
 
-typedef enum
-{
-    Type_OTHER = 0,  //  --
-    Type_INT,        //  value_int
-    Type_DOUBLE,     //  value_double
-    Type_CHAR,       //  value_char
-    Type_STRING,     //  value_char*
-    Type_CSTRING,    //  value_cstring
-    Type_BOOL,      // value bool
-} Type;
-
-typedef union
-{
-    double d;
-    int i;
-    cstring s;
-    bool b;
-} Value_data;
-
-typedef struct
-{
-    Value_data data;
-    Type type;
-} My_value;
-
-typedef enum
-{
-    I_WRITE,    // printf
-    I_READLN,   // scanf
-    I_ASSIGN,   // :=
-    I_ADD,      // +
-    I_SUB,      // -
-    I_MULTIPLY, // *
-    I_DIV,      // /
-    I_LESS,     // <
-    I_GREATER,  // >
-    I_LESS_EQUAL,   // <=
-    I_GREATER_EQUAL,    // >=
-    I_EQUAL,    // ==
-    I_NOT_EQUAL,    // !=
-    I_LEN,  // length
-    I_COPY, // copy
-    I_FIND, // find
-    I_SORT, // sort
-} Instruction_type;
-
-typedef struct
-{
-    My_value *op1;
-    My_value *op2;
-    My_value *result;
-    int start; //because inbuild copy function needs it
-    int count;    //because inbuild copy function needs it
-    Instruction_type instruction;
-} T_ITEM;
 
 // Must be also for string, bool etc.?
 bool f_less(T_ITEM *item)
 {
     if ((item->op1->type == Type_INT)  && (item->op2->type == Type_INT))
-        return ((item->op1->data.i) < (item->op2->data.i));
+        return ((item->op1->data.integer) < (item->op2->data.integer));
     else if ((item->op1->type == Type_DOUBLE) && (item->op2->type == Type_DOUBLE))
-        return ((item->op1->data.d) < (item->op2->data.d));
+        return ((item->op1->data.real) < (item->op2->data.real));
     else if ((item->op1->type == Type_STRING) && (item->op2->type == Type_STRING))
-        return ((item->op1->data.s.str) < (item->op2->data.s.str));
+        return ((item->op1->data.string.str) < (item->op2->data.string.str));
     else if ((item->op1->type == Type_BOOL) && (item->op2->type == Type_BOOL))
-        return ((item->op1->data.b) < (item->op2->data.b));
+        return ((item->op1->data.boolean) < (item->op2->data.boolean));
     return print_error(INCOMPATIBLE_TYPE);
 }
 
 bool f_greater(T_ITEM *item)
 {
     if ((item->op1->type == Type_INT)  && (item->op2->type == Type_INT))
-        return ((item->op1->data.i) > (item->op2->data.i));
+        return ((item->op1->data.integer) > (item->op2->data.integer));
     else if ((item->op1->type == Type_DOUBLE) && (item->op2->type == Type_DOUBLE))
-        return ((item->op1->data.d) > (item->op2->data.d));
+        return ((item->op1->data.real) > (item->op2->data.real));
     else if ((item->op1->type == Type_STRING) && (item->op2->type == Type_STRING))
-        return ((item->op1->data.s.str) > (item->op2->data.s.str));
+        return ((item->op1->data.string.str) > (item->op2->data.string.str));
     else if ((item->op1->type == Type_BOOL) && (item->op2->type == Type_BOOL))
-        return ((item->op1->data.b) > (item->op2->data.b));
+        return ((item->op1->data.boolean) > (item->op2->data.boolean));
     return print_error(INCOMPATIBLE_TYPE);
 }
 
 bool f_less_equal(T_ITEM *item)
 {
     if ((item->op1->type == Type_INT)  && (item->op2->type == Type_INT))
-        return ((item->op1->data.i) <= (item->op2->data.i));
+        return ((item->op1->data.integer) <= (item->op2->data.integer));
     else if ((item->op1->type == Type_DOUBLE) && (item->op2->type == Type_DOUBLE))
-        return ((item->op1->data.d) <= (item->op2->data.d));
+        return ((item->op1->data.real) <= (item->op2->data.real));
     else if ((item->op1->type == Type_STRING) && (item->op2->type == Type_STRING))
-        return ((item->op1->data.s.str) <= (item->op2->data.s.str));
+        return ((item->op1->data.string.str) <= (item->op2->data.string.str));
     else if ((item->op1->type == Type_BOOL) && (item->op2->type == Type_BOOL))
-        return ((item->op1->data.b) <= (item->op2->data.b));
+        return ((item->op1->data.boolean) <= (item->op2->data.boolean));
 
     return print_error(INCOMPATIBLE_TYPE);
 }
@@ -116,39 +52,39 @@ bool f_less_equal(T_ITEM *item)
 bool f_greater_equal(T_ITEM *item)
 {
     if ((item->op1->type == Type_INT)  && (item->op2->type == Type_INT))
-        return ((item->op1->data.i) >= (item->op2->data.i));
+        return ((item->op1->data.integer) >= (item->op2->data.integer));
     else if ((item->op1->type == Type_DOUBLE) && (item->op2->type == Type_DOUBLE))
-        return ((item->op1->data.d) >= (item->op2->data.d));
+        return ((item->op1->data.real) >= (item->op2->data.real));
     else if ((item->op1->type == Type_STRING) && (item->op2->type == Type_STRING))
-        return ((item->op1->data.s.str) >= (item->op2->data.s.str));
+        return ((item->op1->data.string.str) >= (item->op2->data.string.str));
     else if ((item->op1->type == Type_BOOL) && (item->op2->type == Type_BOOL))
-        return ((item->op1->data.b) >= (item->op2->data.b));
+        return ((item->op1->data.boolean) >= (item->op2->data.boolean));
     return print_error(INCOMPATIBLE_TYPE);
 }
 
 bool f_equal(T_ITEM *item)
 {
     if ((item->op1->type == Type_INT)  && (item->op2->type == Type_INT))
-        return ((item->op1->data.i) == (item->op2->data.i));
+        return ((item->op1->data.integer) == (item->op2->data.integer));
     else if ((item->op1->type == Type_DOUBLE) && (item->op2->type == Type_DOUBLE))
-        return ((item->op1->data.d) == (item->op2->data.d));
+        return ((item->op1->data.real) == (item->op2->data.real));
     else if ((item->op1->type == Type_STRING) && (item->op2->type == Type_STRING))
-        return strcmp(item->op1->data.s.str, item->op2->data.s.str); //is this correct for equal / not equal?
+        return strcmp(item->op1->data.string.str, item->op2->data.string.str); //is this correct for equal / not equal?
     else if ((item->op1->type == Type_BOOL) && (item->op2->type == Type_BOOL))
-        return ((item->op1->data.b) == (item->op2->data.b));
+        return ((item->op1->data.boolean) == (item->op2->data.boolean));
     return print_error(INCOMPATIBLE_TYPE);
 }
 
 bool f_not_equal(T_ITEM *item)
 {
     if ((item->op1->type == Type_INT)  && (item->op2->type == Type_INT))
-        return ((item->op1->data.i) != (item->op2->data.i));
+        return ((item->op1->data.integer) != (item->op2->data.integer));
     else if ((item->op1->type == Type_DOUBLE) && (item->op2->type == Type_DOUBLE))
-        return ((item->op1->data.d) != (item->op2->data.d));
+        return ((item->op1->data.real) != (item->op2->data.real));
     else if ((item->op1->type == Type_STRING) && (item->op2->type == Type_STRING))
-        return strcmp(item->op1->data.s.str, item->op2->data.s.str); // is this correct for equal/notequal?
+        return strcmp(item->op1->data.string.str, item->op2->data.string.str); // is this correct for equal/notequal?
     else if ((item->op1->type == Type_BOOL) && (item->op2->type == Type_BOOL))
-        return ((item->op1->data.b) != (item->op2->data.b));
+        return ((item->op1->data.boolean) != (item->op2->data.boolean));
     return print_error(INCOMPATIBLE_TYPE);
 }
 
@@ -159,23 +95,23 @@ int interpret(T_ITEM *testValue)
     {
     case I_WRITE:
         if (testValue->op1->type == Type_INT)
-            printf("%d\n", (testValue->op1->data.i));
+            printf("%d\n", (testValue->op1->data.integer));
         else if (testValue->op1->type == Type_DOUBLE)
-            printf("%f\n", testValue->op1->data.d);
+            printf("%f\n", testValue->op1->data.real);
         else if (testValue->op1->type == Type_STRING)
-            printf("%s\n", testValue->op1->data.s.str);
+            printf("%s\n", testValue->op1->data.string.str);
         else if (testValue->op1->type == Type_BOOL)
-            printf("%s", testValue->op1->data.b ? "true\n" : "false\n");
+            printf("%s", testValue->op1->data.boolean ? "true\n" : "false\n");
         else print_error(INCOMPATIBLE_TYPE);
         break;
 
     //TODO: string
     case I_READLN:
         if (testValue->op1->type == Type_INT)
-            //scanf("%d", &testValue->data.i);
+            //scanf("%d", &testValue->data.integer);
             printf("I_READLN - integer\n");
         else if (testValue->op1->type == Type_DOUBLE)
-            //scanf("%lf", &testValue->data.d);
+            //scanf("%lf", &testValue->data.real);
             printf("I_READLN - integer\n");
         else print_error(INCOMPATIBLE_TYPE);
         break;
@@ -183,9 +119,9 @@ int interpret(T_ITEM *testValue)
     // can be string := string ?
     case I_ASSIGN:
         if (testValue->op1->type == Type_INT)
-            testValue->result->data.i = testValue->op1->data.i;
+            testValue->result->data.integer = testValue->op1->data.integer;
         else if (testValue->op1->type == Type_DOUBLE)
-            testValue->result->data.d = testValue->op1->data.d;
+            testValue->result->data.real = testValue->op1->data.real;
         else print_error(INCOMPATIBLE_TYPE);
         break;
 
@@ -193,9 +129,9 @@ int interpret(T_ITEM *testValue)
     //Is it concat for strings?
     case I_ADD:
         if ((testValue->op1->type == Type_INT) && (testValue->op2->type == Type_INT))
-            testValue->result->data.i = testValue->op1->data.i + testValue->op2->data.i;
+            testValue->result->data.integer = testValue->op1->data.integer + testValue->op2->data.integer;
         else if ((testValue->op1->type == Type_DOUBLE) && (testValue->op2->type == Type_DOUBLE))
-            testValue->result->data.d = testValue->op1->data.d + testValue->op2->data.d;
+            testValue->result->data.real = testValue->op1->data.real + testValue->op2->data.real;
 
         else if ((testValue->op1->type == Type_STRING) && (testValue->op2->type == Type_STRING))
         {
@@ -214,18 +150,18 @@ int interpret(T_ITEM *testValue)
     //TODO: Strings, ----Do we need this for string/bool? I dont think so.----
     case I_SUB:
         if ((testValue->op1->type == Type_INT) && (testValue->op2->type == Type_INT))
-            testValue->result->data.i = testValue->op1->data.i - testValue->op2->data.i;
+            testValue->result->data.integer = testValue->op1->data.integer - testValue->op2->data.integer;
         else if ((testValue->op1->type == Type_DOUBLE) && (testValue->op2->type == Type_DOUBLE))
-            testValue->result->data.d = testValue->op1->data.d - testValue->op2->data.d;
+            testValue->result->data.real = testValue->op1->data.real - testValue->op2->data.real;
         else print_error(INCOMPATIBLE_TYPE);
         break;
 
     //TODO: Strings,bool, etc
     case I_MULTIPLY:
         if ((testValue->op1->type == Type_INT) && (testValue->op2->type == Type_INT))
-            testValue->result->data.i = testValue->op1->data.i * testValue->op2->data.i;
+            testValue->result->data.integer = testValue->op1->data.integer * testValue->op2->data.integer;
         else if ((testValue->op1->type == Type_DOUBLE) && (testValue->op2->type == Type_DOUBLE))
-            testValue->result->data.d = testValue->op1->data.d * testValue->op2->data.d;
+            testValue->result->data.real = testValue->op1->data.real * testValue->op2->data.real;
         else print_error(INCOMPATIBLE_TYPE);
         break;
 
@@ -234,130 +170,130 @@ int interpret(T_ITEM *testValue)
         if ((testValue->op1->type == Type_INT) && (testValue->op2->type == Type_INT))
         {
             testValue->result->type = Type_DOUBLE;
-            testValue->result->data.d = testValue->op1->data.i / testValue->op2->data.i;
+            testValue->result->data.real = testValue->op1->data.integer / testValue->op2->data.integer;
             testValue->op1->type = Type_DOUBLE;
-            testValue->op1->data.d = testValue->result->data.d;
+            testValue->op1->data.real = testValue->result->data.real;
         }
         else if ((testValue->op1->type == Type_DOUBLE) && (testValue->op2->type == Type_DOUBLE))
-            testValue->result->data.d = testValue->op1->data.d / testValue->op2->data.d;
+            testValue->result->data.real = testValue->op1->data.real / testValue->op2->data.real;
         else print_error(INCOMPATIBLE_TYPE);
         break;
 
     case I_LESS:
         if ((testValue->op1->type == Type_INT) && (testValue->op2->type == Type_INT))
-            testValue->result->data.b = f_less(&*testValue);
+            testValue->result->data.boolean = f_less(&*testValue);
         else if ((testValue->op1->type == Type_DOUBLE) && (testValue->op2->type == Type_DOUBLE))
-            testValue->result->data.b = f_less(&*testValue);
+            testValue->result->data.boolean = f_less(&*testValue);
         else if ((testValue->op1->type == Type_STRING) && (testValue->op2->type == Type_STRING))
-            testValue->result->data.b = f_less(&*testValue);
+            testValue->result->data.boolean = f_less(&*testValue);
         else if ((testValue->op1->type == Type_BOOL) && (testValue->op2->type == Type_BOOL))
-            testValue->result->data.b = f_less(&*testValue);
+            testValue->result->data.boolean = f_less(&*testValue);
         else print_error(INCOMPATIBLE_TYPE);
         break;
 
     case I_GREATER:
         if (testValue->op1->type == Type_INT)
         {
-            testValue->result->data.b = f_greater(&*testValue);
+            testValue->result->data.boolean = f_greater(&*testValue);
             debug("I_GREATER - integer\n");
         }
         else if (testValue->op1->type == Type_DOUBLE)
         {
-            testValue->result->data.b = f_greater(&*testValue);
+            testValue->result->data.boolean = f_greater(&*testValue);
             debug("I_GREATER - integer\n");
         }
         else if ((testValue->op1->type == Type_STRING) && (testValue->op2->type == Type_STRING))
         {
-            testValue->result->data.b = f_greater(&*testValue);
+            testValue->result->data.boolean = f_greater(&*testValue);
             debug("I_GREATER - string\n");
         }
         else if ((testValue->op1->type == Type_BOOL) && (testValue->op2->type == Type_BOOL))
-            testValue->result->data.b = f_greater(&*testValue);
+            testValue->result->data.boolean = f_greater(&*testValue);
         else print_error(INCOMPATIBLE_TYPE);
         break;
 
     case I_LESS_EQUAL:
         if (testValue->op1->type == Type_INT)
         {
-            testValue->result->data.b = f_less_equal(&*testValue);
+            testValue->result->data.boolean = f_less_equal(&*testValue);
             debug("I_LESS_EQUAL - integer\n");
         }
         else if (testValue->op1->type == Type_DOUBLE)
         {
-            testValue->result->data.b = f_less_equal(&*testValue);
+            testValue->result->data.boolean = f_less_equal(&*testValue);
             debug("I_LESS_EQUAL - double\n");
         }
         else if ((testValue->op1->type == Type_STRING) && (testValue->op2->type == Type_STRING))
         {
-            testValue->result->data.b = f_less_equal(&*testValue);
+            testValue->result->data.boolean = f_less_equal(&*testValue);
             debug("I_GREATER - string\n");
         }
         else if ((testValue->op1->type == Type_BOOL) && (testValue->op2->type == Type_BOOL))
-            testValue->result->data.b = f_less_equal(&*testValue);
+            testValue->result->data.boolean = f_less_equal(&*testValue);
         else print_error(INCOMPATIBLE_TYPE);
         break;
 
     case I_GREATER_EQUAL:
         if (testValue->op1->type == Type_INT)
         {
-            testValue->result->data.b = f_greater_equal(&*testValue);
+            testValue->result->data.boolean = f_greater_equal(&*testValue);
             debug("I_GREATER_EQUAL - integer\n");
         }
         else if (testValue->op1->type == Type_DOUBLE)
         {
-            testValue->result->data.b = f_greater_equal(&*testValue);
+            testValue->result->data.boolean = f_greater_equal(&*testValue);
             debug("I_GREATER_EQUAL - double\n");
         }
         else if ((testValue->op1->type == Type_STRING) && (testValue->op2->type == Type_STRING))
         {
-            testValue->result->data.b = f_greater_equal(&*testValue);
+            testValue->result->data.boolean = f_greater_equal(&*testValue);
             debug("I_GREATER - string\n");
         }
         else if ((testValue->op1->type == Type_BOOL) && (testValue->op2->type == Type_BOOL))
-            testValue->result->data.b = f_greater_equal(&*testValue);
+            testValue->result->data.boolean = f_greater_equal(&*testValue);
         else print_error(INCOMPATIBLE_TYPE);
         break;
 
     case I_EQUAL:
         if (testValue->op1->type == Type_INT)
         {
-            testValue->result->data.b = f_equal(&*testValue);
+            testValue->result->data.boolean = f_equal(&*testValue);
             debug("I_EQUAL - integer\n");
         }
         else if (testValue->op1->type == Type_DOUBLE)
         {
-            testValue->result->data.b = f_equal(&*testValue);
+            testValue->result->data.boolean = f_equal(&*testValue);
             debug("I_EQUAL - double\n");
         }
         else if ((testValue->op1->type == Type_STRING) && (testValue->op2->type == Type_STRING))
-            testValue->result->data.b = f_greater_equal(&*testValue);
+            testValue->result->data.boolean = f_greater_equal(&*testValue);
         else if ((testValue->op1->type == Type_BOOL) && (testValue->op2->type == Type_BOOL))
-            testValue->result->data.b = f_greater_equal(&*testValue);
+            testValue->result->data.boolean = f_greater_equal(&*testValue);
         else print_error(INCOMPATIBLE_TYPE);
         break;
 
     case I_NOT_EQUAL:
         if (testValue->op1->type == Type_INT)
         {
-            testValue->result->data.b = f_not_equal(&*testValue);
+            testValue->result->data.boolean = f_not_equal(&*testValue);
             debug("I_NOT_EQUAL - integer\n");
         }
         else if (testValue->op1->type == Type_DOUBLE)
         {
-            testValue->result->data.b = f_not_equal(&*testValue);
+            testValue->result->data.boolean = f_not_equal(&*testValue);
             debug("I_NOT_EQUAL - double\n");
         }
         else if ((testValue->op1->type == Type_STRING) && (testValue->op2->type == Type_STRING))
-            testValue->result->data.b = f_not_equal(&*testValue);
+            testValue->result->data.boolean = f_not_equal(&*testValue);
         else if ((testValue->op1->type == Type_BOOL) && (testValue->op2->type == Type_BOOL))
-            testValue->result->data.b = f_not_equal(&*testValue);
+            testValue->result->data.boolean = f_not_equal(&*testValue);
         else print_error(INCOMPATIBLE_TYPE);
         break;
     //works fine
     case I_LEN:
         if (testValue->op1->type == Type_STRING)
         {
-            testValue->result->data.i = length(&(testValue->op1->data.s));
+            testValue->result->data.integer = length(&(testValue->op1->data.string));
             debug("I_LEN - string\n");
         }
         else
@@ -368,7 +304,7 @@ int interpret(T_ITEM *testValue)
         if (testValue->op1->type == Type_STRING)
         {
             //error: incompatible types when assigning to type ‘cstring’ from type ‘struct cstring *’
-            //testValue->result->data.s = copy(&(testValue->op1->data.s), testValue->start, testValue->count);
+            //testValue->result->data.string = copy(&(testValue->op1->data.string), testValue->start, testValue->count);
             debug("I_COPY - string\n");
         }
         else
@@ -379,7 +315,7 @@ int interpret(T_ITEM *testValue)
     case I_FIND:
         if (testValue->op1->type == Type_STRING)
         {
-            testValue->result->data.i = find(&(testValue->op1->data.s), &(testValue->op2->data.s));
+            testValue->result->data.integer = find(&(testValue->op1->data.string), &(testValue->op2->data.string));
             debug("I_FIND - string\n");
         }
         else
@@ -390,7 +326,7 @@ int interpret(T_ITEM *testValue)
     case I_SORT:
         if (testValue->op1->type == Type_STRING)
         {
-            // testValue->result->data.s = sort(&(testValue->op1->data.s));
+            // testValue->result->data.string = sort(&(testValue->op1->data.string));
             debug("I_FIND - string\n");
         }
         else
@@ -419,8 +355,8 @@ int main(void)
     item.op1->type = Type_INT;
     item.op2->type = Type_INT;
     item.result->type = item.op1->type;
-    item.op1->data.i = 10;
-    item.op2->data.i = 4;
+    item.op1->data.integer = 10;
+    item.op2->data.integer = 4;
 
 */
 /*if you want to test Double remove
@@ -431,11 +367,11 @@ item.result = malloc(sizeof(double));
 item.op1->type = Type_DOUBLE;
 item.op2->type = Type_DOUBLE;
 
-item.op1->data.d = 2.00;
-item.op2->data.d = 4.00;
+item.op1->data.real = 2.00;
+item.op2->data.real = 4.00;
 
 item.result->type = item.op1->type;
-item.result->data.i = 0.0; */
+item.result->data.integer = 0.0; */
 
 
 /* item.op1 = malloc(sizeof(cstring));
@@ -447,8 +383,8 @@ item.result->data.i = 0.0; */
  item.op2->type = Type_STRING;
  item.result->type = Type_INT;
 
- cstr_append_str(&(item.op1->data.s), "ahoj vojto ako sa mas");
- cstr_append_str(&(item.op2->data.s), "to");
+ cstr_append_str(&(item.op1->data.string), "ahoj vojto ako sa mas");
+ cstr_append_str(&(item.op2->data.string), "to");
  item.start = 1;
  item.count = 2;
 */
@@ -456,7 +392,7 @@ item.result->data.i = 0.0; */
 /*
     interpret(&item);
 
-    printf("hodnota: %d", (item.result->data.i));
+    printf("hodnota: %d", (item.result->data.integer));
 
     return 0;
 }*/
