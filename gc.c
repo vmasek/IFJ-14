@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 #include "gc.h"
 
 struct branch {
@@ -58,7 +59,10 @@ void *gc_realloc(const char *tag, void *pointer, size_t size)
         return NULL;
 
     if (pointer != NULL)
-        memcpy(new_pointer, pointer, size);
+    {
+		debug("memcpy printof: new %p\told %p\tsize %u\t diff %u\n", new_pointer, pointer, size, (long)new_pointer - (long)pointer);
+		memcpy(new_pointer, pointer, size);
+	}
 
     return new_pointer;
 }

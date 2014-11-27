@@ -16,7 +16,7 @@ int stack_init(Stack *stack)
 {
 	if(!stack)
 	{
-		debug("No stack given");
+		debug("No stack given\n");
 		return INTERNAL_ERROR;
 	}
 
@@ -29,7 +29,7 @@ int stack_push(Stack *stack, int type, void *value)
 {
 	if(!stack)
 	{
-		debug("No stack given");
+		debug("No stack given\n");
 		return INTERNAL_ERROR;
 	}
 
@@ -42,7 +42,7 @@ int stack_push(Stack *stack, int type, void *value)
 
 	tmp->type = type;
 
-	if(!value) {debug("pushing NULL pointer as the value");}
+	if(!value) {debug("pushing NULL pointer as the value\n");}
 
 	tmp->value = value;
 	tmp->next = stack->top; ///towards
@@ -57,12 +57,12 @@ int stack_top(Stack *stack, int *type, void **value)
 {
 	if(!stack)
 	{
-		debug("No stack given");
+		debug("No stack given\n");
 		return INTERNAL_ERROR;
 	}
 	if(!stack->top)
 	{
-		debug("Stack is empty");
+		debug("Stack is empty\n");
 		return INTERNAL_ERROR;
 	}
 
@@ -77,12 +77,12 @@ int stack_pop(Stack *stack)
 {
 	if(!stack)
 	{
-		debug("No stack given");
+		debug("No stack given\n");
 		return INTERNAL_ERROR;
 	}
 	if(!stack->top)
 	{
-		debug("Stack is empty");
+		debug("Stack is empty\n");
 		return INTERNAL_ERROR;
 	}
 
@@ -99,7 +99,7 @@ static Stack_Node *stack_find_first_type(Stack *stack, int type)
 {
 	if(!stack||!stack->top)
 	{
-		debug("No stack given or stack empty");
+		debug("No stack given or stack empty\n");
 		return NULL;
 	}
 
@@ -113,7 +113,7 @@ static Stack_Node *stack_find_first_type(Stack *stack, int type)
 		count--;
 		tmp=tmp->next;
 	}
-	debug("type not found in the stack");
+	debug("type not found in the stack\n");
 	return NULL;
 }
 
@@ -121,12 +121,12 @@ int stack_read_first_of_type(Stack *stack, int type, void **value)
 {
 	if(!stack)
 	{
-		debug("No stack given");
+		debug("No stack given\n");
 		return INTERNAL_ERROR;
 	}
 	if(!stack->top)
 	{
-		debug("Stack is empty");
+		debug("Stack is empty\n");
 		return INTERNAL_ERROR;
 	}
 
@@ -169,12 +169,12 @@ int stack_uninsert(Stack *stack, int searched_type, int *type, void **value)
 {
 	if(!stack)
 	{
-		debug("No stack given");
+		debug("No stack given\n");
 		return INTERNAL_ERROR;
 	}
 	if(!stack->top)
 	{
-		debug("Stack is empty");
+		debug("Stack is empty\n");
 		return INTERNAL_ERROR;
 	}
 
@@ -196,7 +196,7 @@ int stack_uninsert(Stack *stack, int searched_type, int *type, void **value)
 		if (searched_type == tmp->type)
 		{
 			//printf("UNINSERT: ____________IF(SEARCHED_type==FOUND_type)____\n");
-			debug("searched type was found.");
+			debug("searched type was found.\n");
 			found = tmp;
 			//printf("UNINSERT:     f was ok\n");
 			break;
@@ -223,7 +223,7 @@ int stack_uninsert(Stack *stack, int searched_type, int *type, void **value)
 		if(found==before_found)
 		{
 			//printf("UNINSERT: ____________IF(FOUND==B_FOUND)____\n");
-			debug("found is on top of the stack. Nothing to uninsert.");
+			debug("found is on top of the stack. Nothing to uninsert.\n");
 			return INTERNAL_ERROR;
 		}
 
@@ -232,7 +232,7 @@ int stack_uninsert(Stack *stack, int searched_type, int *type, void **value)
 
 		if(before_before_found==before_found)
 		{
-			debug("found is one node under top of the stack.");
+			debug("found is one node under top of the stack.\n");
 			stack->top = found;
 		}
 		else
@@ -245,7 +245,7 @@ int stack_uninsert(Stack *stack, int searched_type, int *type, void **value)
 
 	}
 	//printf("UNINSERT: ____________NOT_FOUND____\n");
-	debug("Type not found");
+	debug("Type not found\n");
 	return INTERNAL_ERROR;
 }
 
@@ -253,7 +253,7 @@ int stack_free(Stack *stack)
 {
 	if(!stack)
 	{
-		debug("No stack given");
+		debug("No stack given\n");
 		return INTERNAL_ERROR;
 	}
 
@@ -377,7 +377,10 @@ printf("\n===============================Top_of_Stack===========================
 
 	while(count)
 	{
+#ifdef DEBUG
 		printf("Pointer is: [ %p ]\t(long)[ %lu ]", (void*)tmp, (long)tmp);
+#endif
+
 		stack_print_node(tmp->type, tmp->value);
 
 		tmp = tmp->next;

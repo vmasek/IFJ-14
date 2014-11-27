@@ -9,6 +9,7 @@
 #define __GC_H__
 
 #include <stdlib.h>
+#include "common.h"
 
 void *gc_calloc(const char *tag, size_t number, size_t size);
 void gc_free(const char *tag);
