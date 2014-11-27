@@ -34,17 +34,17 @@ do{ /// do{...}while(0); 	is for testing hack
 
     str = cstr_create_str("Blablla");
     printf("aaaaaaaa\n");
-    print_cstr_all(str);                                                // { 7 / 16 - [ Blablla ]   }
-    print_cstr_all(cstr_assign_str(str, "LEET"));                       // { 4 / 16 - [ LEET ]  }
-    print_cstr_all(cstr_append_str(str, " 1337"));                      // { 9 / 16 - [ LEET 1337 ] }
-    print_cstr_all(cstr_append_str(str, " dalsi string"));
+    //print_cstr_all(str);                                                // { 7 / 16 - [ Blablla ]   }
+    /*print_cstr_all(*/cstr_assign_str(str, "LEET")/*)*/;                       // { 4 / 16 - [ LEET ]  }
+    /*print_cstr_all(*/cstr_append_str(str, " 1337")/*)*/;                      // { 9 / 16 - [ LEET 1337 ] }
+    /*print_cstr_all(*/cstr_append_str(str, " dalsi string")/*)*/;
     cstr_clear(str);
     cstr_append_str(str, "@+!\t5%^*#42=answ2' '");      // { 20 / 32 - [ @+! 5%^*#42=answ2' ' ] }
 
     cstring*  ch_str = cstr_create_str("11111");
-    print_cstr_all(ch_str);
+    /*print_cstr_all(ch_str);*/
     cstr_clear(ch_str);
-    print_cstr_all(ch_str);
+    /*print_cstr_all(ch_str);*/
 
     for (unsigned int i=0; i<20; i++)
     {

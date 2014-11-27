@@ -45,8 +45,12 @@ cleanup:
     gc_free("test_vojto");
 
     cstring *cstr1 = cstr_create_str("0123");
-    print_cstr(cstr1);
 
+    printf("\n\nGC Printing cstrings:\n\n");
+    print_cstr(cstr1);
+    printf("\n");
+    print_cstr_all(cstr1);
+	printf("\n");
 
 errors=0;
 }while(0);

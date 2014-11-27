@@ -63,7 +63,7 @@ do
 	#if array contains element
 	if [[ "${FILE_OUT_TESTS[@]}" =~ "${test}" || "${FILE_OUT_TESTS[${#FILE_OUT_TESTS[@]}-1]}" == "${test}" ]]; then
 		#echo "*************************************contained*********************************************************"
-		"$BIN" "$test" 1>"$test".out 2>"$test".out
+		"$BIN" "$test" &>"$test".out
 		echo "*** Testing of $test ***"
 
 		if [[ "$(tail "$test".out)" =~ "OK. Everything is fine." ]]; then

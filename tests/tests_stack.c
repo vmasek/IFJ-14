@@ -90,7 +90,10 @@ printf("\n0. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 do{ /// do{...}while(0); 	is for testing hack
 
 	if(stack.count==(_N_))			// (_N_) is default
+	{
 		stack_print(&stack);
+		printf("\t0. OK: stack count is OK ( %u ) .\n", stack.count);
+	}
 	else
 	{
 		printf("\t0. ERROR: stack counter should be %d and its %u\n", (_N_), stack.count);
@@ -297,15 +300,16 @@ printf("\n3. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	unsigned int old_count = stack.count;
 	stack_print(&stack);
-	printf("\t3.5. Inserting [ double ] behind first [ cstring ]\n");
+	printf("\t3.5. Inserting [ double ] BEFORE first [ cstring ]\n");
 	stack_insert(&stack, Type_CSTRING, Type_DOUBLE, (void*)&ddd);
-	printf("\t3.5. Inserting [ another (90) with char* value ] behind first [ int ]\n");
-	stack_insert(&stack, Type_INT, 90, (void*)string);
+	printf("\t3.5. Inserting [ another (90) with char* value ] BEFORE first [ double ], This should be new top now.\n");
+	stack_insert(&stack, Type_DOUBLE, 90, (void*)string);
+	printf("\t3.5. Inserting [ another (89) with NULL pointer ] BEFORE first [ string ]\n");
 	stack_insert(&stack, Type_STRING, 89, (void*)NULL);
 
 	if(old_count+3 == stack.count)
 	{
-		printf("\t3.5. Inserts were OK. %u nodes were inserted.\n", stack.count-old_count);
+		printf("\t3.5. Inserting count is OK. %u nodes were inserted.\n", stack.count-old_count);
 	}
 	else
 	{
@@ -314,12 +318,46 @@ printf("\n3. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		//stack_print(&stack);
 		break;
 	}
-	///this insert shoul fail
-	if(stack_insert(&stack, Type_CHAR, Type_DOUBLE, (void*)&ddd)==INTERNAL_ERROR)
-		printf("\t3.6. Ret. code of failed insertion OK.");
+
+///checking if the inserted node is on the top now.
+	if(stack.count==(_N_)-5+1+3)			// (_N_) is default so afer 5 pops and 1 push and 3 inserts its "-5+1+3"
+	{
+		///readind top of stack by using direct stack access
+		if(stack.top->type == 90 && (!strcmp((char*)(stack.top->value), "nejaky text")) )
+			printf("\t3.5.1. POP was OK. top is: [ char* ]\n");
+		else
+		{
+			printf("\t3.5.1. ERROR: POP went wrong. type was %d and value was %s\n", stack.top->type, (char*)(stack.top->value));
+			break;
+		}
+
+		///readind top of stack by using stack_top
+		stack_top(&stack, &type, &value);
+
+		if(type == 90 && (!strcmp((char*)(value), "nejaky text")))
+			printf("\t3.5.2. TOP was OK. top is: [ char* ]\n");
+		else
+		{
+			printf("\t3.5.2. ERROR: TOP went wrong. type was %d and value was %s\n", type, (char*)(value));
+			break;
+		}
+	}
 	else
 	{
-		printf("\t3.6. Wrong ret. code of failed insertion.");
+		printf("\t3.5. ERROR: stack counter should be %d and its %u\n", (_N_)-5+1+3, stack.count);
+		break;
+	}
+
+
+
+///this insert shoul fail
+	if(stack_insert(&stack, Type_CHAR, Type_DOUBLE, (void*)&ddd)==INTERNAL_ERROR)
+	{
+		printf("\t3.6. Ret. code of failed insertion OK.\n");
+	}
+	else
+	{
+		printf("\t3.6. Wrong ret. code of failed insertion.\n");
 		break;
 	}
 
@@ -336,7 +374,20 @@ printf("\n3. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	stack_print(&stack);
 
+
 	stack_insert(&stack, Type_INT, Type_STRING, (void*)string);
+
+	if(old_count+4== stack.count)
+	{
+		printf("\t3.5. Inserting count is OK. %u nodes were inserted.\n", stack.count-old_count);
+	}
+	else
+	{
+		printf("\t3.5. ERROR in inserts were wrong.\n");
+		printf("\t3.5. count should be %u and is %u.\n", old_count+4, stack.count);
+		//stack_print(&stack);
+		break;
+	}
 
 	printf("\n");
 
@@ -360,22 +411,22 @@ printf("\n3. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	if(stack.count==(_N_)-15+2+3)			// (_N_) is default so afer 13 pops and 2 pushes and 3 inserts its "--13+3"
 	{
 		///readind top of stack by using direct stack access
-		if(stack.top->type == Type_STRING && (!strcmp((char*)(stack.top->value), "just another char*")) )
+		if(stack.top->type == 89 && (stack.top->value)==NULL )
 			printf("\t3.7.1. POP was OK. top is: [ char* ]\n");
 		else
 		{
-			printf("\t3.7.1. ERROR: POP went wrong., type was %d and value was %s\n", stack.top->type, (char*)(stack.top->value));
+			printf("\t3.7.1. ERROR: POP went wrong. type was %d and value was %s\n", stack.top->type, (char*)(stack.top->value));
 			break;
 		}
 
 		///readind top of stack by using stack_top
 		stack_top(&stack, &type, &value);
 
-		if(type == Type_STRING && (!strcmp((char*)(value), "just another char*")))
+		if(type == 89 && (value)==NULL )
 			printf("\t3.7.2. TOP was OK. top is: [ char* ]\n");
 		else
 		{
-			printf("\t3.7.2. ERROR: TOP went wrong., type was %d and value was %s\n", type, (char*)(value));
+			printf("\t3.7.2. ERROR: TOP went wrong. type was %d and value was %s\n", type, (char*)(value));
 			break;
 		}
 	}
@@ -454,11 +505,11 @@ printf("\n5. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	stack_print(&stack);
 	stack_uninsert(&stack, Type_STRING, &type, &value);
 
-	if(type == Type_CSTRING && !strcmp(((cstring*)(value))->str, "cstr of NEW top"))
-		printf("\t5. OK ret. value of UNINSERT, type was cstring and value was text\n");
+	if(type == Type_INT && *(int*)(value)==100)
+		printf("\t5. OK ret. value of UNINSERT, type was int and value was 100\n");
 	else
 	{
-		printf("\t5. Ret valued of UNINSERT, type was %d and value was %s\n\t\t\t\t   should be cstring(5) and \"cstr of NEW top\"\n", type, (char*)(value));
+		printf("\t5. ERROR. Ret valued of UNINSERT, type was %d and value was %s\n\t\t\t\t   should be cstring(5) and \"cstr of NEW top\"\n", type, (char*)(value));
 		break;
 	}
 
@@ -485,11 +536,11 @@ printf("\n6. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	stack_uninsert(&stack, Type_STRING, &type, &value);
 
-	if(type == Type_CHAR && (*(char*)value)=='~')
-		printf("\t6. OK ret. value of UNINSERT, type was char and value was '~'.\n");
+	if(type == Type_INT && (*(int*)value)==10)
+		printf("\t6. OK ret. value of UNINSERT, type was int and value was 10 .\n");
 	else
 	{
-		printf("\t6. Ret valued of UNINSERT, type was %d and value was %s\n\t\t\t\t   should be char and '~'\n", type, (char*)(value));
+		printf("\t6. ERROR. Ret valued of UNINSERT, type was %d and value was %s\n\t\t\t\t   should be char and '~'\n", type, (char*)(value));
 		break;
 	}
 
@@ -565,6 +616,7 @@ errors=0;
 
 }while(0);
 
+printf("\n\n");
 	stack_free(&stack);
 	stack_print(&stack);	//This print should print nothing
 
