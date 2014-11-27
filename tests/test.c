@@ -46,6 +46,5 @@ int main(int argc, char *argv[])
 	}
 
 	cstr_gc_free_all();
-	gc_free("tree");
 	return SUCCESS;
 }

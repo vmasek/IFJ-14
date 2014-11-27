@@ -17,10 +17,12 @@ int test_tree_complex(void)
 {
 	static int errors = 1;
 
-do{ /// do{...}while(0); 	is for testing hack
-
 	Tree tree;
 	tree_init(&tree);
+
+do{ /// do{...}while(0); 	is for testing hack
+
+
 
 #define _N_ 10
 	const char *keys[_N_] = {"test", "test", "7357", "aaaaaaaaa", "aerhyearh", "4ae5sda64", "  asg  rrii", "zzzzzzz", "123456789", "wysdga"};
@@ -123,11 +125,11 @@ printf("\n---------------------------------\n");
 	printf("\n\n--------------free---------------------\n\n");
 
 
-
-
-
 errors=0;
 }while(0);
+
+
+	tree_free(&tree);
 
 	if(errors)
 	{
