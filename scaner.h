@@ -35,10 +35,12 @@ enum token_keyword {
     KEYWORD_INTEGER,
     KEYWORD_READLN,     // r
     KEYWORD_REAL,
+    KEYWORD_REPEAT,
     KEYWORD_SORT,       // s
     KEYWORD_STRING,
     KEYWORD_THEN,       // t
     KEYWORD_TRUE,
+    KEYWORD_UNTIL,      // u
     KEYWORD_VAR,        // v
     KEYWORD_WHILE,      // w
     KEYWORD_WRITE,
@@ -55,9 +57,9 @@ enum token_symbol {
     ASSIGNMENT,     // :=
     SEMICOLON,      // ;
     DOT,            // .
-    COMMA,          // ,
     DOUBLE_DOT,     // ..
     COLON,          // :
+    COMMA,          // ,
     PARENTHESIS_L,  // (
     PARENTHESIS_R,  // )
     GREATER_THAN,   // >
@@ -119,5 +121,8 @@ void get_token(Token *token, FILE *input);
 
 /* Unget a token */
 void unget_token(Token *token);
+
+/* Frees token */
+void free_token(Token *token);
 
 #endif //__SCANER_H__

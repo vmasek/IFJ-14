@@ -1,6 +1,9 @@
 #ifndef __PARSER_H__
 #define __PARSER_H__
 
-int parse(FILE *input);
+#include <stdio.h>
+#include "ial.h"
+
+int parse(FILE *input, Tree *globals, Tree *functions);
 
 #endif
