@@ -18,7 +18,7 @@
  * @param s pointer to csting that will be extended.
  * @param str string that will be used to exted cstring.
  * @param size lenght of string "str".
- * @returns pointer to extended cstring s.
+ * @return pointer to extended cstring s.
  *
  * Function extends cstring controls the behavior of the unsolicited reallocation.
  */
@@ -59,7 +59,7 @@ static cstring *append(cstring *s, char const *str, unsigned long size)
 /**
  * @brief Quick enlargement of memory allocated for strig in cstring.
  * @param s cstring that will be reallocated.
- * @returns Warning returns (-1) //TRUE if realloc failed, else if everything is ok (0) //FALSE
+ * @return Warning returns (-1) //TRUE if realloc failed, else if everything is ok (0) //FALSE
  *
  * Reallocates memory for cstring string, multiples actual allocated size by 2.
  * Function is used for appending of chars to cstring, this will be used
@@ -85,7 +85,7 @@ static int cstr_quick_resize(cstring *s)
  * @brief Appends char to cstring.
  * @param s pointer to cstring where char will be appended.
  * @param c char that will be appended.
- * @returns cstrig with appended char.
+ * @return cstrig with appended char.
  *
  * Function provides fast of chars at the end of the cstring, when reallocation
  * of memory is needed @see cstr_quick_resize() will be called, this method of
@@ -108,7 +108,7 @@ cstring *cstr_append_chr(cstring *s, char c)
  * @brief Appends string to cstring.
  * @param s pointer to cstring where string will be appended.
  * @param str that will be appended.
- * @returns cstrig with appended string.
+ * @return cstrig with appended string.
  *
  * Uses static function @see append implemented in cstring.c, more details
  * written there.
@@ -138,7 +138,7 @@ cstring *cstr_append_cstr(cstring *s, cstring const *cstr)
  * @brief Assigns string to cstring.
  * @param s poiter to cstring where will be str assigned.
  * @param str string that will be assigned.
- * @returns cstring
+ * @return cstring
  *
  * Uses static function @see append implemented in cstring.c, more details
  * written there.
@@ -154,7 +154,7 @@ cstring *cstr_assign_str(cstring *s, char const *str)
  * @brief Assigns cstring to cstring.
  * @param s poiter to cstring where will be cstr assigned.
  * @param cstr cstring that will be assigned.
- * @returns cstring
+ * @return cstring
  *
  * Uses static function @see append implemented in cstring.c, more details
  * written there.
@@ -216,6 +216,7 @@ cstring *cstr_create_cstr(cstring const *cstr)
     return NULL;
 }
 
+
 /**
  * @brief  Copies cstring.
  * @param  cstr pointer to cstring, from witch will be taken data.
@@ -234,7 +235,7 @@ cstring *cstr_copy(cstring const *cstr)
  * @brief Enlarges memory allocated for cstring string.
  * @param s cstring that will be reallocated.
  * @param size minimal size that needs to be added.
- * @returns Warning returns (-1) //TRUE if realloc failed, else if everything is ok (0) //FALSE
+ * @return Warning returns (-1) //TRUE if realloc failed, else if everything is ok (0) //FALSE
  */
 int cstr_resize(cstring *s, unsigned long size)
 {
@@ -290,11 +291,12 @@ void print_cstr(cstring const *s)
     puts(s->str);
 }
 
+
 /**
  * @brief Compares two cstrings.
  * @param s1 first cstring to compare
  * @param s2 second cstring to compare
- * @returns int value, if cstrings are same returns 0, else <>0
+ * @return int value, if cstrings are same returns 0, else <>0
  *
  * Uses strcmp to compare "str" valuses of cstrings.
  */
@@ -302,7 +304,7 @@ int cstr_cmp(cstring const *s1, cstring const *s2)
 {
 	if(!s1||!s2)
 	{
-		debug("one of cstirngs to compare not given.");
+		debug("one of cstrings to compare not given.");
 	}
 
     return strcmp(s1->str, s2->str);
@@ -326,4 +328,23 @@ void print_cstr_all(cstring const *s)
     for (unsigned int i = 0; i < s->size; i++) {
         printf("\t%d\t=\t%c\n", s->str[i], s->str[i]);
     }
+}
+
+
+
+cstring *cstr_read_line(cstring *cstr)
+{
+	if(!cstr)
+		return NULL;
+
+	int ch;
+	cstr_clear(cstr);
+
+	while(1)
+	{
+		ch = getchar();
+		if(ch == '\n' || ch == EOF)
+			return cstr;
+		cstr_append_chr(cstr, ch);
+	}
 }

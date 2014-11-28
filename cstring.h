@@ -48,4 +48,10 @@ cstring     *cstr_append_cstr(cstring *, cstring const *);
 void        cstr_clear(cstring *);
 void        cstr_gc_free_all(void);
 
+
+/* Other */
+cstring    *cstr_read_line(cstring *);
+
+
+
 #endif //__CSTRING_H__
