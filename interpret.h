@@ -35,6 +35,7 @@ typedef enum
     I_COPY, 			// copy
     I_FIND, 			// find
     I_SORT, 			// sort
+						// TODO: function
 } Instruction_type;
 
 typedef struct
@@ -42,8 +43,6 @@ typedef struct
     My_value *op1;
     My_value *op2;
     My_value *result;
-    int start; 						//because inbuild copy function needs it
-    int count;    					//because inbuild copy function needs it
     Instruction_type instruction;
 } T_ITEM;
 
