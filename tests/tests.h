@@ -57,6 +57,7 @@ int test_gc_complex(void);
 ///=================================INTERPRET=================================
 
 int test_arithmetic_interpret(void);
+int test_relation_functions(void);
 void test_interpret(void);
 
 #endif // __TESTS_H__
