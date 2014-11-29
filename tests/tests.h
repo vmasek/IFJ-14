@@ -16,6 +16,7 @@
 #include "../ial.h"
 #include "../buildin.h"
 #include "../common.h"
+#include "../interpret.h"
 
 
 ///=================================BUILDIN===================================
@@ -52,5 +53,10 @@ int test_cstring_complex(void);
 ///===================================GC======================================
 int test_gc(void);
 int test_gc_complex(void);
+
+///=================================INTERPRET=================================
+
+int test_arithmetic_interpret(void);
+void test_interpret(void);
 
 #endif // __TESTS_H__

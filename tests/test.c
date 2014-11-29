@@ -42,6 +42,10 @@ int main(int argc, char *argv[])
 		{
 			test_buildin(); ///test for buildin copy gives SIGSEGV
 		}
+		if(!argc || !strcmp(argv[i], "interpret"))
+		{
+			test_interpret();
+		}
 
 	}
 

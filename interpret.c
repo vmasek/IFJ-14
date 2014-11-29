@@ -85,16 +85,16 @@ int interpret(T_ITEM *testValue)
 			testValue->result->type = Type_DOUBLE;
 			testValue->result->data.real = testValue->op1->data.real + testValue->op2->data.real;
 		}
-		else if ((testValue->op1->type == Type_INT) && (testValue->op2->type == Type_Double))
+		else if ((testValue->op1->type == Type_INT) && (testValue->op2->type == Type_DOUBLE))
 		{
 			debug("I_ADD for int + real\n");
-			testValue->result->type == Type_DOUBLE; // for different type of operands, we need to change result type
+			testValue->result->type = Type_DOUBLE; // for different type of operands, we need to change result type
 			testValue->result->data.real = testValue->op1->data.integer + testValue->op2->data.real;
 		}
 		else if ((testValue->op1->type == Type_DOUBLE) && (testValue->op2->type == Type_INT))
 		{
 			debug("I_ADD for real + int\n");
-			testValue->result->type == Type_DOUBLE;
+			testValue->result->type = Type_DOUBLE;
 			testValue->result->data.real = testValue->op1->data.real + testValue->op2->data.integer;
 		}
 		else if ((testValue->op1->type == Type_CSTRING) && (testValue->op2->type == Type_CSTRING))
@@ -120,16 +120,16 @@ int interpret(T_ITEM *testValue)
 			testValue->result->type = Type_DOUBLE;
 			testValue->result->data.real = testValue->op1->data.real - testValue->op2->data.real;
 		}
-		else if ((testValue->op1->type == Type_INT) && (testValue->op2->type == Type_Double))
+		else if ((testValue->op1->type == Type_INT) && (testValue->op2->type == Type_DOUBLE))
 		{
-			debug("I_SUB for int + real\n");
-			testValue->result->type == Type_DOUBLE;
+			debug("I_SUB for int - real\n");
+			testValue->result->type = Type_DOUBLE;
 			testValue->result->data.real = testValue->op1->data.integer - testValue->op2->data.real;
 		}
 		else if ((testValue->op1->type == Type_DOUBLE) && (testValue->op2->type == Type_INT))
 		{
-			debug("I_SUB for real + int\n");
-			testValue->result->type == Type_DOUBLE;
+			debug("I_SUB for real - int\n");
+			testValue->result->type = Type_DOUBLE;
 			testValue->result->data.real = testValue->op1->data.real - testValue->op2->data.integer;
 		}
 		else
@@ -141,26 +141,26 @@ int interpret(T_ITEM *testValue)
 	case I_MULTIPLY:
 		if ((testValue->op1->type == Type_INT) && (testValue->op2->type == Type_INT))
 		{
-			debug("I_DIV - INT\n");
+			debug("I_MULTIPLY - INT\n");
 			testValue->result->type = Type_INT;
-			testValue->result->data.real = testValue->op1->data.integer * testValue->op2->data.integer;
+			testValue->result->data.integer = testValue->op1->data.integer * testValue->op2->data.integer;
 		}
 		else if ((testValue->op1->type == Type_DOUBLE) && (testValue->op2->type == Type_DOUBLE))
 		{
-			debug("I_DIV - DOUBLE\n");
+			debug("I_MULTIPLY - DOUBLE\n");
 			testValue->result->type = Type_DOUBLE;
 			testValue->result->data.real = testValue->op1->data.real * testValue->op2->data.real;
 		}
-		else if ((testValue->op1->type == Type_INT) && (testValue->op2->type == Type_Double))
+		else if ((testValue->op1->type == Type_INT) && (testValue->op2->type == Type_DOUBLE))
 		{
 			debug("I_MULTIPLY for int + real\n");
-			testValue->result->type == Type_DOUBLE;
+			testValue->result->type = Type_DOUBLE;
 			testValue->result->data.real = testValue->op1->data.integer * testValue->op2->data.real;
 		}
 		else if ((testValue->op1->type == Type_DOUBLE) && (testValue->op2->type == Type_INT))
 		{
 			debug("I_MULTIPLY for real + int\n");
-			testValue->result->type == Type_DOUBLE;
+			testValue->result->type = Type_DOUBLE;
 			testValue->result->data.real = testValue->op1->data.real * testValue->op2->data.integer;
 		}
 		else
