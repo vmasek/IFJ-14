@@ -40,13 +40,12 @@ typedef enum
 
 typedef struct
 {
-    My_value *op1;
-    My_value *op2;
-    My_value *result;
-    Instruction_type instruction;
+    My_value *op1;  // first operand of expression
+    My_value *op2;  // second operand of expression
+    My_value *result; // result of expression
+    Instruction_type instruction; // type of instructions
 } T_ITEM;
 
 
-//TODO: ERROR CODES
 int interpret(T_ITEM *testValue);
 
