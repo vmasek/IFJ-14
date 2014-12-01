@@ -68,8 +68,10 @@ int stack_top(Stack *stack, int *type, void **value)
 
 	Stack_Node *tmp = stack->top;
 
-	*type = tmp->type;
-	*value = (tmp->value);
+	if(type)
+		*type = tmp->type;
+	if(value)
+		*value = tmp->value;
 	return SUCCESS;
 }
 
@@ -133,7 +135,8 @@ int stack_read_first_of_type(Stack *stack, int type, void **value)
 	Stack_Node *tmp = stack_find_first_type(stack, type);
 	if(tmp)
 	{
-		*value = (tmp->value);
+		if(value)
+			*value = (tmp->value);
 		return SUCCESS;
 	}
 	else
@@ -227,8 +230,11 @@ int stack_uninsert(Stack *stack, int searched_type, int *type, void **value)
 			return INTERNAL_ERROR;
 		}
 
-		*type = before_found->type;
-		*value = (before_found->value);
+		if(type)
+			*type = before_found->type;
+
+		if(value)
+			*value = before_found->value;
 
 		if(before_before_found==before_found)
 		{
