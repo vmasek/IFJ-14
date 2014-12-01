@@ -10,16 +10,17 @@
 #include "scaner.h"
 
 typedef struct var_record {
-    cstring *id;
+    cstring *id; //TODO IS THIS NECESSARY?
     My_value value;
-    bool inited;
+    bool inited; //TODO IS THIS NECESSARY IN PARSER?
 } Var_record;
 
 typedef struct func_record {
-    cstring *id;
+    cstring *id; //TODO IS THIS NECESSARY?
     unsigned param_count;
     Var_record **params;
-    Type type;
+    Var_record *ret_value;
+    Type type; //TODO OBSOLETE
     Tree *locals;
 } Func_record;
 
