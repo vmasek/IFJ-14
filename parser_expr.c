@@ -17,7 +17,7 @@
 #include "common.h"
 #include "parser_private.h"
 
-#define RULE_COUNT 16
+#define RULE_COUNT 18
 #define RULE_MAXLEN 8
 #define TERM_COUNT 16
 #define TREE_COUNT 3
@@ -31,9 +31,10 @@
 
 /* TYPES */
 enum symbol {
-    SYM_NONTERM,
-    SYM_RULE,
-    SYM_TERM
+    SYM_SNT,        // scalar non-terminal symbol
+    SYM_VNT,        // vectorial non-terminal symbol
+    SYM_RS,         // start of rule
+    SYM_TERM        // terminal symbol
 };
 
 enum terminal {
@@ -47,7 +48,7 @@ enum terminal {
     TERM_GT,        // >
     TERM_LEQ,       // <=
     TERM_GEQ,       // >=
-    TERM_COM,       // ,
+    TERM_COMMA,     // ,
     TERM_LP,        // (
     TERM_RP,        // )
     TERM_LIT,       // literal
@@ -71,6 +72,7 @@ struct rule {
         enum symbol sym_type;
         enum terminal term_type;
     } symbols[RULE_MAXLEN];
+    enum symbol reduction;
     Handler *handler;
 };
 
@@ -110,24 +112,27 @@ const enum action PREC_TABLE[TERM_COUNT][TERM_COUNT] = {
 };
 
 const struct rule RULES[RULE_COUNT] = {
-    {1, {{SYM_TERM, TERM_ID}}, handle_id},
-    {1, {{SYM_TERM, TERM_LIT}}, handle_literal},
-    {3, {{SYM_TERM, TERM_LP}, {SYM_NONTERM}, {SYM_TERM, TERM_RP}}, NULL},
-    {3, {{SYM_NONTERM}, {SYM_TERM, TERM_ADD}, {SYM_NONTERM}}, handle_add},
-    {3, {{SYM_NONTERM}, {SYM_TERM, TERM_SUB}, {SYM_NONTERM}}, handle_sub_mul},
-    {3, {{SYM_NONTERM}, {SYM_TERM, TERM_MUL}, {SYM_NONTERM}}, handle_sub_mul},
-    {3, {{SYM_NONTERM}, {SYM_TERM, TERM_DIV}, {SYM_NONTERM}}, handle_div},
-    {3, {{SYM_NONTERM}, {SYM_TERM, TERM_EQ}, {SYM_NONTERM}}, handle_comp},
-    {3, {{SYM_NONTERM}, {SYM_TERM, TERM_NEQ}, {SYM_NONTERM}}, handle_comp},
-    {3, {{SYM_NONTERM}, {SYM_TERM, TERM_LT}, {SYM_NONTERM}}, handle_comp},
-    {3, {{SYM_NONTERM}, {SYM_TERM, TERM_GT}, {SYM_NONTERM}}, handle_comp},
-    {3, {{SYM_NONTERM}, {SYM_TERM, TERM_LEQ}, {SYM_NONTERM}}, handle_comp},
-    {3, {{SYM_NONTERM}, {SYM_TERM, TERM_GEQ}, {SYM_NONTERM}}, handle_comp},
-    {3, {{SYM_NONTERM}, {SYM_TERM, TERM_COM}, {SYM_NONTERM}}, NULL},
+    {1, {{SYM_TERM, TERM_ID}}, SYM_SNT, handle_id},
+    {1, {{SYM_TERM, TERM_LIT}}, SYM_SNT, handle_literal},
+    {3, {{SYM_TERM, TERM_LP}, {SYM_SNT}, {SYM_TERM, TERM_RP}}, SYM_SNT, NULL},
+    {3, {{SYM_SNT}, {SYM_TERM, TERM_ADD}, {SYM_SNT}}, SYM_SNT, handle_add},
+    {3, {{SYM_SNT}, {SYM_TERM, TERM_SUB}, {SYM_SNT}}, SYM_SNT, handle_sub_mul},
+    {3, {{SYM_SNT}, {SYM_TERM, TERM_MUL}, {SYM_SNT}}, SYM_SNT, handle_sub_mul},
+    {3, {{SYM_SNT}, {SYM_TERM, TERM_DIV}, {SYM_SNT}}, SYM_SNT, handle_div},
+    {3, {{SYM_SNT}, {SYM_TERM, TERM_EQ}, {SYM_SNT}}, SYM_SNT, handle_comp},
+    {3, {{SYM_SNT}, {SYM_TERM, TERM_NEQ}, {SYM_SNT}}, SYM_SNT, handle_comp},
+    {3, {{SYM_SNT}, {SYM_TERM, TERM_LT}, {SYM_SNT}}, SYM_SNT, handle_comp},
+    {3, {{SYM_SNT}, {SYM_TERM, TERM_GT}, {SYM_SNT}}, SYM_SNT, handle_comp},
+    {3, {{SYM_SNT}, {SYM_TERM, TERM_LEQ}, {SYM_SNT}}, SYM_SNT, handle_comp},
+    {3, {{SYM_SNT}, {SYM_TERM, TERM_GEQ}, {SYM_SNT}}, SYM_SNT, handle_comp},
+    {3, {{SYM_SNT}, {SYM_TERM, TERM_COMMA}, {SYM_SNT}}, SYM_VNT, NULL},
+    {3, {{SYM_VNT, 0}, {SYM_TERM, TERM_COMMA}, {SYM_SNT}}, SYM_VNT, NULL},
     {3, {{SYM_TERM, TERM_ID}, {SYM_TERM, TERM_LP}, {SYM_TERM, TERM_RP}},
-    handle_call},
-    {4, {{SYM_TERM, TERM_ID}, {SYM_TERM, TERM_LP}, {SYM_NONTERM},
-         {SYM_TERM, TERM_RP}}, handle_call},
+     SYM_SNT, handle_call},
+    {4, {{SYM_TERM, TERM_ID}, {SYM_TERM, TERM_LP}, {SYM_SNT},
+         {SYM_TERM, TERM_RP}}, SYM_SNT, handle_call},
+    {4, {{SYM_TERM, TERM_ID}, {SYM_TERM, TERM_LP}, {SYM_VNT, 0},
+         {SYM_TERM, TERM_RP}}, SYM_SNT, handle_call}
 };
 
 /* DEFINITION OF MISCELLANEOUS FUNCTIONS */
@@ -192,7 +197,7 @@ static enum terminal get_terminal(Token *token)
         case PARENTHESIS_R:
             return TERM_RP;
         case COMMA:
-            return TERM_COM;
+            return TERM_COMMA;
         default:
             break;
         }
@@ -449,7 +454,7 @@ int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions)
         switch (PREC_TABLE[get_terminal(stack_token)]
                           [get_terminal(input_token)]) {
         case I:
-            if ((error = stack_insert(&sym_stack, SYM_TERM, SYM_RULE, NULL))
+            if ((error = stack_insert(&sym_stack, SYM_TERM, SYM_RS, NULL))
                 != SUCCESS)
                 goto fail;
         case P:
@@ -495,7 +500,7 @@ static int reduce_rule(Stack *sym_stack, Stack *type_stack, Tree **trees)
     enum symbol sym_array[RULE_MAXLEN];
     Token *token_array[RULE_MAXLEN];
 
-    while (stack_uninsert(sym_stack, SYM_RULE, (int *)&sym_array[count],
+    while (stack_uninsert(sym_stack, SYM_RS, (int *)&sym_array[count],
            (void **)&token_array[count]) == SUCCESS)
         count++;
 
@@ -514,7 +519,7 @@ static int reduce_rule(Stack *sym_stack, Stack *type_stack, Tree **trees)
         }
         if (index != count)
             continue;
-        if (stack_push(sym_stack, SYM_NONTERM, NULL) != SUCCESS)
+        if (stack_push(sym_stack, RULES[i].reduction, NULL) != SUCCESS)
             return INTERNAL_ERROR;
         if (RULES[i].handler == NULL)
             return SUCCESS;
