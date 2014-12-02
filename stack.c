@@ -25,6 +25,7 @@ int stack_init(Stack *stack)
 	return SUCCESS;
 }
 
+
 int stack_push(Stack *stack, int type, void *value)
 {
 	if(!stack)
@@ -53,6 +54,7 @@ int stack_push(Stack *stack, int type, void *value)
 	return SUCCESS;
 }
 
+
 int stack_top(Stack *stack, int *type, void **value)
 {
 	if(!stack)
@@ -75,6 +77,7 @@ int stack_top(Stack *stack, int *type, void **value)
 	return SUCCESS;
 }
 
+
 int stack_index(Stack *stack, unsigned index, int *type, void **value)
 {
     Stack_Node *node = stack->top;
@@ -95,6 +98,7 @@ int stack_index(Stack *stack, unsigned index, int *type, void **value)
 
     return SUCCESS;
 }
+
 
 int stack_pop(Stack *stack)
 {
@@ -118,6 +122,22 @@ int stack_pop(Stack *stack)
 	return SUCCESS;
 }
 
+
+int stack_popping_spree(Stack *stack, unsigned int count)
+{
+	if(stack->count < count)
+	{
+		debug("Popping of %u items, but stack count is only %u", count, stack->count);
+		return INTERNAL_ERROR;
+	}
+
+	while(count--)
+		stack_pop(stack);
+
+	return SUCCESS;
+}
+
+
 static Stack_Node *stack_find_first_type(Stack *stack, int type)
 {
 	if(!stack||!stack->top)
@@ -139,6 +159,7 @@ static Stack_Node *stack_find_first_type(Stack *stack, int type)
 	debug("type not found in the stack\n");
 	return NULL;
 }
+
 
 int stack_read_first_of_type(Stack *stack, int type, void **value)
 {
@@ -163,6 +184,7 @@ int stack_read_first_of_type(Stack *stack, int type, void **value)
 	else
 		return INTERNAL_ERROR;
 }
+
 
 int stack_insert(Stack *stack, int searched_type, int type, void *value)
 {
@@ -275,6 +297,7 @@ int stack_uninsert(Stack *stack, int searched_type, int *type, void **value)
 	debug("int not found\n");
 	return INTERNAL_ERROR;
 }
+
 
 int stack_free(Stack *stack)
 {

@@ -39,12 +39,14 @@ int    stack_free(Stack*);
 int    stack_pop(Stack*);
 int    stack_push(Stack*, int, void*);
 int    stack_top(Stack*, int*, void**);
-int    stack_index(Stack*, unsigned, int*, void**);
+
 
 /* Advanced operations */
 int    stack_read_first_of_type(Stack*, int, void**);
 int    stack_insert(Stack*, int, int, void*);
 int    stack_uninsert(Stack*, int, int*, void**);
+int    stack_index(Stack*, unsigned, int*, void**);
+int    stack_popping_spree(Stack *, unsigned int);
 
 
 /* Printing */
