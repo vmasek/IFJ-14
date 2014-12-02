@@ -281,6 +281,12 @@ static int handle_call(Token **tokens, Stack *type_stack, Tree **trees)
         stack_pop(type_stack);
     }
 
+    if (stack_top(type_stack, (int *)&cur_type, NULL) != SUCCESS ||
+        cur_type != Type_OTHER)
+        return INCOMPATIBLE_TYPE;
+
+    stack_pop(type_stack);
+
     if (stack_push(type_stack, function->ret_value->value.type, NULL)
         != SUCCESS)
         return INTERNAL_ERROR;
@@ -447,6 +453,10 @@ int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions)
                 != SUCCESS)
                 goto fail;
         case P:
+            if (get_terminal(stack_token) == TERM_ID &&
+                get_terminal(input_token) == TERM_LP &&
+                stack_push(&type_stack, Type_OTHER, NULL) != SUCCESS)
+                goto fail;
             if ((error = stack_push(&sym_stack, SYM_TERM, input_token))
                 != SUCCESS)
                 goto fail;
@@ -458,6 +468,7 @@ int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions)
                 goto fail;
             break;
         case F:
+            unget_token(input_token);
             finished = true;
             break;
         default:
@@ -465,6 +476,9 @@ int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions)
             goto fail;
         }
     }
+
+    if (type_stack.count != 1)
+        error = INCOMPATIBLE_TYPE;
 
 fail:
     stack_free(&sym_stack);
