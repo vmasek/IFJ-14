@@ -4,6 +4,6 @@
 #include <stdio.h>
 #include "ial.h"
 
-int parse(FILE *input, Tree *globals, Tree *functions);
+int parse(FILE *input);
 
 #endif

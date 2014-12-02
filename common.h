@@ -46,7 +46,7 @@
  * Value checking macro
  */
 #define CHECK_VALUE(val, ret) if (((ret) = (val)) != SUCCESS) return (ret);
-#define CATCH_VALUE(val, ret) if (((ret) = (val)) != SUCCESS || (ret) != RETURNING) return (ret)
+#define CATCH_VALUE(val, ret) if (((ret) = (val)) != SUCCESS && (ret) != RETURNING) return (ret)
 
 /**
  * Macro for memory allocation

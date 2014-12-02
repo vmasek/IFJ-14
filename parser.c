@@ -24,21 +24,27 @@ static int nt_main(FILE *input, Tree *globals, Tree *functions);
 static int nt_arg_list(FILE *input, Tree *locals, Tree *globals, Tree *functions);
 static int nt_else(FILE *input, Tree *locals, Tree *globals, Tree *functions);
 
-int parse(FILE *input, Tree *globals, Tree *functions)
+int parse(FILE *input)
 {
-    tree_init(globals);
-    tree_init(functions);
-    nt_program(input, globals, functions);
+    int ret = SUCCESS;
+    Tree globals;
+    Tree functions;
 
-    return SUCCESS;
+    tree_init(&globals);
+    tree_init(&functions);
+    ret = nt_program(input, &globals, &functions);
+
+    tree_free(&globals);
+    tree_free(&functions);
+
+    return ret;
 }
 
 static int nt_program(FILE *input, Tree *globals, Tree *functions)
 {
     int ret;
-
     CATCH_VALUE(nt_var_section(input, globals), ret);
-    CHECK_VALUE(nt_func_section(input, globals, functions), ret);
+    CATCH_VALUE(nt_func_section(input, globals, functions), ret);
     CHECK_VALUE(nt_main(input, globals, functions), ret);
 
     return SUCCESS;
