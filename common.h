@@ -67,13 +67,11 @@ typedef union {
 
 typedef enum
 {
-    Type_OTHER = 0,  //  --
-    Type_INT,        //  value_int
-    Type_DOUBLE,     //  value_double
-    Type_CHAR,       //  value_char
-    Type_STRING,     //  value_char*
-    Type_CSTRING,    //  value_cstring
-    Type_BOOL,       // value bool
+    TYPE_OTHER = 0,  //  --
+    TYPE_INT,        //  value_int
+    TYPE_REAL,       //  value_real      (double)
+    TYPE_STRING,     //  value_cstring
+    TYPE_BOOL,       //  value bool
 } Type;
 
 
