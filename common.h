@@ -14,6 +14,9 @@
 
 #include "cstring.h"
 
+/* Macro for gcc to stop nagging about unused parameters */
+#define IGNORE_PARAM(id) (void)(id)
+
 /**
  * Debbuging macro
  * Prints out message + info about file, line and the current function.

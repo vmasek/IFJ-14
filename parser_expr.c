@@ -25,9 +25,6 @@
 #define TREE_GLOBALS 1
 #define TREE_FUNCS 2
 
-/* TO STOP GCC FROM NAGGING ABOUT UNUSED PARAMETERS */
-#define IGNORE_ARG(id) (void)(id)
-
 /* TYPES */
 enum symbol {
     SYM_SNT,        // scalar non-terminal symbol
@@ -229,8 +226,8 @@ static int handle_add(Token **tokens, Stack *type_stack, Tree **trees)
     Type op2_type;
     Type result_type;
 
-    IGNORE_ARG(tokens);
-    IGNORE_ARG(trees);
+    IGNORE_PARAM(tokens);
+    IGNORE_PARAM(trees);
 
     if (stack_top(type_stack, (int *)&op2_type, NULL) != SUCCESS ||
         stack_pop(type_stack) != SUCCESS ||
@@ -303,8 +300,8 @@ static int handle_comp(Token **tokens, Stack *type_stack, Tree **trees)
     Type op1_type;
     Type op2_type;
 
-    IGNORE_ARG(tokens); //TODO ERASE - OPERATOR TOKEN WILL BE NEEDED
-    IGNORE_ARG(trees);
+    IGNORE_PARAM(tokens); //TODO ERASE - OPERATOR TOKEN WILL BE NEEDED
+    IGNORE_PARAM(trees);
 
     if (stack_top(type_stack, (int *)&op2_type, NULL) != SUCCESS ||
         stack_pop(type_stack) != SUCCESS ||
@@ -326,8 +323,8 @@ static int handle_div(Token **tokens, Stack *type_stack, Tree **trees)
     Type op1_type;
     Type op2_type;
 
-    IGNORE_ARG(tokens);
-    IGNORE_ARG(trees);
+    IGNORE_PARAM(tokens);
+    IGNORE_PARAM(trees);
 
     if (stack_top(type_stack, (int *)&op2_type, NULL) != SUCCESS ||
         stack_pop(type_stack) != SUCCESS ||
@@ -367,7 +364,7 @@ static int handle_literal(Token **tokens, Stack *type_stack, Tree **trees)
 {
     Type type = get_type(tokens[0]);
 
-    IGNORE_ARG(trees);
+    IGNORE_PARAM(trees);
 
     if (stack_push(type_stack, type, NULL) != SUCCESS)
         return INTERNAL_ERROR;
@@ -381,8 +378,8 @@ static int handle_sub_mul(Token **tokens, Stack *type_stack, Tree **trees)
     Type op2_type;
     Type result_type;
 
-    IGNORE_ARG(trees);
-    IGNORE_ARG(tokens); //TODO ERASE - OPERATOR TOKEN WILL BE NEEDED
+    IGNORE_PARAM(trees);
+    IGNORE_PARAM(tokens); //TODO ERASE - OPERATOR TOKEN WILL BE NEEDED
 
     if (stack_top(type_stack, (int *)&op2_type, NULL) != SUCCESS ||
         stack_pop(type_stack) != SUCCESS ||
