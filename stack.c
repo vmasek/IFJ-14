@@ -75,6 +75,27 @@ int stack_top(Stack *stack, int *type, void **value)
 	return SUCCESS;
 }
 
+int stack_index(Stack *stack, unsigned index, int *type, void **value)
+{
+    Stack_Node *node = stack->top;
+
+    if (stack == NULL || stack->top == NULL)
+        return INTERNAL_ERROR;
+
+	while (index--) {
+		if ((node = node->next) == NULL)
+			return INTERNAL_ERROR;
+	}
+
+    if (type != NULL)
+        *type = node->type;
+
+    if (value != NULL)
+        *value = node->value;
+
+    return SUCCESS;
+}
+
 int stack_pop(Stack *stack)
 {
 	if(!stack)
