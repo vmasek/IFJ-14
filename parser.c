@@ -10,25 +10,19 @@ static int nt_var_sublist(FILE *input, Tree *vars);
 static int nt_var(FILE *input, Tree *vars, bool eps, Var_record **_var);
 static int t_symbol(FILE *input, enum token_symbol symbol);
 static int nt_type(FILE *input, Type *vars);
-static int nt_func_section(FILE *input, Tree *functions);
-static int nt_func(FILE *input, Tree *functions);
+static int nt_func_section(FILE *input, Tree *globals, Tree *functions);
+static int nt_func(FILE *input, Tree *globals, Tree *functions);
 static int t_id(FILE *input, cstring **_id);
 static int nt_paramlist(FILE *input, Func_record *func, int count);
-static int nt_func_body(FILE *input, Tree *functions);
-static int nt_comp_cmd(FILE *input, Tree *functions);
+static int nt_func_body(FILE *input, Tree *locals, Tree *globals, Tree *functions);
+static int nt_comp_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions);
 static int t_keyword(FILE *input, enum token_keyword keyword);
-static int nt_cmd_list(FILE *input, Tree *functions);
-static int nt_cmd_sublist(FILE *input, Tree *functions);
-static int nt_cmd(FILE *input, Tree *functions);
+static int nt_cmd_list(FILE *input, Tree *locals, Tree *globals, Tree *functions);
+static int nt_cmd_sublist(FILE *input, Tree *locals, Tree *globals, Tree *functions);
+static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions);
 static int nt_main(FILE *input, Tree *globals, Tree *functions);
-static int nt_arg_list(FILE *input, Tree *functions);
-static int nt_else(FILE *input, Tree *functions);
-
-static int parse_expr(FILE *input) //TODO DELETE AFTER CONNECTING WITH EXPRESSION PARSER
-{
-    (void)input;
-    return SUCCESS;
-}
+static int nt_arg_list(FILE *input, Tree *locals, Tree *globals, Tree *functions);
+static int nt_else(FILE *input, Tree *locals, Tree *globals, Tree *functions);
 
 int parse(FILE *input, Tree *globals, Tree *functions)
 {
@@ -44,7 +38,7 @@ static int nt_program(FILE *input, Tree *globals, Tree *functions)
     int ret;
 
     CATCH_VALUE(nt_var_section(input, globals), ret);
-    CHECK_VALUE(nt_func_section(input, functions), ret);
+    CHECK_VALUE(nt_func_section(input, globals, functions), ret);
     CHECK_VALUE(nt_main(input, globals, functions), ret);
 
     return SUCCESS;
@@ -99,7 +93,7 @@ static int nt_var(FILE *input, Tree *vars, bool eps, Var_record **_var)
         MALLOC_VAR(var, MODULE);
         tree_insert(vars, cstr_create_str(token.value.value_name), var);
         CHECK_VALUE(t_symbol(input, COLON), ret);
-        CHECK_VALUE(nt_type(input, &(var->value.type)), ret);
+        CHECK_VALUE(nt_type(input, &(var->type)), ret);
         if (_var != NULL)
             *_var = var;
         return SUCCESS;
@@ -153,16 +147,16 @@ static int nt_type(FILE *input, Type *type)
     return (ret) ? SUCCESS : SYNTAX_ERROR;
 }
 
-static int nt_func_section(FILE *input, Tree *functions) 
+static int nt_func_section(FILE *input, Tree *globals, Tree *functions)
 {
     int ret;
-    CHECK_VALUE(nt_func(input, functions), ret);
-    CHECK_VALUE(nt_func_section(input, functions), ret);
+    CHECK_VALUE(nt_func(input, globals, functions), ret);
+    CHECK_VALUE(nt_func_section(input, globals, functions), ret);
 
     return SUCCESS;
 }
 
-static int nt_func(FILE *input, Tree *functions)
+static int nt_func(FILE *input, Tree *globals, Tree *functions)
 {
     int ret;
     Token token;
@@ -176,13 +170,13 @@ static int nt_func(FILE *input, Tree *functions)
         MALLOC_FUNC(func, MODULE);
 
         CHECK_VALUE(t_id(input, &id), ret);
-        func->id = id;
         CHECK_VALUE(t_symbol(input, PARENTHESIS_L), ret);
         CATCH_VALUE(nt_paramlist(input, func, 0), ret);
         CHECK_VALUE(t_symbol(input, PARENTHESIS_R), ret);
-        CHECK_VALUE(nt_type(input, &(func->type)), ret);
+        CHECK_VALUE(nt_type(input, &(func->ret_value.type)), ret);
+        tree_insert(func->locals, id, &(func->ret_value));
         CHECK_VALUE(t_symbol(input, SEMICOLON), ret);
-        CHECK_VALUE(nt_func_body(input, functions), ret);
+        CHECK_VALUE(nt_func_body(input, func->locals, globals, functions), ret);
 
         return SUCCESS;
     }
@@ -229,7 +223,7 @@ static int nt_paramlist(FILE *input, Func_record *func, int count)
     return SUCCESS;
 }
 
-static int nt_func_body(FILE *input, Tree *functions)
+static int nt_func_body(FILE *input, Tree *locals, Tree *globals, Tree *functions)
 {
     int ret;
     Token token;
@@ -242,16 +236,16 @@ static int nt_func_body(FILE *input, Tree *functions)
     } else {
         unget_token(&token);
         CATCH_VALUE(nt_var_section(input, functions), ret);
-        CHECK_VALUE(nt_comp_cmd(input, functions), ret);
+        CHECK_VALUE(nt_comp_cmd(input, locals, globals, functions), ret);
         return SUCCESS;
     }
 }
 
-static int nt_comp_cmd(FILE *input, Tree *functions)
+static int nt_comp_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions)
 {
     int ret;
     CHECK_VALUE(t_keyword(input, KEYWORD_BEGIN), ret);
-    CATCH_VALUE(nt_cmd_list(input, functions), ret);
+    CATCH_VALUE(nt_cmd_list(input, locals, globals, functions), ret);
     CHECK_VALUE(t_keyword(input, KEYWORD_END), ret);
 
     return SUCCESS;
@@ -268,25 +262,25 @@ static int t_keyword(FILE *input, enum token_keyword keyword)
     return SYNTAX_ERROR;
 }
 
-static int nt_cmd_list(FILE *input, Tree *functions)
+static int nt_cmd_list(FILE *input, Tree *locals, Tree *globals, Tree *functions)
 {
     int ret;
-    CATCH_VALUE(nt_cmd_sublist(input, functions), ret);
+    CATCH_VALUE(nt_cmd_sublist(input, locals, globals, functions), ret);
 
     return SUCCESS;
 }
 
-static int nt_cmd_sublist(FILE *input, Tree *functions)
+static int nt_cmd_sublist(FILE *input, Tree *locals, Tree *globals, Tree *functions)
 {
     int ret;
-    CHECK_VALUE(nt_cmd(input, functions), ret);
+    CHECK_VALUE(nt_cmd(input, locals, globals, functions), ret);
     CHECK_VALUE(t_symbol(input, SEMICOLON), ret);
-    CHECK_VALUE(nt_cmd_sublist(input, functions), ret);
+    CHECK_VALUE(nt_cmd_sublist(input, locals, globals, functions), ret);
 
     return SUCCESS;
 }
 
-static int nt_cmd(FILE *input, Tree *functions)
+static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions)
 {
     int ret;
     Token token;
@@ -301,30 +295,30 @@ static int nt_cmd(FILE *input, Tree *functions)
             return SUCCESS;
         } else if (token.value.value_keyword == KEYWORD_WRITE) {
             CHECK_VALUE(t_symbol(input, PARENTHESIS_L), ret);
-            CHECK_VALUE(nt_arg_list(input, functions), ret);
+            CHECK_VALUE(nt_arg_list(input, locals, globals, functions), ret);
             CHECK_VALUE(t_symbol(input, PARENTHESIS_R), ret);
             return SUCCESS;
         } else if (token.value.value_keyword == KEYWORD_IF) {
-            CHECK_VALUE(parse_expr(input), ret);
+            CHECK_VALUE(parse_expr(input, locals, globals, functions), ret);
             CHECK_VALUE(t_symbol(input, KEYWORD_THEN), ret);
-            CHECK_VALUE(nt_comp_cmd(input, functions), ret);
-            CATCH_VALUE(nt_else(input, functions), ret);
+            CHECK_VALUE(nt_comp_cmd(input, locals, globals, functions), ret);
+            CATCH_VALUE(nt_else(input, locals, globals, functions), ret);
             return SUCCESS;
         } else if (token.value.value_keyword == KEYWORD_WHILE) {
-            CHECK_VALUE(parse_expr(input), ret);
+            CHECK_VALUE(parse_expr(input,locals, globals, functions), ret);
             CHECK_VALUE(t_keyword(input, KEYWORD_DO), ret);
-            CHECK_VALUE(nt_comp_cmd(input, functions), ret);
+            CHECK_VALUE(nt_comp_cmd(input, locals, globals, functions), ret);
             return SUCCESS;
         } else if (token.value.value_keyword == KEYWORD_REPEAT) {
-            CHECK_VALUE(nt_cmd_list(input, functions), ret);
+            CHECK_VALUE(nt_cmd_list(input, locals, globals, functions), ret);
             CHECK_VALUE(t_keyword(input, KEYWORD_UNTIL), ret);
-            CHECK_VALUE(parse_expr(input), ret);
+            CHECK_VALUE(parse_expr(input, locals, globals, functions), ret);
             return SUCCESS;
         }
     } else if (token.type == TOKEN_ID) {
         //TODO: array
         CHECK_VALUE(t_symbol(input, ASSIGNMENT), ret);
-        CHECK_VALUE(parse_expr(input), ret);
+        CHECK_VALUE(parse_expr(input, locals, globals, functions), ret);
     }
     unget_token(&token);
     return RETURNING;
@@ -333,34 +327,34 @@ static int nt_cmd(FILE *input, Tree *functions)
 static int nt_main(FILE *input, Tree *globals, Tree *functions)
 {
     int ret;
-    CHECK_VALUE(nt_comp_cmd(input, functions), ret);
+    CHECK_VALUE(nt_comp_cmd(input, NULL, globals, functions), ret);
     CHECK_VALUE(t_symbol(input, DOT), ret);
 
     return SUCCESS;
 }
 
-static int nt_arg_list(FILE *input, Tree *functions) {
+static int nt_arg_list(FILE *input, Tree *locals, Tree *globals, Tree *functions) {
     int ret;
     Token token;
-    CHECK_VALUE(parse_expr(input), ret);
+    CHECK_VALUE(parse_expr(input, locals, globals, functions), ret);
     get_token(&token, input);
     if (token.type == TOKEN_SYMBOL &&
         token.value.value_symbol == COMMA) {
-        CHECK_VALUE(nt_arg_list(input, functions),ret);
+        CHECK_VALUE(nt_arg_list(input, locals, globals, functions),ret);
     } else {
         unget_token(&token);
     }
     return SUCCESS;
 }
 
-static int nt_else(FILE *input, Tree *functions) {
+static int nt_else(FILE *input, Tree *locals, Tree *globals, Tree *functions) {
     int ret;
     Token token;
 
     get_token(&token, input);
     if (token.type == TOKEN_KEYWORD &&
         token.value.value_keyword == KEYWORD_ELSE) {
-        CHECK_VALUE(nt_comp_cmd(input, functions), ret);
+        CHECK_VALUE(nt_comp_cmd(input, locals, globals, functions), ret);
     }
     unget_token(&token);
     return RETURNING;

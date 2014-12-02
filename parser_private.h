@@ -10,18 +10,20 @@
 #include "scaner.h"
 
 typedef struct var_record {
-    cstring *id; //TODO IS THIS NECESSARY?
-    My_value value;
-    bool inited; //TODO IS THIS NECESSARY IN PARSER?
+    Value data;
+    Type type;
+    unsigned index;
 } Var_record;
 
 typedef struct func_record {
-    cstring *id; //TODO IS THIS NECESSARY?
     unsigned param_count;
     Var_record **params;
-    Var_record *ret_value;
-    Type type; //TODO OBSOLETE
+    Var_record ret_value;
     Tree *locals;
+    bool defined;
+    unsigned index;
 } Func_record;
+
+int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions);
 
 #endif

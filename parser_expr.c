@@ -8,7 +8,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#include "parser_expr.h"
 #include "ial.h"
 #include "scaner.h"
 #include "errors.h"
@@ -281,7 +280,7 @@ static int handle_call(Token **tokens, Stack *type_stack, Tree **trees)
 
     while (param_count--) {
         if (stack_top(type_stack, (int *)&cur_type, NULL) != SUCCESS ||
-            cur_type != function->params[param_count]->value.type)
+            cur_type != function->params[param_count]->type)
             return INCOMPATIBLE_TYPE;
         stack_pop(type_stack);
     }
@@ -292,7 +291,7 @@ static int handle_call(Token **tokens, Stack *type_stack, Tree **trees)
 
     stack_pop(type_stack);
 
-    if (stack_push(type_stack, function->ret_value->value.type, NULL)
+    if (stack_push(type_stack, function->ret_value.type, NULL)
         != SUCCESS)
         return INTERNAL_ERROR;
 
@@ -357,7 +356,7 @@ static int handle_id(Token **tokens, Stack *type_stack, Tree **trees)
                                  tokens[0]->value.value_name)) == NULL)
         return SEMANTIC_ERROR;
 
-    if (stack_push(type_stack, ((struct var_record *)node->data)->value.type,
+    if (stack_push(type_stack, ((struct var_record *)node->data)->type,
                    NULL) != SUCCESS)
         return INTERNAL_ERROR;
 
