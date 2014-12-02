@@ -135,29 +135,29 @@ const struct rule RULES[RULE_COUNT] = {
 static Type get_type(Token *token)
 {
     if (token == NULL)
-        return Type_OTHER;
+        return TYPE_OTHER;
 
     switch (token->type) {
     case TOKEN_KEYWORD:
         switch (token->value.value_keyword) {
         case KEYWORD_TRUE:
         case KEYWORD_FALSE:
-            return Type_BOOL;
+            return TYPE_BOOL;
         default:
             break;
         }
         break;
     case TOKEN_INT:
-        return Type_INT;
+        return TYPE_INT;
     case TOKEN_FLOAT:
-        return Type_DOUBLE;
+        return TYPE_REAL;
     case TOKEN_STRING:
-        return Type_CSTRING;
+        return TYPE_STRING;
     default:
         break;
     }
 
-    return Type_OTHER;
+    return TYPE_OTHER;
 }
 
 static enum terminal get_terminal(Token *token)
@@ -236,20 +236,20 @@ static int handle_add(Token **tokens, Stack *type_stack, Tree **trees)
         return SYNTAX_ERROR;
 
     switch (op1_type) {
-    case Type_INT:
-        if (op2_type != Type_INT && op2_type != Type_DOUBLE)
+    case TYPE_INT:
+        if (op2_type != TYPE_INT && op2_type != TYPE_REAL)
             return INCOMPATIBLE_TYPE;
         result_type = op2_type;
         break;
-    case Type_DOUBLE:
-        if (op2_type != Type_INT && op2_type != Type_DOUBLE)
+    case TYPE_REAL:
+        if (op2_type != TYPE_INT && op2_type != TYPE_REAL)
             return INCOMPATIBLE_TYPE;
-        result_type = Type_DOUBLE;
+        result_type = TYPE_REAL;
         break;
-    case Type_CSTRING:
-        if (op2_type != Type_CSTRING)
+    case TYPE_STRING:
+        if (op2_type != TYPE_STRING)
             return INCOMPATIBLE_TYPE;
-        result_type = Type_CSTRING;
+        result_type = TYPE_STRING;
         break;
     default:
         return INCOMPATIBLE_TYPE;
@@ -283,7 +283,7 @@ static int handle_call(Token **tokens, Stack *type_stack, Tree **trees)
     }
 
     if (stack_top(type_stack, (int *)&cur_type, NULL) != SUCCESS ||
-        cur_type != Type_OTHER)
+        cur_type != TYPE_OTHER)
         return INCOMPATIBLE_TYPE;
 
     stack_pop(type_stack);
@@ -312,7 +312,7 @@ static int handle_comp(Token **tokens, Stack *type_stack, Tree **trees)
     if (op1_type != op2_type)
         return INCOMPATIBLE_TYPE;
 
-    if (stack_push(type_stack, Type_BOOL, NULL) != SUCCESS)
+    if (stack_push(type_stack, TYPE_BOOL, NULL) != SUCCESS)
         return INTERNAL_ERROR;
 
     return SUCCESS;
@@ -332,11 +332,11 @@ static int handle_div(Token **tokens, Stack *type_stack, Tree **trees)
         stack_pop(type_stack) != SUCCESS)
         return SYNTAX_ERROR;
 
-    if ((op1_type != Type_INT && op1_type != Type_DOUBLE) ||
-        (op2_type != Type_INT && op2_type != Type_DOUBLE))
+    if ((op1_type != TYPE_INT && op1_type != TYPE_REAL) ||
+        (op2_type != TYPE_INT && op2_type != TYPE_REAL))
         return INCOMPATIBLE_TYPE;
 
-    if (stack_push(type_stack, Type_DOUBLE, NULL) != SUCCESS)
+    if (stack_push(type_stack, TYPE_REAL, NULL) != SUCCESS)
         return INTERNAL_ERROR;
 
     return SUCCESS;
@@ -388,15 +388,15 @@ static int handle_sub_mul(Token **tokens, Stack *type_stack, Tree **trees)
         return SYNTAX_ERROR;
 
     switch (op1_type) {
-    case Type_INT:
-        if (op2_type != Type_INT && op2_type != Type_DOUBLE)
+    case TYPE_INT:
+        if (op2_type != TYPE_INT && op2_type != TYPE_REAL)
             return INCOMPATIBLE_TYPE;
         result_type = op2_type;
         break;
-    case Type_DOUBLE:
-        if (op2_type != Type_INT && op2_type != Type_DOUBLE)
+    case TYPE_REAL:
+        if (op2_type != TYPE_INT && op2_type != TYPE_REAL)
             return INCOMPATIBLE_TYPE;
-        result_type = Type_DOUBLE;
+        result_type = TYPE_REAL;
         break;
     default:
         return INCOMPATIBLE_TYPE;
@@ -456,7 +456,7 @@ int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions)
         case P:
             if (get_terminal(stack_token) == TERM_ID &&
                 get_terminal(input_token) == TERM_LP &&
-                stack_push(&type_stack, Type_OTHER, NULL) != SUCCESS)
+                stack_push(&type_stack, TYPE_OTHER, NULL) != SUCCESS)
                 goto fail;
             if ((error = stack_push(&sym_stack, SYM_TERM, input_token))
                 != SUCCESS)

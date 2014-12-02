@@ -87,7 +87,7 @@ static int nt_var(FILE *input, Tree *vars, bool eps, Var_record **_var)
     int ret;
     Token token;
     Var_record *var = NULL;
-    
+
     get_token(&token, input);
     if (token.type == TOKEN_ID) {
         MALLOC_VAR(var, MODULE);
@@ -130,16 +130,16 @@ static int nt_type(FILE *input, Type *type)
                 token.value.value_keyword == KEYWORD_BOOLEAN));
     switch (token.value.value_keyword) {
     case KEYWORD_INTEGER:
-        *type = Type_INT;
+        *type = TYPE_INT;
         break;
     case KEYWORD_REAL:
-        *type = Type_DOUBLE;
+        *type = TYPE_REAL;
         break;
     case KEYWORD_STRING:
-        *type = Type_STRING;
+        *type = TYPE_STRING;
         break;
     case KEYWORD_BOOLEAN:
-        *type = Type_BOOL;
+        *type = TYPE_BOOL;
         break;
     default:
         break;

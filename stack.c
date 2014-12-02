@@ -330,7 +330,7 @@ inline void stack_print_node(int type, void *value)
 {
 	printf("\n\t_________________________________________________________________\n");
 	//printf("\t|\ttype:  %d\n", type);
-	if (type == Type_INT)									// INT
+	if (type == TYPE_INT)									// INT
 	{
 		if (!value)
 		{
@@ -341,29 +341,7 @@ inline void stack_print_node(int type, void *value)
 			printf("\t|  value:     (int)[ %d ]\n", *(int*)value);
 		}
 	}
-	else if (type == Type_CHAR)							// CHAR
-	{
-		if (!value)
-		{
-			printf("\t|  value:    (char)[ ivalid or NULL pointer to value ]\n");
-		}
-		else
-		{
-			printf("\t|  value:    (char)[ %c ]\n", *(char*)value);
-		}
-	}
-	else if (type == Type_STRING)							// CHAR*
-	{
-		if (!value)
-		{
-			printf("\t|  value:   (char*)[ ivalid or NULL pointer to value ]\n");
-		}
-		else
-		{
-			printf("\t|  value:   (char*)[ %s ]\n", (char*)value);
-		}
-	}
-	else if (type == Type_CSTRING)							// CSTRING
+	else if (type == TYPE_STRING)							// CSTRING
 	{
 		if (!value)
 		{
@@ -374,7 +352,7 @@ inline void stack_print_node(int type, void *value)
 			printf("\t|  value: (cstring)[ %s ]\n", ((cstring*)value)->str);
 		}
 	}
-	else if (type == Type_DOUBLE)							// DOUBLE
+	else if (type == TYPE_REAL)							// DOUBLE
 	{
 		if (!value)
 		{
@@ -385,7 +363,7 @@ inline void stack_print_node(int type, void *value)
 			printf("\t|  value:  (double)[ %e ]\n", *(double*)value);
 		}
 	}
-	else if (type == Type_OTHER)							// DOUBLE
+	else if (type == TYPE_OTHER)							// DOUBLE
 	{
 		if (!value)
 		{
