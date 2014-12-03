@@ -1,6 +1,6 @@
 /**
- * @file    interpret.c
- * @brief   Implementation of interpret
+ * @file    interpreter.c
+ * @brief   Implementation of interpreter
  * @author  Tomas Paulus (xpaulu01), Vojtech Mašek (xmasek15)
  *******************************************************************/
 
@@ -24,7 +24,7 @@ typedef enum
     I_ASSIGN,   		// :=
     I_ADD,      		// +
     I_SUB,      		// -
-    I_MUL, 				// *
+    I_MUL,				// *
     I_DIV,      		// /
     I_LESS,     		// <
     I_GREATER,  		// >
@@ -49,5 +49,5 @@ typedef struct Instruction
 }Instruction;
 
 
-int interpret(Instruction *item, Stack *locals, Stack *calcs, Stack *instructions);
+int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instructions);
 
