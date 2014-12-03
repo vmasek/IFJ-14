@@ -8,13 +8,13 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#include "ial.h"
-#include "scaner.h"
-#include "errors.h"
-#include "stack.h"
-#include "gc.h"
 #include "common.h"
+#include "errors.h"
+#include "gc.h"
+#include "ial.h"
 #include "parser_private.h"
+#include "scaner.h"
+#include "stack.h"
 
 #define RULE_COUNT 18
 #define RULE_MAXLEN 8
@@ -347,8 +347,9 @@ static int handle_id(Token **tokens, Stack *type_stack, Tree **trees)
 {
     Tree_Node *node;
 
-    if ((node = tree_find_key_ch(trees[TREE_LOCALS],
-                                 tokens[0]->value.value_name)) == NULL &&
+    if ((trees[TREE_LOCALS] == NULL ||
+         (node = tree_find_key_ch(trees[TREE_LOCALS],
+                                  tokens[0]->value.value_name)) == NULL) &&
         (node = tree_find_key_ch(trees[TREE_GLOBALS],
                                  tokens[0]->value.value_name)) == NULL)
         return SEMANTIC_ERROR;
@@ -427,6 +428,9 @@ int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions)
     Stack sym_stack;
     Stack type_stack;
     Tree *trees[TREE_COUNT];
+
+    if (input == NULL || globals == NULL || functions == NULL)
+        return INTERNAL_ERROR;
 
     trees[TREE_LOCALS] = locals;
     trees[TREE_GLOBALS] = globals;
