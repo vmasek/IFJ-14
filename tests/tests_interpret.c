@@ -1,182 +1,299 @@
 /**
- * @name tests_interpret.c
- * @brief Tests for interpret
- * @author Tomas Paulus (xpaulu01)
+ * @file tests_interpret.c
+ * @brief Tests for interpreter instructions
+ * @author Vojtech Mašek (xmasek15)
  **********************************************/
 
 #include "tests.h"
 
-void test_interpret()
+void test_I_ASSIGN(void);
+
+void test_I_ADD(void);
+
+
+void test_interpreter()
 {
-	test_arithmetic_interpret();
-	test_relation_functions();
+	test_I_ASSIGN();
+printf("\n=================================================================================================================\n");
+	test_I_ADD();
 }
 
-// Tests for int and double
-int test_arithmetic_interpret()
+
+
+
+void test_I_ASSIGN(void)
 {
-	int failures = 0;
-	int count = 5;
+	int test = 0, errors = 1;
 
-	printf("*** Testing arithmetic functions in interpret ***\n");
+///-----declarations-of-needed-structs----------------------------------------
+	Instruction instruction;
+	instruction.instruction = I_ASSIGN;
 
-	T_ITEM test;
-	test.op1 = malloc(sizeof(int));
-	test.op2 = malloc(sizeof(int));
-	test.result = malloc(sizeof(int));
+	Stack calcs;
+	stack_init(&calcs);
+
+	Value values[4];
+
+	///tu je potrebne si popridavat values pre testy
+	values[0].integer	= 42;
+	values[1].real		= 16.125;
+	values[2].boolean	= 1;
+
+///---------------------------------------------------------------------------
+
+do{ /// do{...}while(0); 	is for testing hack
 
 
-	test.op1->type = Type_INT;
-	test.op2->type = Type_INT;
+///PRVY test na assign
 
-	test.op1->data.integer = 10;
-	test.op2->data.integer = 20;
 
-	test.instruction = I_ADD;
+printf("\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
+	stack_push(&calcs, TYPE_INT, &(values[test].integer));
 
-	interpret(&test);
 
-	if (test.result->data.integer != 30)
+	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
 	{
-		printf("Error in a+b\n");
-		failures++;
+		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
+		break;
 	}
 
-	test.op1->data.integer = test.result->data.integer;
-	test.op2->data.integer = 10;
-	test.instruction = I_MULTIPLY;
 
-	interpret(&test);
-
-	if (test.result->data.integer != 300)
+	if(calcs.count==1)
 	{
-		printf("Error in (a+b)*c == %d \n", test.result->data.integer);
-		failures++;
+		///readind top of stack by using direct stack access
+		if(calcs.top->type == TYPE_INT && (*(int*)(calcs.top->value) == values[test].integer))
+			printf("%s:[test %d.] ASSIGN was OK.\n", __func__, test);
+		else
+		{
+			printf("%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, *(int*)(calcs.top->value), values[test].integer);
+			break;
+		}
+	}
+	else
+	{
+		printf("%s:[test %d.] ERROR: stack counter should be %d and its %u\n", __func__, test, 1, calcs.count);
+		break;
+	}
+	printf("\n");
+
+	///v stacku je iba jedna vec (result operacie assign) tak ho popneme a zistime ci je stack prazdny
+	stack_pop(&calcs);
+	if(calcs.count==0)
+	{
+		printf("%s:[test %d.] OK. pop was ok and stack is empty\n", __func__, test);
+	}
+	else
+	{
+		printf("%s:[test %d.] ERROR: stack counter should be %d and its %u\n", __func__, test, 0, calcs.count);
+		break;
 	}
 
-	test.op1->data.integer = test.result->data.integer;
-	test.op2->data.integer = 5;
-	test.instruction = I_DIV;
 
-	interpret(&test);
+///DRUHY test na assign
+test++;
+printf("\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
+	stack_push(&calcs, TYPE_REAL, &(values[test].real));
 
-	if (test.result->data.real != 60)
+	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
 	{
-		printf("Error in ((a+b)*c) / d == %.2f\n", test.result->data.real);
-		failures++;
+		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
+		break;
+	}
+	printf("\n\t%d\n", calcs.count);
+
+	///zas bol stack pred pushom prazdny takze by count mal byt 1
+	if(calcs.count==1)
+	{
+		///readind top of stack by using direct stack access
+		if(calcs.top->type == TYPE_REAL && (*(double*)(calcs.top->value) == values[test].real))
+			printf("%s:[test %d.] ASSIGN was OK.\n", __func__, test);
+		else
+		{
+			printf("%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, *(double*)(calcs.top->value), values[test].real);
+			break;
+		}
+	}
+	else
+	{
+		printf("%s:[test %d.] ERROR: stack counter should be %d and its %u\n", __func__, test, 1, calcs.count);
+		break;
+	}
+	printf("\n");
+
+	///tentokrat uz stack nepopnem aby som otestoval ci to funguje aj s neprazdnym stackom
+
+///TRETI test na assign
+test++;
+printf("\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
+
+	stack_push(&calcs, TYPE_BOOL, &(values[test].boolean));
+
+	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	{
+		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
+		break;
 	}
 
-	test.op1->type = Type_DOUBLE;
-	test.op1->data.real = test.result->data.real;
-	test.op2->data.integer = 12;
-	test.instruction = I_SUB;
-
-	interpret(&test);
-
-	if (test.result->data.real != 48)
+	///stack pred pushom obsahoval result z predchadzajuceho + bol push takze 2
+	if(calcs.count==2)
 	{
-		printf("Error in (((a+b)*c) / d) - e) == %.2f \n", test.result->data.real);
-		failures++;
+		///readind top of stack by using direct stack access
+		if(calcs.top->type == TYPE_BOOL && (*(bool*)(calcs.top->value) == values[test].boolean))
+			printf("%s:[test %d.] ASSIGN was OK.\n", __func__, test);
+		else
+		{
+			printf("%s:[test %d.] ERROR: stack value is (bool)%d and should be (bool)%d\n", __func__, test, *(bool*)(calcs.top->value), values[test].boolean);
+			break;
+		}
+	}
+	else
+	{
+		printf("%s:[test %d.] ERROR: stack counter should be %d and its %u\n", __func__, test, 2, calcs.count);
+		break;
+	}
+	printf("\n");
+
+	///tentokrat uz stack nepopnem aby som otestoval ci to funguje aj s neprazdnym stackom
+
+
+///STVRTY test na assign
+test++;
+printf("\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
+
+///TODO: spravim este cstring
+
+
+
+
+
+
+errors=0;
+}while(0);
+
+	if(errors)
+	{
+		printf("\n\n!!! ERROR has occured during testing !!!\n\n");
+	}
+	else
+	{
+		printf("\n\nOK. Everything is fine.\n\n");
 	}
 
-	debug("Result of ((10+20) * 10) / 5) - 12 is %.2f\n", test.result->data.real);
-	print_result(count, failures);
-
-	free(test.op1);
-	free(test.op2);
-	free(test.result);
-
-	return failures;
 }
 
-//no leaks but !43! errors ? :(
-int test_relation_functions()
+
+void test_I_ADD(void)
 {
+	int test = 0, errors = 1;
 
-	printf("\n*** Testing relation less in interpret ***\n");
-	int failures = 0;
-	int count = 10;
+///-----declarations-of-needed-structs----------------------------------------
+	Instruction instruction;
+	instruction.instruction = I_ADD;
 
-	T_ITEM test;
-	test.op1 = malloc(sizeof(int));
-	test.op2 = malloc(sizeof(int));
-	test.result = malloc(sizeof(int));
+	Stack calcs;
+	stack_init(&calcs);
+
+	Value values[10];
+
+	///tu je potrebne si popridavat values pre testy
+	values[0].integer	= 8;
+	values[1].integer	= 100;
+
+	values[2].real		= 16.125;
+	values[3].real		= 2.5;
+
+///---------------------------------------------------------------------------
+
+do{ /// do{...}while(0); 	is for testing hack
 
 
-	test.op1->type = Type_INT;
-	test.op2->type = Type_INT;
+///PRVY test na add
 
-	test.op1->data.integer = 10;
-	test.op2->data.integer = 20;
 
-	test.instruction = I_LESS;
-	interpret(&test);
+printf("\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
+	///push dvoch int values ktore budeme scitat
+	stack_push(&calcs, TYPE_INT, &(values[0].integer));
+	stack_push(&calcs, TYPE_INT, &(values[1].integer));
 
-//==========TEST FOR INT====================
-	if (!test.result->data.boolean) // I_LESS
+	///zavolanie interpretera
+	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
 	{
-		failures++;
-		printf("Error in I_LESS 10 < 20\n");
+		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
+		break;
 	}
 
-	test.instruction = I_GREATER;
-	interpret(&test);
-
-	if (test.result->data.boolean)
+	///kontrola velkosti stacku, boli pushnute dve hodnoty, tie su v inter. popnute a je pushnuty result
+	if(calcs.count==1)
 	{
-		failures++;
-		printf("Error in I_GREATER 10 < 20\n");
+		///readind top of stack by using direct stack access
+		if(calcs.top->type == TYPE_INT && (*(int*)(calcs.top->value) == ( values[0].integer + values[1].integer )))
+			printf("%s:[test %d.] ADD was OK.\n", __func__, test);
+		else
+		{
+			printf("%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, *(int*)(calcs.top->value), values[0].integer + values[1].integer);
+			break;
+		}
+	}
+	else
+	{
+		printf("%s:[test %d.] ERROR: stack counter should be %d and its %u\n", __func__, test, 1, calcs.count);
+		break;
+	}
+	printf("\n");
+
+	///v stacku je iba jedna vec (result operacie assign) tak ho popneme a zistime ci je stack prazdny
+	stack_pop(&calcs);
+	if(calcs.count==0)
+	{
+		printf("%s:[test %d.] OK. pop was ok and stack is empty\n", __func__, test);
+	}
+	else
+	{
+		printf("%s:[test %d.] ERROR: stack counter should be %d and its %u\n", __func__, test, 0, calcs.count);
+		break;
 	}
 
-	test.instruction = I_LESS_EQUAL;
-	interpret(&test);
 
-	if (!test.result->data.boolean)
+///DRUHY test na add
+test++;
+printf("\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
+
+
+//                ###code###
+
+
+
+///TRETI test na assign
+test++;
+printf("\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
+
+
+//                ###code###
+
+
+
+///STVRTY test na add
+test++;
+printf("\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
+
+//TODO: spravim este cstring
+
+
+
+
+
+
+errors=0;
+}while(0);
+
+	if(errors)
 	{
-		failures++;
-		printf("Error in I_LESS_EQUAL 10 < 20\n");
+		printf("\n\n!!! ERROR has occured during testing !!!\n\n");
+	}
+	else
+	{
+		printf("\n\nOK. Everything is fine.\n\n");
 	}
 
-	test.instruction = I_GREATER_EQUAL;
-	interpret(&test);
-
-	if (test.result->data.boolean)
-	{
-		failures++;
-		printf("Error in I_GREATER_EQUAL 10 < 20\n");
-	}
-
-	test.instruction = I_EQUAL;
-	interpret(&test);
-
-	if (test.result->data.boolean)
-	{
-		failures++;
-		printf("Error in I_EQUAL 10 < 20\n");
-	}
-
-	test.instruction = I_NOT_EQUAL;
-	interpret(&test);
-
-	if (!test.result->data.boolean)
-	{
-		failures++;
-		printf("Error in I_NOT_EQUAL 10 < 20\n");
-	}
-
-	
-	print_result(count, failures);
-
-	free(test.op1);
-	free(test.op2);
-	free(test.result);
-
-	return failures;
 }
 
-/*
-** For Vojtík -> please make some tests for strings.
-int test_arithmetic_interpret_string()
-{
-
-}*/
