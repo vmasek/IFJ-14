@@ -27,16 +27,16 @@ int test_stack_complex(void)
 
 
 
-	int type = Type_STRING;
-	void *value = (void*)"this is char*";
+	int type = 911;
+	void *value = (void*)"this is string(char*)";
 
 
 	stack_push(&stack, type, (void*)value);
 
 	stack_print(&stack);
 
-	type = Type_STRING;
-	value = (void*)"this is also char*";
+	type = 112;
+	value = (void*)"this is also string(char*)";
 
 	stack_push(&stack, type, (void*)value);
 
@@ -52,23 +52,23 @@ printf("\n0. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	int		i[4]  = {42, 0, 5, -1};
 	cstring *cstr = cstr_create_str("this is cstring");
 	cstring *cstr1= cstr_create_str("cstr of NEW top");
-	char	c	  = 'c';
+	int	c	  = 'c';
 
-	int	types[_N_]= {		Type_STRING,
-							Type_INT,
-							Type_INT,
-							Type_DOUBLE,
-							Type_CSTRING,
-							Type_INT,
+	int	types[_N_]= {		112,
+							TYPE_INT,
+							TYPE_INT,
+							TYPE_REAL,
+							TYPE_STRING,
+							TYPE_INT,
 							99,				//valid another type
-							Type_DOUBLE,
+							TYPE_REAL,
 							88,				//valid another type
-							Type_OTHER,
-							Type_CHAR,
-							Type_INT,
+							TYPE_OTHER,
+							TYPE_INT,
+							TYPE_INT,
 					};
 
-	void *values[_N_]=	{	(void*)"just another char*",
+	void *values[_N_]=	{	(void*)"just another string(char*)",
 							(void*)&i[0],
 							(void*)NULL,
 							(void*)&d[0],
@@ -110,7 +110,7 @@ printf("\n1. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	//printf("\n1. value after top %d\n", *(int*)value);
 	printf("\n\n\t1. reading the top of stack:");
 	stack_print_node(type, value);
-	if(type == Type_INT && *(int*)value == i[2])
+	if(type == TYPE_INT && *(int*)value == i[2])
 		printf("\t1. TOP was OK.\n");
 	else
 	{
@@ -124,7 +124,7 @@ printf("\n2. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	type = 0;
 	value = (void*)NULL;
 
-	type = Type_DOUBLE;
+	type = TYPE_REAL;
 	stack_read_first_of_type(&stack, type, &value);
 	printf("\n\n\t2. reading the first of type DOUBLE:");
 	stack_print_node(type, value);
@@ -144,8 +144,8 @@ printf("\n3. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		printf("\n\n\t3. reading the top of stack:");
 		stack_print_node(type, value);
 
-		if(type == Type_CHAR && *(char*)value == c)
-			printf("\t3. TOP was OK. top is: [char]\n");
+		if(type == TYPE_INT && *(int*)value == c)
+			printf("\t3. TOP was OK. top is: [int]\n");
 		else
 		{
 			printf("\t3. ERROR: POP went wrong.\n");
@@ -166,8 +166,8 @@ printf("\n3. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	if(stack.count==(_N_)-2)			// (_N_) is default so afer 2 pops its "-2"
 	{
 		///readind top of stack by using direct stack access
-		if(stack.top->type == Type_OTHER && (!strcmp((char*)(stack.top->value), "other data as string")))
-			printf("\t3.1.1. POP was OK. top is: [other (with char* value)]\n");
+		if(stack.top->type == TYPE_OTHER && (!strcmp((char*)(stack.top->value), "other data as string")))
+			printf("\t3.1.1. POP was OK. top is: [other (with int* value)]\n");
 		else
 		{
 			printf("\t3.1.1. ERROR: POP went wrong., type was %d and value was %s\n", stack.top->type, (char*)(stack.top->value));
@@ -177,8 +177,8 @@ printf("\n3. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		///readind top of stack by using stack_top
 		stack_top(&stack, &type, &value);
 
-		if(type == Type_OTHER && (!strcmp((char*)(value), "other data as string")))
-			printf("\t3.1.2. TOP was OK. top is: [other (with char* value)]\n");
+		if(type == TYPE_OTHER && (!strcmp((char*)(value), "other data as string")))
+			printf("\t3.1.2. TOP was OK. top is: [other (with int* value)]\n");
 		else
 		{
 			printf("\t3.1.2. ERROR: TOP went wrong., type was %d and value was %s\n", type, (char*)(value));
@@ -226,7 +226,7 @@ printf("\n3. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ///*******************
 
 	///PUSH
-	type = Type_INT;
+	type = TYPE_INT;
 	value = (void*)&i[3];
 	stack_push(&stack, type, value);
 
@@ -234,7 +234,7 @@ printf("\n3. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	if(stack.count==(_N_)-3+1)			// (_N_) is default so afer 3 pops and 1 push its "-3+1"
 	{
 		///readind top of stack by using direct stack access
-		if(stack.top->type == Type_INT && (*(int*)(stack.top->value) == i[3]))
+		if(stack.top->type == TYPE_INT && (*(int*)(stack.top->value) == i[3]))
 			printf("\t3.3.1. PUSH was OK. top is: [ int ]\n");
 		else
 		{
@@ -245,7 +245,7 @@ printf("\n3. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		///readind top of stack by using stack_top
 		stack_top(&stack, &type, &value);
 
-		if(type == Type_INT && (*(int*)(value) == i[3]))
+		if(type == TYPE_INT && (*(int*)(value) == i[3]))
 			printf("\t3.3.2. TOP was OK. top is: [ int ]\n");
 		else
 		{
@@ -267,7 +267,7 @@ printf("\n3. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	if(stack.count==(_N_)-5+1)			// (_N_) is default so afer 5 pops and 1 push its "-5+1"
 	{
 		///readind top of stack by using direct stack access
-		if(stack.top->type == Type_DOUBLE && (*(double*)(stack.top->value) == d[1]))
+		if(stack.top->type == TYPE_REAL && (*(double*)(stack.top->value) == d[1]))
 			printf("\t3.4.1. POP was OK. top is: [ double ]\n");
 		else
 		{
@@ -278,7 +278,7 @@ printf("\n3. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		///readind top of stack by using stack_top
 		stack_top(&stack, &type, &value);
 
-		if(type == Type_DOUBLE && (*(double*)(value) == d[1]))
+		if(type == TYPE_REAL && (*(double*)(value) == d[1]))
 			printf("\t3.4.2. TOP was OK. top is: [ double ]\n");
 		else
 		{
@@ -301,11 +301,11 @@ printf("\n3. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	unsigned int old_count = stack.count;
 	stack_print(&stack);
 	printf("\t3.5. Inserting [ double ] BEFORE first [ cstring ]\n");
-	stack_insert(&stack, Type_CSTRING, Type_DOUBLE, (void*)&ddd);
+	stack_insert(&stack, TYPE_STRING, TYPE_REAL, (void*)&ddd);
 	printf("\t3.5. Inserting [ another (90) with char* value ] BEFORE first [ double ], This should be new top now.\n");
-	stack_insert(&stack, Type_DOUBLE, 90, (void*)string);
+	stack_insert(&stack, TYPE_REAL, 90, (void*)string);
 	printf("\t3.5. Inserting [ another (89) with NULL pointer ] BEFORE first [ string ]\n");
-	stack_insert(&stack, Type_STRING, 89, (void*)NULL);
+	stack_insert(&stack, TYPE_STRING, 89, (void*)NULL);
 
 	if(old_count+3 == stack.count)
 	{
@@ -351,7 +351,7 @@ printf("\n3. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 ///this insert shoul fail
-	if(stack_insert(&stack, Type_CHAR, Type_DOUBLE, (void*)&ddd)==INTERNAL_ERROR)
+	if(stack_insert(&stack, 888, TYPE_REAL, (void*)&ddd)==INTERNAL_ERROR)
 	{
 		printf("\t3.6. Ret. code of failed insertion OK.\n");
 	}
@@ -375,7 +375,7 @@ printf("\n3. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	stack_print(&stack);
 
 
-	stack_insert(&stack, Type_INT, Type_STRING, (void*)string);
+	stack_insert(&stack, TYPE_INT, TYPE_STRING, (void*)string);
 
 	if(old_count+4== stack.count)
 	{
@@ -411,8 +411,8 @@ printf("\n3. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	if(stack.count==(_N_)-15+2+3)			// (_N_) is default so afer 13 pops and 2 pushes and 3 inserts its "--13+3"
 	{
 		///readind top of stack by using direct stack access
-		if(stack.top->type == 89 && (stack.top->value)==NULL )
-			printf("\t3.7.1. POP was OK. top is: [ char* ]\n");
+		if(stack.top->type == TYPE_INT && (*(int*)(stack.top->value) == 42) )
+			printf("\t3.7.1. POP was OK. top is: [ int ]\n");
 		else
 		{
 			printf("\t3.7.1. ERROR: POP went wrong. type was %d and value was %s\n", stack.top->type, (char*)(stack.top->value));
@@ -422,8 +422,8 @@ printf("\n3. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		///readind top of stack by using stack_top
 		stack_top(&stack, &type, &value);
 
-		if(type == 89 && (value)==NULL )
-			printf("\t3.7.2. TOP was OK. top is: [ char* ]\n");
+		if(type == TYPE_INT && (*(int*)(value) == 42) )
+			printf("\t3.7.2. TOP was OK. top is: [ int* ]\n");
 		else
 		{
 			printf("\t3.7.2. ERROR: TOP went wrong. type was %d and value was %s\n", type, (char*)(value));
@@ -460,7 +460,7 @@ printf("\n3. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 printf("\n4. ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 	///Setting type and value to cstring.
-	type = Type_CSTRING;
+	type = TYPE_STRING;
 	value = (void*)cstr1;
 	stack_push(&stack, type, value); 						///pushin cstring
 
@@ -473,7 +473,7 @@ printf("\n4. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	printf("\n\n\t4. reading the NEW top of the stack:\n");
 
 	///readind top of stack by using direct stack access
-	if(stack.top->type == Type_CSTRING && (!strcmp(((cstring*)(stack.top->value))->str, "cstr of NEW top")))
+	if(stack.top->type == TYPE_STRING && (!strcmp(((cstring*)(stack.top->value))->str, "cstr of NEW top")))
 		printf("\t4.1. PUSH was OK. top is: [cstring]\n");
 	else
 	{
@@ -483,7 +483,7 @@ printf("\n4. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	///readind top of stack by using stack_top
 	stack_top(&stack, &type, &value);
-	if(type == Type_CSTRING && (!strcmp(((cstring*)(stack.top->value))->str, "cstr of NEW top")))
+	if(type == TYPE_STRING && (!strcmp(((cstring*)(stack.top->value))->str, "cstr of NEW top")))
 		printf("\t4.1. TOP was OK. top is: [cstring]\n");
 	else
 	{
@@ -498,14 +498,14 @@ printf("\n5. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ///---------------------------------------------------------------------------
 
 	int cislo = 10;
-	stack_push(&stack, Type_INT, (void*)&cislo);
-	stack_insert(&stack, Type_CSTRING, Type_STRING, (void*)"text");
+	stack_push(&stack, TYPE_INT, (void*)&cislo);
+	stack_insert(&stack, TYPE_STRING, TYPE_STRING, (void*)"text");
 	int cislo2 = 100;
-	stack_insert(&stack, Type_STRING, Type_INT, (void*)&cislo2);
+	stack_insert(&stack, TYPE_STRING, TYPE_INT, (void*)&cislo2);
 	stack_print(&stack);
-	stack_uninsert(&stack, Type_STRING, &type, &value);
+	stack_uninsert(&stack, TYPE_STRING, &type, &value);
 
-	if(type == Type_INT && *(int*)(value)==100)
+	if(type == TYPE_INT && *(int*)(value)==100)
 		printf("\t5. OK ret. value of UNINSERT, type was int and value was 100\n");
 	else
 	{
@@ -528,19 +528,19 @@ printf("\n6. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ///---------------------------------------------------------------------------
 
 	printf("\t\n6. Test for calling UNINSERT when its only one node above searched_type\n");
-	char ch2 = '~';
-	stack_insert(&stack, Type_INT, Type_CHAR, (void*)&ch2);
+	int ch2 = '~';
+	stack_insert(&stack, TYPE_INT, TYPE_INT, (void*)&ch2);
 	stack_pop(&stack);
 
 	stack_print(&stack);
 
-	stack_uninsert(&stack, Type_STRING, &type, &value);
+	stack_uninsert(&stack, TYPE_STRING, &type, &value);
 
-	if(type == Type_INT && (*(int*)value)==10)
+	if(type == TYPE_INT && (*(int*)value)==10)
 		printf("\t6. OK ret. value of UNINSERT, type was int and value was 10 .\n");
 	else
 	{
-		printf("\t6. ERROR. Ret valued of UNINSERT, type was %d and value was %s\n\t\t\t\t   should be char and '~'\n", type, (char*)(value));
+		printf("\t6. ERROR. Ret valued of UNINSERT, type was %d and value was %s\n\t\t\t\t   should be int and '~'\n", type, (char*)(value));
 		break;
 	}
 
@@ -562,7 +562,7 @@ printf("\n7. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	printf("\n\t7. Test for calling UNINSERT on empty stack, stack with just one node and not found type.\n");
 
-	if(stack_uninsert(&stack, Type_DOUBLE, &type, &value) == INTERNAL_ERROR)
+	if(stack_uninsert(&stack, TYPE_REAL, &type, &value) == INTERNAL_ERROR)
 	{
 		printf("\t7.1. OK. UNINSERT failed because there is no searched type in the stack.\n");
 	}
@@ -575,7 +575,7 @@ printf("\n7. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	printf("\n\t7. POPing one.\n");
 	stack_pop(&stack);
 
-	if(stack_uninsert(&stack, Type_INT, &type, &value) == INTERNAL_ERROR)
+	if(stack_uninsert(&stack, TYPE_INT, &type, &value) == INTERNAL_ERROR)
 	{
 		printf("\t7.2. OK. UNINSERT failed because there is only one node in the stack.\n");
 	}
@@ -596,7 +596,7 @@ printf("\n7. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		break;
 	}
 
-	if(stack_uninsert(&stack, Type_INT, &type, &value) == INTERNAL_ERROR)
+	if(stack_uninsert(&stack, TYPE_INT, &type, &value) == INTERNAL_ERROR)
 	{
 		printf("\t7.3. OK. UNINSERT failed because the stack is empty.\n");
 	}
