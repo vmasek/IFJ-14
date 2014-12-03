@@ -1,4 +1,4 @@
-/**
+/*
  * @file    parser_expr.c
  * @name    Expression Parser
  * @author  Pavel Tobias (xtobia01)
@@ -229,10 +229,8 @@ static int handle_add(Token **tokens, Stack *type_stack, Tree **trees)
     IGNORE_PARAM(tokens);
     IGNORE_PARAM(trees);
 
-    if (stack_top(type_stack, (int *)&op2_type, NULL) != SUCCESS ||
-        stack_pop(type_stack) != SUCCESS ||
-        stack_top(type_stack, (int *)&op1_type, NULL) != SUCCESS ||
-        stack_pop(type_stack) != SUCCESS)
+    if (stack_index(type_stack, 1, (int *)&op1_type, NULL) != SUCCESS ||
+        stack_index(type_stack, 0, (int *)&op2_type, NULL) != SUCCESS)
         return SYNTAX_ERROR;
 
     switch (op1_type) {
@@ -255,6 +253,8 @@ static int handle_add(Token **tokens, Stack *type_stack, Tree **trees)
         return INCOMPATIBLE_TYPE;
     }
 
+    stack_popping_spree(type_stack, 2);
+
     if (stack_push(type_stack, result_type, NULL) != SUCCESS)
         return INTERNAL_ERROR;
 
@@ -266,27 +266,24 @@ static int handle_call(Token **tokens, Stack *type_stack, Tree **trees)
     Type cur_type;
     Tree_Node *node;
     struct func_record *function;
-    unsigned param_count;
 
     if ((node = tree_find_key_ch(trees[TREE_FUNCS],
                                  tokens[0]->value.value_name)) == NULL)
         return SEMANTIC_ERROR;
 
     function = node->data;
-    param_count = function->param_count;
 
-    while (param_count--) {
-        if (stack_top(type_stack, (int *)&cur_type, NULL) != SUCCESS ||
-            cur_type != function->params[param_count]->type)
+    for (unsigned i = 0; i < function->param_count; i++) {
+        if (stack_index(type_stack, i, (int *)&cur_type, NULL) != SUCCESS ||
+            cur_type != function->params[function->param_count - i - 1]->type)
             return INCOMPATIBLE_TYPE;
-        stack_pop(type_stack);
     }
 
-    if (stack_top(type_stack, (int *)&cur_type, NULL) != SUCCESS ||
-        cur_type != TYPE_OTHER)
+    if (stack_index(type_stack, function->param_count, (int *)&cur_type, NULL)
+        != SUCCESS || cur_type != TYPE_OTHER)
         return INCOMPATIBLE_TYPE;
 
-    stack_pop(type_stack);
+    stack_popping_spree(type_stack, function->param_count + 1);
 
     if (stack_push(type_stack, function->ret_value.type, NULL)
         != SUCCESS)
@@ -303,14 +300,14 @@ static int handle_comp(Token **tokens, Stack *type_stack, Tree **trees)
     IGNORE_PARAM(tokens); //TODO ERASE - OPERATOR TOKEN WILL BE NEEDED
     IGNORE_PARAM(trees);
 
-    if (stack_top(type_stack, (int *)&op2_type, NULL) != SUCCESS ||
-        stack_pop(type_stack) != SUCCESS ||
-        stack_top(type_stack, (int *)&op1_type, NULL) != SUCCESS ||
-        stack_pop(type_stack) != SUCCESS)
+    if (stack_index(type_stack, 1, (int *)&op1_type, NULL) != SUCCESS ||
+        stack_index(type_stack, 0, (int *)&op2_type, NULL) != SUCCESS)
         return SYNTAX_ERROR;
 
     if (op1_type != op2_type)
         return INCOMPATIBLE_TYPE;
+
+    stack_popping_spree(type_stack, 2);
 
     if (stack_push(type_stack, TYPE_BOOL, NULL) != SUCCESS)
         return INTERNAL_ERROR;
@@ -326,15 +323,15 @@ static int handle_div(Token **tokens, Stack *type_stack, Tree **trees)
     IGNORE_PARAM(tokens);
     IGNORE_PARAM(trees);
 
-    if (stack_top(type_stack, (int *)&op2_type, NULL) != SUCCESS ||
-        stack_pop(type_stack) != SUCCESS ||
-        stack_top(type_stack, (int *)&op1_type, NULL) != SUCCESS ||
-        stack_pop(type_stack) != SUCCESS)
+    if (stack_index(type_stack, 1, (int *)&op1_type, NULL) != SUCCESS ||
+        stack_index(type_stack, 0, (int *)&op2_type, NULL) != SUCCESS)
         return SYNTAX_ERROR;
 
     if ((op1_type != TYPE_INT && op1_type != TYPE_REAL) ||
         (op2_type != TYPE_INT && op2_type != TYPE_REAL))
         return INCOMPATIBLE_TYPE;
+
+    stack_popping_spree(type_stack, 2);
 
     if (stack_push(type_stack, TYPE_REAL, NULL) != SUCCESS)
         return INTERNAL_ERROR;
@@ -382,10 +379,8 @@ static int handle_sub_mul(Token **tokens, Stack *type_stack, Tree **trees)
     IGNORE_PARAM(trees);
     IGNORE_PARAM(tokens); //TODO ERASE - OPERATOR TOKEN WILL BE NEEDED
 
-    if (stack_top(type_stack, (int *)&op2_type, NULL) != SUCCESS ||
-        stack_pop(type_stack) != SUCCESS ||
-        stack_top(type_stack, (int *)&op1_type, NULL) != SUCCESS ||
-        stack_pop(type_stack) != SUCCESS)
+    if (stack_index(type_stack, 1, (int *)&op1_type, NULL) != SUCCESS ||
+        stack_index(type_stack, 0, (int *)&op2_type, NULL) != SUCCESS)
         return SYNTAX_ERROR;
 
     switch (op1_type) {
@@ -402,6 +397,8 @@ static int handle_sub_mul(Token **tokens, Stack *type_stack, Tree **trees)
     default:
         return INCOMPATIBLE_TYPE;
     }
+
+    stack_popping_spree(type_stack, 2);
 
     if (stack_push(type_stack, result_type, NULL) != SUCCESS)
         return INTERNAL_ERROR;
