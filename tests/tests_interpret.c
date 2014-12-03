@@ -10,12 +10,15 @@ void test_I_ASSIGN(void);
 
 void test_I_ADD(void);
 
+void test_I_SUB(void);
 
 void test_interpreter()
 {
 	test_I_ASSIGN();
-printf("\n=================================================================================================================\n");
+	printf("\n=================================================================================================================\n");
 	test_I_ADD();
+	printf("\n=================================================================================================================\n");
+	test_I_SUB();
 }
 
 
@@ -277,7 +280,7 @@ printf("\n\n%s:[test %d.]-------------------------------------------------------
 			printf("%s:[test %d.] ADD was OK.\n", __func__, test);
 		else
 		{
-			printf("%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, *(double*)(calcs.top->value), (values[3].real + values[4].real));
+			printf("%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, *(double*)(calcs.top->value), (values[3].real - values[4].real));
 			break;
 		}
 	}
@@ -419,3 +422,227 @@ errors=0;
 
 }
 
+void test_I_SUB(void)
+{
+	int test = 0, errors = 1;
+
+///-----declarations-of-needed-structs----------------------------------------
+	Instruction instruction;
+	instruction.instruction = I_SUB;
+
+	Stack calcs;
+	stack_init(&calcs);
+
+	Value values[10];
+
+	///tu je potrebne si popridavat values pre testy
+	values[0].integer	= 8;
+	values[1].integer	= 100;
+
+	values[2].real		= 16.125;
+	values[3].real		= 2.5;
+
+///---------------------------------------------------------------------------
+
+do{ /// do{...}while(0); 	is for testing hack
+
+
+///PRVY test na sub
+printf("\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
+	///push dvoch int values ktore budeme odcitat
+	stack_push(&calcs, TYPE_INT, &(values[0].integer));
+	stack_push(&calcs, TYPE_INT, &(values[1].integer));
+
+	///zavolanie interpretera
+	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	{
+		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
+		break;
+	}
+
+	///kontrola velkosti stacku, boli pushnute dve hodnoty, tie su v inter. popnute a je pushnuty result
+	if(calcs.count==1)
+	{
+		///readind top of stack by using direct stack access
+		if(calcs.top->type == TYPE_INT && (*(int*)(calcs.top->value) == ( values[0].integer - values[1].integer )))
+			printf("%s:[test %d.] SUB was OK.\n", __func__, test);
+		else
+		{
+			printf("%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, *(int*)(calcs.top->value), values[0].integer - values[1].integer);
+			break;
+		}
+	}
+	else
+	{
+		printf("%s:[test %d.] ERROR: stack counter should be %d and its %u\n", __func__, test, 1, calcs.count);
+		break;
+	}
+	printf("\n");
+
+	///v stacku je iba jedna vec (result operacie assign) tak ho popneme a zistime ci je stack prazdny
+	stack_pop(&calcs);
+	if(calcs.count==0)
+	{
+		printf("%s:[test %d.] OK. pop was ok and stack is empty\n", __func__, test);
+	}
+	else
+	{
+		printf("%s:[test %d.] ERROR: stack counter should be %d and its %u\n", __func__, test, 0, calcs.count);
+		break;
+	}
+
+
+///DRUHY test na sub
+test++;
+printf("\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
+
+
+	stack_push(&calcs, TYPE_REAL, &(values[3].real));
+	stack_push(&calcs, TYPE_REAL, &(values[4].real));
+
+	///zavolanie interpretera
+	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	{
+		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
+		break;
+	}
+
+	///kontrola velkosti stacku, boli pushnute dve hodnoty, tie su v inter. popnute a je pushnuty result
+	if(calcs.count==1)
+	{
+		///readind top of stack by using direct stack access
+		if(calcs.top->type == TYPE_REAL && (*(double*)(calcs.top->value) == ( values[3].real - values[4].real )))
+			printf("%s:[test %d.] SUB was OK.\n", __func__, test);
+		else
+		{
+			printf("%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, *(double*)(calcs.top->value), (values[3].real - values[4].real));
+			break;
+		}
+	}
+	else
+	{
+		printf("%s:[test %d.] ERROR: stack counter should be %d and its %u\n", __func__, test, 1, calcs.count);
+		break;
+	}
+	printf("\n");
+
+	///v stacku je iba jedna vec (result operacie assign) tak ho popneme a zistime ci je stack prazdny
+	stack_pop(&calcs);
+	if(calcs.count==0)
+	{
+		printf("%s:[test %d.] OK. pop was ok and stack is empty\n", __func__, test);
+	}
+	else
+	{
+		printf("%s:[test %d.] ERROR: stack counter should be %d and its %u\n", __func__, test, 0, calcs.count);
+		break;
+	}
+
+
+
+///TRETI test na sub
+test++;
+printf("\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
+
+
+	stack_push(&calcs, TYPE_INT, &(values[1].integer));
+	stack_push(&calcs, TYPE_REAL, &(values[4].real));
+
+	///zavolanie interpretera
+	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	{
+		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
+		break;
+	}
+
+	///kontrola velkosti stacku, boli pushnute dve hodnoty, tie su v inter. popnute a je pushnuty result
+	if(calcs.count==1)
+	{
+		///readind top of stack by using direct stack access
+		if(calcs.top->type == TYPE_REAL && (*(double*)(calcs.top->value) == ( values[1].integer - values[4].real )))
+			printf("%s:[test %d.] SUB was OK.\n", __func__, test);
+		else
+		{
+			printf("%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, *(double*)(calcs.top->value), (values[1].integer - values[4].real));
+			break;
+		}
+	}
+	else
+	{
+		printf("%s:[test %d.] ERROR: stack counter should be %d and its %u\n", __func__, test, 1, calcs.count);
+		break;
+	}
+	printf("\n");
+
+	///v stacku je iba jedna vec (result operacie assign) tak ho popneme a zistime ci je stack prazdny
+	stack_pop(&calcs);
+	if(calcs.count==0)
+	{
+		printf("%s:[test %d.] OK. pop was ok and stack is empty\n", __func__, test);
+	}
+	else
+	{
+		printf("%s:[test %d.] ERROR: stack counter should be %d and its %u\n", __func__, test, 0, calcs.count);
+		break;
+	}
+
+
+
+///STVRTY test na sub
+test++;
+printf("\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
+
+	stack_push(&calcs, TYPE_REAL, &(values[3].real));
+	stack_push(&calcs, TYPE_INT, &(values[1].integer));
+
+	///zavolanie interpretera
+	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	{
+		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
+		break;
+	}
+
+	///kontrola velkosti stacku, boli pushnute dve hodnoty, tie su v inter. popnute a je pushnuty result
+	if(calcs.count==1)
+	{
+		///readind top of stack by using direct stack access
+		if(calcs.top->type == TYPE_REAL && (*(double*)(calcs.top->value) == ( values[3].real - values[1].integer )))
+			printf("%s:[test %d.] SUB was OK.\n", __func__, test);
+		else
+		{
+			printf("%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, *(double*)(calcs.top->value), (values[3].real - values[1].integer));
+			break;
+		}
+	}
+	else
+	{
+		printf("%s:[test %d.] ERROR: stack counter should be %d and its %u\n", __func__, test, 1, calcs.count);
+		break;
+	}
+	printf("\n");
+
+	///v stacku je iba jedna vec (result operacie assign) tak ho popneme a zistime ci je stack prazdny
+	stack_pop(&calcs);
+	if(calcs.count==0)
+	{
+		printf("%s:[test %d.] OK. pop was ok and stack is empty\n", __func__, test);
+	}
+	else
+	{
+		printf("%s:[test %d.] ERROR: stack counter should be %d and its %u\n", __func__, test, 0, calcs.count);
+		break;
+	}
+
+errors=0;
+}while(0);
+
+	if(errors)
+	{
+		printf("\n\n!!! ERROR has occured during testing !!!\n\n");
+	}
+	else
+	{
+		printf("\n\nOK. Everything is fine.\n\n");
+	}
+
+}
