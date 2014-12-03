@@ -1,4 +1,5 @@
 #include "scaner.h"
+#include "errors.h"
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
@@ -158,7 +159,7 @@ static void strcatc(char * destination, char c) {
  * Load (another) lexeme from the source file
  * and return it's Token representation
  */
-void get_token(Token *token, FILE *input) {
+int get_token(Token *token, FILE *input) {
     char symbol = 0;
     enum lexer_state state = LEXER_START;
 
@@ -168,7 +169,7 @@ void get_token(Token *token, FILE *input) {
     char buffer[100] = "";
 
     if (token_register(token, false))
-        return;
+        return SUCCESS;
 
     while (1) {
         symbol = getc(input);
@@ -179,7 +180,7 @@ void get_token(Token *token, FILE *input) {
 
             if (symbol == EOF) {
                 token->type = TOKEN_EOF;
-                return;
+                return SUCCESS;
             }
 
             if ((symbol >= 'a' && symbol <= 'z') ||
@@ -202,27 +203,27 @@ void get_token(Token *token, FILE *input) {
             case '+':
                 token->type = TOKEN_SYMBOL;
                 token->value.value_symbol = ADDITION;
-                return;
+                return SUCCESS;
 
             case '-':
                 token->type = TOKEN_SYMBOL;
                 token->value.value_symbol = SUBSTRACTION;
-                return;
+                return SUCCESS;
 
             case '*':
                 token->type = TOKEN_SYMBOL;
                 token->value.value_symbol = MULTIPLICATION;
-                return;
+                return SUCCESS;
 
             case '/':
                 token->type = TOKEN_SYMBOL;
                 token->value.value_symbol = DIVISION;
-                return;
+                return SUCCESS;
 
             case '=':
                 token->type = TOKEN_SYMBOL;
                 token->value.value_symbol = COMPARISON;
-                return;
+                return SUCCESS;
 
             case ':':
                 token->type = TOKEN_SYMBOL;
@@ -232,7 +233,7 @@ void get_token(Token *token, FILE *input) {
             case ';':
                 token->type = TOKEN_SYMBOL;
                 token->value.value_symbol = SEMICOLON;
-                return;
+                return SUCCESS;
 
             case '.':
                 token->type = TOKEN_SYMBOL;
@@ -242,17 +243,17 @@ void get_token(Token *token, FILE *input) {
             case ',':
                 token->type = TOKEN_SYMBOL;
                 token->value.value_symbol = COMMA;
-                return;
+                return SUCCESS;
 
             case '(':
                 token->type = TOKEN_SYMBOL;
                 token->value.value_symbol = PARENTHESIS_L;
-                return;
+                return SUCCESS;
 
             case ')':
                 token->type = TOKEN_SYMBOL;
                 token->value.value_symbol = PARENTHESIS_R;
-                return;
+                return SUCCESS;
 
             case '>':
                 token->type = TOKEN_SYMBOL;
@@ -321,7 +322,7 @@ void get_token(Token *token, FILE *input) {
             }
 
             ungetc(symbol, input);
-            return;
+            return SUCCESS;
 
 
         case LEXER_STR_SPEC:
@@ -339,11 +340,11 @@ void get_token(Token *token, FILE *input) {
         case LEXER_MAYBE_GREATER_EQUAL:
             if (symbol == '=') {
                 token->value.value_symbol = GREATER_EQUAL;
-                return;
+                return SUCCESS;
             } else {
                 ungetc(symbol, input);
                 token->value.value_symbol = GREATER_THAN;
-                return;
+                return SUCCESS;
             }
 
             break;
@@ -352,14 +353,14 @@ void get_token(Token *token, FILE *input) {
         case LEXER_MAYBE_LESS_EQUAL:
             if (symbol == '=') {
                 token->value.value_symbol = LESS_EQUAL;
-                return;
+                return SUCCESS;
             } else if (symbol == '>') {
                 token->value.value_symbol = NOT_EQUAL;
-                return;
+                return SUCCESS;
             } else {
                 ungetc(symbol, input);
                 token->value.value_symbol = LESS_THAN;
-                return;
+                return SUCCESS;
             }
 
             break;
@@ -368,11 +369,11 @@ void get_token(Token *token, FILE *input) {
         case LEXER_MAYBE_ASSIGNMENT:
             if (symbol == '=') {
                 token->value.value_symbol = ASSIGNMENT;
-                return;
+                return SUCCESS;
             } else {
                 ungetc(symbol, input);
                 token->value.value_symbol = COLON;
-                return;
+                return SUCCESS;
             }
 
             break;
@@ -381,11 +382,11 @@ void get_token(Token *token, FILE *input) {
         case LEXER_MAYBE_DOUBLE_DOT:
             if (symbol == '.') {
                 token->value.value_symbol = DOUBLE_DOT;
-                return;
+                return SUCCESS;
             } else {
                 ungetc(symbol, input);
                 token->value.value_symbol = DOT;
-                return;
+                return SUCCESS;
             }
 
             break;
@@ -398,14 +399,14 @@ void get_token(Token *token, FILE *input) {
 
             } else if (symbol == '.') {
                 strcatc(buffer, symbol);
-                state = LEXER_FLOAT_LOADING;
+                state = LEXER_FLOAT_LOADING_FIRST;
                 token->type = TOKEN_FLOAT;
                 token->value.value_float = (double)token->value.value_int;
                 break;
 
             } else if (symbol == 'e') {
                 strcatc(buffer, symbol);
-                state = LEXER_FLOAT_EXP_LOADING;
+                state = LEXER_FLOAT_EXP_LOADING_FIRST;
                 token->type = TOKEN_FLOAT;
                 token->value.value_float = (double)token->value.value_int;
                 break;
@@ -413,18 +414,43 @@ void get_token(Token *token, FILE *input) {
             } else {
                 token->value.value_int = (int)atof(buffer);
                 ungetc(symbol, input);
-                return;
+                return SUCCESS;
             }
 
             break;
 
-        case LEXER_FLOAT_LOADING:
-            if (! ((symbol >= '0' && symbol <= '9') || symbol == 'e')) {
-                token->value.value_float = atof(buffer);
-                ungetc(symbol, input);
-                return;
+        case LEXER_FLOAT_LOADING_FIRST:
+            if (! ((symbol >= '0' && symbol <= '9'))) {
+                return LEXICAL_ERROR;
             }
 
+            state = LEXER_FLOAT_LOADING;
+            strcatc(buffer, symbol);
+            break;
+
+        case LEXER_FLOAT_LOADING:
+            if (symbol == 'e') {
+                strcatc(buffer, symbol);
+                state = LEXER_FLOAT_EXP_LOADING_FIRST;
+                token->type = TOKEN_FLOAT;
+                token->value.value_float = (double)token->value.value_int;
+                break;
+
+            } else if (! ((symbol >= '0' && symbol <= '9'))) {
+                token->value.value_float = atof(buffer);
+                ungetc(symbol, input);
+                return SUCCESS;
+            }
+
+            strcatc(buffer, symbol);
+            break;
+
+        case LEXER_FLOAT_EXP_LOADING_FIRST:
+            if (! (symbol >= '0' && symbol <= '9')) {
+                return LEXICAL_ERROR;
+            }
+
+            state = LEXER_FLOAT_EXP_LOADING;
             strcatc(buffer, symbol);
             break;
 
@@ -432,7 +458,7 @@ void get_token(Token *token, FILE *input) {
             if (! (symbol >= '0' && symbol <= '9')) {
                 token->value.value_float = atof(buffer);
                 ungetc(symbol, input);
-                return;
+                return SUCCESS;
             }
 
             strcatc(buffer, symbol);
@@ -453,7 +479,7 @@ void get_token(Token *token, FILE *input) {
                     token->value.value_keyword = keyword;
                 }
                 ungetc(symbol, input);
-                return;
+                return SUCCESS;
             } else {
                 token->value.value_name[token_name_pos] = symbol;
                 token_name_pos ++;
@@ -462,7 +488,7 @@ void get_token(Token *token, FILE *input) {
 
             if (symbol == EOF) {
                 token->type = TOKEN_EOF;
-                return;
+                return SUCCESS;
             }
 
             break;
@@ -478,13 +504,17 @@ void unget_token(Token *token)
 /* 
  * Just for testing purpose
  */
-/*
 int main() {
     FILE *input = fopen("test", "r");
     Token *token = malloc(sizeof(Token *));
+    int err;
 
     while(1) {
-        get_token(token, input);
+        err = get_token(token, input);
+        if (err) {
+            printf ("FUCK IT !!!!!!!!!!!!!!!!!!!!!!! \nehm... Error: Lexical Error.\n");
+            exit(1);
+        }
         if (token->type == TOKEN_ID)
             printf (" TOKEN_ID          %s", token->value.value_name);
         else if (token->type == TOKEN_KEYWORD)
@@ -506,4 +536,4 @@ int main() {
     fclose(input);
 
     return 0;
-} */
+} 

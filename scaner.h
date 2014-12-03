@@ -106,7 +106,9 @@ enum lexer_state {
     LEXER_STR_LOAD,
     LEXER_STR_SPEC,
     LEXER_INT_LOADING,
+    LEXER_FLOAT_LOADING_FIRST,
     LEXER_FLOAT_LOADING,
+    LEXER_FLOAT_EXP_LOADING_FIRST,
     LEXER_FLOAT_EXP_LOADING,
     LEXER_COMMENT,
     LEXER_MAYBE_ASSIGNMENT,
@@ -117,7 +119,7 @@ enum lexer_state {
 
 
 /* Get a token */
-void get_token(Token *token, FILE *input);
+int get_token(Token *token, FILE *input);
 
 /* Unget a token */
 void unget_token(Token *token);
