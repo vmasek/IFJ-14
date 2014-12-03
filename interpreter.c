@@ -17,7 +17,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 
 	Value values[2];
 	Type  types[2];
-	Value *result = calloc(sizeof(Value),1);
+	Value *result = calloc(sizeof(Value), 1);
 
 	//void *tmp_ptr= NULL;
 
@@ -63,36 +63,36 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 
 	case I_ASSIGN:                                                                                                                                                     ///OK?
 
-		///							Stack operations
-		if(stack_index_value(calcs, 0, (int*)&types[0], &values[0])==INTERNAL_ERROR)
+		///                         Stack operations
+		if (stack_index_value(calcs, 0, (int *)&types[0], &values[0]) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
-		if(stack_pop(calcs)==INTERNAL_ERROR)											///ACHTUNG! If is only one operand then only one pop
+		if (stack_pop(calcs) == INTERNAL_ERROR)                                         ///ACHTUNG! If is only one operand then only one pop
 			return INTERNAL_ERROR;
 
-		///							Instruction operations
+		///                         Instruction operations
 		if (types[0] == TYPE_INT)
 		{
 			debug("I_ASSIGN - integer\n");
 			result->integer = values[0].integer;
-			stack_push(calcs, TYPE_INT, (void*)&(result->integer));
+			stack_push(calcs, TYPE_INT, (void *) & (result->integer));
 		}
 		else if (types[0] == TYPE_REAL)
 		{
 			debug("I_ASSIGN - double\n");
 			result->real = values[0].real;
-			stack_push(calcs, TYPE_REAL, (void*)&(result->real));
+			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
 		}
 		else if (types[0] == TYPE_BOOL)
 		{
 			debug("I_ASSIGN - bool\n");
 			result->boolean = values[0].boolean;
-			stack_push(calcs, TYPE_BOOL, (void*)&(result->boolean));
+			stack_push(calcs, TYPE_BOOL, (void *) & (result->boolean));
 		}
 		else if (types[0] == TYPE_STRING)
 		{
 			debug("I_ASSIGN - cstring\n");
 			cstr_assign_cstr(result->string, values[0].string);
-			stack_push(calcs, TYPE_STRING, (void*)(result->string));
+			stack_push(calcs, TYPE_STRING, (void *)(result->string));
 		}
 		else
 			return INCOMPATIBLE_TYPE;
@@ -100,42 +100,42 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 
 	case I_ADD:                                                                                                                                                     ///OK?
 
-		///							Stack operations
-		if(stack_index_value(calcs, 0, (int*)&types[0], &values[0])==INTERNAL_ERROR)
+		///                         Stack operations
+		if (stack_index_value(calcs, 0, (int *)&types[0], &values[0]) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
 
-		if(stack_index_value(calcs, 1, (int*)&types[1], &values[1])==INTERNAL_ERROR)
+		if (stack_index_value(calcs, 1, (int *)&types[1], &values[1]) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
 
-		if(stack_popping_spree(calcs, 2)==INTERNAL_ERROR)
+		if (stack_popping_spree(calcs, 2) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
 
-		///							Instruction operations
+		///                         Instruction operations
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
 		{
 			debug("I_ADD for ints\n");
 			result->integer = values[0].integer + values[1].integer;
-			stack_push(calcs, TYPE_INT, (void*)&(result->integer));
+			stack_push(calcs, TYPE_INT, (void *) & (result->integer));
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
 		{
 			debug("I_ADD for reals\n");
-			//item->result->type = TYPE_REAL;
-			//item->result->data.real = values[0].real + values[1].real;
+			result->real = values[0].real + values[1].real;
+			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
 		}
 		else if ((types[0] == TYPE_INT) && (types[1] == TYPE_REAL))
 		{
 			debug("I_ADD for int + real\n");
-			//item->result->type = TYPE_REAL; // for different type of operands, we need to change result type
-			//item->result->data.real = values[0].integer + values[1].real;
+			result->real = values[0].integer + values[1].real;
+			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_INT))
 		{
 			debug("I_ADD for real + int\n");
-			//item->result->type = TYPE_REAL;
-			//item->result->data.real = values[0].real + values[1].integer;
+			result->real = values[0].real + values[1].integer;
+			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
 		}
-		else if ((types[0] == TYPE_STRING) && (types[1] == TYPE_STRING))
+		else if ((types[0] == TYPE_STRING) && (types[1] == TYPE_STRING)) //@Vojto: you know what to do.
 		{
 			debug("I_ADD for strings\n");
 			//item->result->type = TYPE_STRING;
@@ -147,43 +147,40 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 
 	case I_SUB:
 
-		///							Stack operations
-		if(stack_index(calcs, 0, (int*)&types[0], (void**)&values[0])==INTERNAL_ERROR)
+		///                         Stack operations
+		if (stack_index(calcs, 0, (int *)&types[0], (void **)&values[0]) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
 
-		if(stack_index(calcs, 1, (int*)&types[1], (void**)&values[1])==INTERNAL_ERROR)
+		if (stack_index(calcs, 1, (int *)&types[1], (void **)&values[1]) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
 
-		if(stack_popping_spree(calcs, 2)==INTERNAL_ERROR)
+		if (stack_popping_spree(calcs, 2) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
 
-		///							Instruction operations
+		///                         Instruction operations
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
 		{
 			debug("I_SUB for ints\n");
-			stack_popping_spree(calcs, 2);
-			result->integer = values[0].integer + values[1].integer;
-			stack_push(calcs, TYPE_INT, (void*)&(result->integer));
-			//item->result->type = TYPE_INT;
-			//item->result->data.integer = values[0].integer - values[1].integer;
+			result->integer = values[0].integer - values[1].integer;
+			stack_push(calcs, TYPE_INT, (void *) & (result->integer));
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
 		{
 			debug("I_SUB for reals\n");
-			//item->result->type = TYPE_REAL;
-			//item->result->data.real = values[0].real - values[1].real;
+			result->real = values[0].real - values[1].real;
+			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
 		}
 		else if ((types[0] == TYPE_INT) && (types[1] == TYPE_REAL))
 		{
 			debug("I_SUB for int - real\n");
-			//item->result->type = TYPE_REAL;
-			//item->result->data.real = values[0].integer - values[1].real;
+			result->real = values[0].integer - values[1].real;
+			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_INT))
 		{
 			debug("I_SUB for real - int\n");
-			//item->result->type = TYPE_REAL;
-			//item->result->data.real = values[0].real - values[1].integer;
+			result->real = values[0].real - values[1].integer;
+			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
 		}
 		else
 			return INCOMPATIBLE_TYPE;
@@ -193,43 +190,40 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 	/// Tom: I dont think that cstrings or booleans can be multiplied.
 	case I_MUL:
 
-		///							Stack operations
-		if(stack_index(calcs, 0, (int*)&types[0], (void**)&values[0])==INTERNAL_ERROR)
+		///                         Stack operations
+		if (stack_index(calcs, 0, (int *)&types[0], (void **)&values[0]) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
 
-		if(stack_index(calcs, 1, (int*)&types[1], (void**)&values[1])==INTERNAL_ERROR)
+		if (stack_index(calcs, 1, (int *)&types[1], (void **)&values[1]) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
 
-		if(stack_popping_spree(calcs, 2)==INTERNAL_ERROR)
+		if (stack_popping_spree(calcs, 2) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
 
-		///							Instruction operations
+		///                         Instruction operations
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
 		{
 			debug("I_MULTIPLY - INT\n");
-			stack_popping_spree(calcs, 2);
-			result->integer = values[0].integer + values[1].integer;
-			stack_push(calcs, TYPE_INT, (void*)&(result->integer));
-			//item->result->type = TYPE_INT;
-			//item->result->data.integer = values[0].integer * values[1].integer;
+			result->integer = values[0].integer * values[1].integer;
+			stack_push(calcs, TYPE_INT, (void *) & (result->integer));
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
 		{
 			debug("I_MULTIPLY - DOUBLE\n");
-			//item->result->type = TYPE_REAL;
-			//item->result->data.real = values[0].real * values[1].real;
+			result->real = values[0].real * values[1].real;
+			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
 		}
 		else if ((types[0] == TYPE_INT) && (types[1] == TYPE_REAL))
 		{
 			debug("I_MULTIPLY for int + real\n");
-			//item->result->type = TYPE_REAL;
-			//item->result->data.real = values[0].integer * values[1].real;
+			result->real = values[0].integer * values[1].real;
+			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_INT))
 		{
 			debug("I_MULTIPLY for real + int\n");
-			//item->result->type = TYPE_REAL;
-			//item->result->data.real = values[0].real * values[1].integer;
+			result->real = values[0].real * values[1].integer;
+			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
 		}
 		else
 			return INCOMPATIBLE_TYPE;
@@ -237,28 +231,28 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 
 	case I_DIV:                                                                                                                                             ///OK?
 
-		///							Stack operations
-		if(stack_index(calcs, 0, (int*)&types[0], (void**)&values[0])==INTERNAL_ERROR)
+		///                         Stack operations
+		if (stack_index(calcs, 0, (int *)&types[0], (void **)&values[0]) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
 
-		if(stack_index(calcs, 1, (int*)&types[1], (void**)&values[1])==INTERNAL_ERROR)
+		if (stack_index(calcs, 1, (int *)&types[1], (void **)&values[1]) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
 
-		if(stack_popping_spree(calcs, 2)==INTERNAL_ERROR)
+		if (stack_popping_spree(calcs, 2) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
 
-		///							Instruction operations
+		///                         Instruction operations
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
 		{
 			debug("I_DIV - INT\n");
-			//item->result->type = TYPE_REAL;
-			//item->result->data.real = values[0].integer / values[1].integer;
+			result->integer = values[0].integer / values[1].integer;
+			stack_push(calcs, TYPE_INT, (void *) & (result->integer));
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
 		{
 			debug("I_DIV - DOUBLE\n");
-			//item->result->type = TYPE_REAL;
-			//item->result->data.real = values[0].real / values[1].real;
+			result->real = values[0].real / values[1].real;
+			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
 		}
 		else
 			return INCOMPATIBLE_TYPE;
@@ -266,28 +260,28 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 
 	case I_LESS:                                                                                                                                                ///OK?
 
-		///							Stack operations
-		if(stack_index(calcs, 0, (int*)&types[0], (void**)&values[0])==INTERNAL_ERROR)
+		///                         Stack operations
+		if (stack_index(calcs, 0, (int *)&types[0], (void **)&values[0]) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
 
-		if(stack_index(calcs, 1, (int*)&types[1], (void**)&values[1])==INTERNAL_ERROR)
+		if (stack_index(calcs, 1, (int *)&types[1], (void **)&values[1]) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
 
-		if(stack_popping_spree(calcs, 2)==INTERNAL_ERROR)
+		if (stack_popping_spree(calcs, 2) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
 
-		///							Instruction operations
+		///                         Instruction operations
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
 		{
 			debug("I_LESS - INT\n");
-			//item->result->type = TYPE_BOOL;
-			//item->result->data.boolean = ((values[0].integer) < (values[1].integer));
+			result->boolean = values[0].integer < values[1].integer;
+			stack_push(calcs, TYPE_INT, (void *) & (result->integer));
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
 		{
 			debug("I_LESS - DOUBLE\n");
-			//item->result->type = TYPE_BOOL;
-			//item->result->data.boolean = ((values[0].real) < (values[1].real));
+			result->boolean = values[0].real < values[1].real;
+			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
 		}
 		else
 			return INCOMPATIBLE_TYPE;
@@ -295,28 +289,28 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 
 	case I_GREATER:                                                                                                                                             ///OK?
 
-		///							Stack operations
-		if(stack_index(calcs, 0, (int*)&types[0], (void**)&values[0])==INTERNAL_ERROR)
+		///                         Stack operations
+		if (stack_index(calcs, 0, (int *)&types[0], (void **)&values[0]) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
 
-		if(stack_index(calcs, 1, (int*)&types[1], (void**)&values[1])==INTERNAL_ERROR)
+		if (stack_index(calcs, 1, (int *)&types[1], (void **)&values[1]) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
 
-		if(stack_popping_spree(calcs, 2)==INTERNAL_ERROR)
+		if (stack_popping_spree(calcs, 2) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
 
-		///							Instruction operations
+		///                         Instruction operations
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
 		{
 			debug("I_GREATER - INT\n");
-			//item->result->type = TYPE_BOOL;
-			//item->result->data.boolean = ((values[0].integer) > (values[1].integer));
+			result->boolean = values[0].integer > values[1].integer;
+			stack_push(calcs, TYPE_INT, (void *) & (result->integer));
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
 		{
 			debug("I_GREATER - DOUBLE\n");
-			//item->result->type = TYPE_BOOL;
-			//item->result->data.boolean = ((values[0].real) > (values[1].real));
+			result->boolean = values[0].real > values[1].real;
+			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
 		}
 		else
 			return INCOMPATIBLE_TYPE;
@@ -324,28 +318,28 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 
 	case I_LESS_EQUAL:                                                                                                                                              ///OK?
 
-		///							Stack operations
-		if(stack_index(calcs, 0, (int*)&types[0], (void**)&values[0])==INTERNAL_ERROR)
+		///                         Stack operations
+		if (stack_index(calcs, 0, (int *)&types[0], (void **)&values[0]) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
 
-		if(stack_index(calcs, 1, (int*)&types[1], (void**)&values[1])==INTERNAL_ERROR)
+		if (stack_index(calcs, 1, (int *)&types[1], (void **)&values[1]) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
 
-		if(stack_popping_spree(calcs, 2)==INTERNAL_ERROR)
+		if (stack_popping_spree(calcs, 2) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
 
-		///							Instruction operations
+		///                         Instruction operations
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
 		{
 			debug("I_LESS_EQUAL - INT\n");
-			//item->result->type = TYPE_BOOL;
-			//item->result->data.boolean = ((values[0].integer) <= (values[1].integer));
+			result->boolean = values[0].integer <= values[1].integer;
+			stack_push(calcs, TYPE_INT, (void *) & (result->integer));
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
 		{
 			debug("I_LESS_EQUAL - DOUBLE\n");
-			//item->result->type = TYPE_BOOL;
-			//item->result->data.boolean = ((values[0].real) <= (values[1].real));
+			result->boolean = values[0].real <= values[1].real;
+			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
 		}
 		else
 			return INCOMPATIBLE_TYPE;
@@ -353,28 +347,28 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 
 	case I_GREATER_EQUAL:                                                                                                                                               ///OK?
 
-		///							Stack operations
-		if(stack_index(calcs, 0, (int*)&types[0], (void**)&values[0])==INTERNAL_ERROR)
+		///                         Stack operations
+		if (stack_index(calcs, 0, (int *)&types[0], (void **)&values[0]) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
 
-		if(stack_index(calcs, 1, (int*)&types[1], (void**)&values[1])==INTERNAL_ERROR)
+		if (stack_index(calcs, 1, (int *)&types[1], (void **)&values[1]) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
 
-		if(stack_popping_spree(calcs, 2)==INTERNAL_ERROR)
+		if (stack_popping_spree(calcs, 2) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
 
-		///							Instruction operations
+		///                         Instruction operations
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
 		{
 			debug("I_GREATER_EQUAL - INT\n");
-			//item->result->type = TYPE_BOOL;
-			//item->result->data.boolean = ((values[0].integer) >= (values[1].integer));
+			result->boolean = values[0].integer >= values[1].integer;
+			stack_push(calcs, TYPE_INT, (void *) & (result->integer));
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
 		{
 			debug("I_GREATER_EQUAL - DOUBLE\n");
-			//item->result->type = TYPE_BOOL;
-			//item->result->data.boolean = ((values[0].real) >= (values[1].real));
+			result->boolean = values[0].real >= values[1].real;
+			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
 		}
 		else
 			return INCOMPATIBLE_TYPE;
@@ -382,30 +376,30 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 
 	case I_EQUAL:                                                                                                                                               ///OK?
 
-		///							Stack operations
-		if(stack_index(calcs, 0, (int*)&types[0], (void**)&values[0])==INTERNAL_ERROR)
+		///                         Stack operations
+		if (stack_index(calcs, 0, (int *)&types[0], (void **)&values[0]) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
 
-		if(stack_index(calcs, 1, (int*)&types[1], (void**)&values[1])==INTERNAL_ERROR)
+		if (stack_index(calcs, 1, (int *)&types[1], (void **)&values[1]) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
 
-		if(stack_popping_spree(calcs, 2)==INTERNAL_ERROR)
+		if (stack_popping_spree(calcs, 2) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
 
-		///							Instruction operations
+		///                         Instruction operations
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
 		{
 			debug("I_EQUAL - INT\n");
-			//item->result->type = TYPE_BOOL;
-			//item->result->data.boolean = ((values[0].integer) == (values[1].integer));
+			result->boolean = values[0].integer == values[1].integer;
+			stack_push(calcs, TYPE_INT, (void *) & (result->integer));
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
 		{
 			debug("I_EQUAL - DOUBLE\n");
-			//item->result->type = TYPE_BOOL;
-			//item->result->data.boolean = ((values[0].real) == (values[1].real));
+			result->boolean = values[0].real == values[1].real;
+			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
 		}
-		else if ((types[0] == TYPE_STRING) && (types[1] == TYPE_STRING))
+		else if ((types[0] == TYPE_STRING) && (types[1] == TYPE_STRING)) //@Vojto: you know what to do.
 		{
 			debug("I_EQUAL - CSTRING\n");
 			//item->result->type = TYPE_BOOL;
@@ -417,30 +411,30 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 
 	case I_NOT_EQUAL:                                                                                                                                               ///OK?
 
-		///							Stack operations
-		if(stack_index(calcs, 0, (int*)&types[0], (void**)&values[0])==INTERNAL_ERROR)
+		///                         Stack operations
+		if (stack_index(calcs, 0, (int *)&types[0], (void **)&values[0]) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
 
-		if(stack_index(calcs, 1, (int*)&types[1], (void**)&values[1])==INTERNAL_ERROR)
+		if (stack_index(calcs, 1, (int *)&types[1], (void **)&values[1]) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
 
-		if(stack_popping_spree(calcs, 2)==INTERNAL_ERROR)
+		if (stack_popping_spree(calcs, 2) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
 
-		///							Instruction operations
+		///                         Instruction operations
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
 		{
 			debug("I_NOT_EQUAL - INT\n");
-			//item->result->type = TYPE_BOOL;
-			//item->result->data.boolean = ((values[0].integer) != (values[1].integer));
+			result->boolean = values[0].integer != values[1].integer;
+			stack_push(calcs, TYPE_INT, (void *) & (result->integer));
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
 		{
 			debug("I_NOT_EQUAL - DOUBLE\n");
-			//item->result->type = TYPE_BOOL;
-			//item->result->data.boolean = ((values[0].real) != (values[1].real));
+			result->boolean = values[0].real != values[1].real;
+			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
 		}
-		else if ((types[0] == TYPE_STRING) && (types[1] == TYPE_STRING))
+		else if ((types[0] == TYPE_STRING) && (types[1] == TYPE_STRING)) //@Vojto: you know what to do.
 		{
 			debug("I_NOT_EQUAL - CSTRING\n");
 			//item->result->type = TYPE_BOOL;
@@ -458,7 +452,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 			debug("I_LEN - string\n");
 			stack_popping_spree(calcs, 2);
 			result->integer = values[0].integer + values[1].integer;
-			stack_push(calcs, TYPE_INT, (void*)&(result->integer));
+			stack_push(calcs, TYPE_INT, (void *) & (result->integer));
 			//item->result->type = TYPE_INT;
 			//item->result->data.integer = length(values[0].string);
 		}
@@ -481,9 +475,8 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		if (types[0] == TYPE_STRING)
 		{
 			debug("I_FIND - string\n");
-			stack_popping_spree(calcs, 2);
-			result->integer = values[0].integer + values[1].integer;
-			stack_push(calcs, TYPE_INT, (void*)&(result->integer));
+			result->integer = values[0].integer + values[1].integer; // ?
+			stack_push(calcs, TYPE_INT, (void *) & (result->integer)); // ?
 			//item->result->type = TYPE_INT;
 			//item->result->data.integer = find(values[0].string, values[1].string);
 		}
