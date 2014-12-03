@@ -78,7 +78,7 @@ int stack_top(Stack *stack, int *type, void **value)
 }
 
 
-int stack_index(Stack *stack, unsigned index, int *type, void **value)
+int stack_index(Stack *stack, unsigned int index, int *type, void **value)
 {
     Stack_Node *node = stack->top;
 
@@ -95,6 +95,55 @@ int stack_index(Stack *stack, unsigned index, int *type, void **value)
 
     if (value != NULL)
         *value = node->value;
+
+    return SUCCESS;
+}
+
+int stack_index_value(Stack *stack, unsigned int index, int *type, Value *value)
+{
+    Stack_Node *node = stack->top;
+
+    if (stack == NULL || stack->top == NULL)
+        return INTERNAL_ERROR;
+
+	while (index--) {
+		if ((node = node->next) == NULL)
+			return INTERNAL_ERROR;
+	}
+
+    if (type != NULL)
+        *type = node->type;
+
+    if (value != NULL)
+    {
+		if (node->type == TYPE_INT)
+		{
+			debug("integer\n");
+			value->integer = *((int*)node->value);
+		}
+		else if (node->type == TYPE_REAL)
+		{
+			debug("double\n");
+			value->real = *((double*)node->value);
+		}
+		else if (node->type == TYPE_STRING)
+		{
+			debug("string\n");
+			value->string = ((cstring*)node->value);
+		}
+		else if (node->type == TYPE_BOOL)
+		{
+			debug("bool\n");
+			value->boolean = *((bool*)node->value);
+		}
+		else
+		{
+			debug("not Value value\n");
+			return INTERNAL_ERROR;
+		}
+	}
+
+
 
     return SUCCESS;
 }

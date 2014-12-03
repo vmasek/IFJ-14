@@ -46,6 +46,7 @@ int    stack_read_first_of_type(Stack*, int, void**);
 int    stack_insert(Stack*, int, int, void*);
 int    stack_uninsert(Stack*, int, int*, void**);
 int    stack_index(Stack*, unsigned, int*, void**);
+int    stack_index_value(Stack *, unsigned, int*, Value*);
 int    stack_popping_spree(Stack *, unsigned int);
 
 
