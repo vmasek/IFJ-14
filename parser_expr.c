@@ -422,8 +422,10 @@ int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions,
     Stack type_stack;
     Tree *trees[TREE_COUNT];
 
-    if (input == NULL || globals == NULL || functions == NULL ||
-        next_instr == NULL)
+    IGNORE_PARAM(next_instr); //TODO ERASE THIS
+
+    if (input == NULL || globals == NULL || functions == NULL /* TODO ||
+        next_instr == NULL*/)
         return INTERNAL_ERROR;
 
     trees[TREE_LOCALS] = locals;
