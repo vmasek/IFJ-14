@@ -16,5 +16,7 @@ int main(int argc, char *argv[])
         return print_error(INTERNAL_ERROR);
     }
 
+    fclose(fp);
+
     return print_error(parse(fp));
 }
