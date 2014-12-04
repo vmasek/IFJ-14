@@ -5,6 +5,7 @@
  *******************************************************************/
 
 #include "ial.h"
+#include    "errors.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -156,10 +157,21 @@ void ms_swap(char **str1, char **str2)
  * @brief Inicialize binary tree.
  * @param tree to inicialize.
  */
-void tree_init(Tree *tree)
+int tree_init(Tree *tree)
 {
-    if (tree)
-        tree->root = tree->last = NULL;
+    if (!tree)
+    {
+		tree = (Tree *)malloc(sizeof(Tree));
+	}
+
+	if (!tree)
+    {
+		return INTERNAL_ERROR;
+	}
+
+	tree->root = tree->last = NULL;
+
+	return SUCCESS;
 }
 
 

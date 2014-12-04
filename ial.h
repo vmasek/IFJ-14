@@ -77,7 +77,7 @@ int         tree_insert(Tree *, cstring *, void *);
 Tree_Node  *tree_find_key(Tree *, cstring *);
 Tree_Node  *tree_find_key_ch(Tree *, char *);
 Tree_Node  *tree_node_find(Tree_Node *, char *);
-void        tree_init(Tree *);
+int         tree_init(Tree *);
 void        tree_free(Tree *);
 void        tree_print(Tree *);
 
