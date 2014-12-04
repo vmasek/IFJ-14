@@ -1,8 +1,6 @@
 #include "parser.h"
 #include "parser_private.h"
 
-#define MODULE "parser"
-
 static int nt_program(FILE *input, Tree *globals, Tree *functions);
 static int nt_var_section(FILE *input, Tree *vars);
 static int nt_var_list(FILE *input, Tree *vars);
@@ -96,7 +94,7 @@ static int nt_var(FILE *input, Tree *vars, bool eps, Var_record **_var)
 
     CHECK_VALUE(get_token(&token, input), ret);
     if (token.type == TOKEN_ID) {
-        MALLOC_VAR(var, MODULE);
+        MALLOC_VAR(var, __FILE__);
         tree_insert(vars, cstr_create_str(token.value.value_name), var);
         CHECK_VALUE(t_symbol(input, COLON), ret);
         CHECK_VALUE(nt_type(input, &(var->type)), ret);
@@ -176,7 +174,7 @@ static int nt_func(FILE *input, Tree *globals, Tree *functions)
     CHECK_VALUE(get_token(&token, input), ret);
     if (token.type == TOKEN_KEYWORD &&
         token.value.value_keyword == KEYWORD_FUNCTION) {
-        MALLOC_FUNC(func, MODULE);
+        MALLOC_FUNC(func, __FILE__);
 
         CHECK_VALUE(t_id(input, &id), ret);
         CHECK_VALUE(t_symbol(input, PARENTHESIS_L), ret);
@@ -216,7 +214,7 @@ static int nt_paramlist(FILE *input, Func_record *func, int count)
     CHECK_VALUE(t_symbol(input, SEMICOLON), ret);
     if ((ret = nt_paramlist(input, func, count + 1)) == RETURNING) {
         func->param_count = count;
-        func->params = (Var_record **)gc_malloc(MODULE, count * sizeof(Var_record *));
+        func->params = (Var_record **)gc_malloc(__FILE__, count * sizeof(Var_record *));
         if (func->params == NULL) {
             return INTERNAL_ERROR;
         }
