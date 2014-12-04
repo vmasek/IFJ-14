@@ -150,8 +150,7 @@ static enum token_keyword _get_keyword(char *name) {
  * Append a character to a string
  */
 static void strcatc(char * destination, char c) {
-    char buffer[2] = "\0\0";
-    buffer[0] = c;
+    char buffer[2] = {c};
     strcat(destination, buffer);
 }
 
@@ -160,13 +159,13 @@ static void strcatc(char * destination, char c) {
  * and return it's Token representation
  */
 int get_token(Token *token, FILE *input) {
-    char symbol = 0;
+    int symbol = 0;
     enum lexer_state state = LEXER_START;
 
     int token_name_pos = 0;
     enum token_keyword keyword;
 
-    char buffer[100] = "";
+    char buffer[100] = {0};
 
     if (token_register(token, false))
         return SUCCESS;
@@ -294,7 +293,7 @@ int get_token(Token *token, FILE *input) {
                 break;
             }
 
-            token->value.value_string = cstr_create_str(&symbol);
+            token->value.value_string = cstr_create_chr(symbol);
             state = LEXER_STR_LOAD;
             break;
 
@@ -305,13 +304,13 @@ int get_token(Token *token, FILE *input) {
                 break;
             }
 
-            cstr_append_str(token->value.value_string, &symbol);
+            cstr_append_chr(token->value.value_string, symbol);
             break;
 
 
         case LEXER_STR_AP:
             if (symbol == '\'') {
-                cstr_append_str(token->value.value_string, &symbol);
+                cstr_append_chr(token->value.value_string, symbol);
                 state = LEXER_STR_LOAD;
                 break;
             }
@@ -329,7 +328,7 @@ int get_token(Token *token, FILE *input) {
             if (symbol == '\'') {
                 // FIXME what if the int is too big?!
                 symbol = (int)atof(buffer);
-                cstr_append_str(token->value.value_string, &symbol);
+                cstr_append_chr(token->value.value_string, symbol);
                 state = LEXER_STR_LOAD;
                 break;
             }
