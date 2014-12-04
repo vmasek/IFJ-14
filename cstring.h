@@ -1,6 +1,5 @@
 /**
  * @file    cstring.h
- * @name    Cstring (header file)
  * @author  Vojtech Mašek (xmasek15)
  * @brief   Implementation of cstrig strings for IFJ projekt
  ****************************************************************************/
@@ -10,7 +9,7 @@
 
 #include    <sys/types.h>
 
-#define     CSTRING_START_SIZE  16
+#define     CSTRING_START_SIZE  32
 
 
 typedef struct {
@@ -28,6 +27,7 @@ cstring     *cstr_copy(cstring const *);
 
 
 /* Allocation and copying */
+cstring     *cstr_create_chr(char);
 cstring     *cstr_create_str(char const *);
 cstring     *cstr_create_cstr(cstring const *);
 int         cstr_resize(cstring *, unsigned long);

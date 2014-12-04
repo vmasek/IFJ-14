@@ -1,6 +1,5 @@
 /**
  * @file    cstring.c
- * @name    Cstring
  * @author  Vojtech Mašek (xmasek15)
  * @brief   Implementation of cstrig strings for IFJ projekt
  ****************************************************************************/
@@ -98,7 +97,7 @@ cstring *cstr_append_chr(cstring *s, char c)
     if (s->size + 1 >= s->tab_size && cstr_quick_resize(s))
         return NULL;
 
-    s->str[s->size] = c;
+    s->str[s->size]      = c;
     s->str[s->size += 1] = '\0';
     return s;
 }
@@ -123,7 +122,7 @@ cstring *cstr_append_str(cstring *s, char const *str)
  * @brief Appends ctring to cstring
  * @param s pointer to cstring where cstring will be appended.
  * @param cstr that will be appended.
- * @returns cstrig with appended cstring.
+ * @return cstrig with appended cstring.
  *
  * Uses static function @see append implemented in cstring.c, more details
  * written there.
@@ -163,6 +162,32 @@ cstring *cstr_assign_cstr(cstring *s, cstring const *cstr)
 {
     cstr_clear(s);
     return append(s, cstr->str, cstr->size);
+}
+
+
+/**
+ * @brief  Creates new cstring.
+ * @param  str string that will be written into newly created cstring.
+ * @return pointer to new cstring.
+ *
+ * Writes char from parameters into newly created cstring.
+ */
+cstring *cstr_create_chr(const char chr)
+{
+    cstring *s = gc_calloc("cstring", 1, CSTRING_START_SIZE);	///allocates new cstring with size of the CSTRING_START_SIZE
+
+    if (!s)
+    {
+        fprintf(stderr, "Memory allocation for cstrig has failed.\n");
+        return NULL;
+    }
+
+    s->tab_size = CSTRING_START_SIZE;
+    s->size = 1;
+    s->str[0] = chr;
+    s->str[1] = '\0';
+
+    return s;
 }
 
 
