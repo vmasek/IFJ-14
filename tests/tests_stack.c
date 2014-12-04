@@ -499,17 +499,17 @@ printf("\n5. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	int cislo = 10;
 	stack_push(&stack, TYPE_INT, (void*)&cislo);
-	stack_insert(&stack, TYPE_STRING, TYPE_STRING, (void*)"text");
-	int cislo2 = 100;
-	stack_insert(&stack, TYPE_STRING, TYPE_INT, (void*)&cislo2);
+	stack_insert(&stack, TYPE_STRING, 112, (void*)"text");
+	double cislo2 = 100.0;
+	stack_insert(&stack, TYPE_STRING, TYPE_REAL, (void*)&cislo2);
 	stack_print(&stack);
-	stack_uninsert(&stack, TYPE_STRING, &type, &value);
+	stack_uninsert(&stack, TYPE_REAL, &type, &value);
 
-	if(type == TYPE_INT && *(int*)(value)==100)
-		printf("\t5. OK ret. value of UNINSERT, type was int and value was 100\n");
+	if(type == 112 )
+		printf("\t5. OK ret. value of UNINSERT, type was 112\n");
 	else
 	{
-		printf("\t5. ERROR. Ret valued of UNINSERT, type was %d and value was %s\n\t\t\t\t   should be cstring(5) and \"cstr of NEW top\"\n", type, (char*)(value));
+		printf("\t5. ERROR. Ret valued of UNINSERT, type was %d and value was %s\n\t\t\t\t   should be 122\n", type, (char*)(value));
 		break;
 	}
 
@@ -528,13 +528,12 @@ printf("\n6. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ///---------------------------------------------------------------------------
 
 	printf("\t\n6. Test for calling UNINSERT when its only one node above searched_type\n");
-	int ch2 = '~';
+	int ch2 = 111;
 	stack_insert(&stack, TYPE_INT, TYPE_INT, (void*)&ch2);
-	stack_pop(&stack);
 
 	stack_print(&stack);
 
-	stack_uninsert(&stack, TYPE_STRING, &type, &value);
+	stack_uninsert(&stack, TYPE_REAL, &type, &value);
 
 	if(type == TYPE_INT && (*(int*)value)==10)
 		printf("\t6. OK ret. value of UNINSERT, type was int and value was 10 .\n");
@@ -544,11 +543,11 @@ printf("\n6. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		break;
 	}
 
-	if(stack.count==2)
+	if(stack.count==3)
 		printf("\n\t6. OK. Stack count is after UINSERT.\n");
 	else
 	{
-		printf("\n\t6. ERROR. Stack count is after UINSERT is %d should be 2.\n", stack.count);
+		printf("\n\t6. ERROR. Stack count is after UINSERT is %d should be 3.\n", stack.count);
 		break;
 	}
 
@@ -562,7 +561,7 @@ printf("\n7. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	printf("\n\t7. Test for calling UNINSERT on empty stack, stack with just one node and not found type.\n");
 
-	if(stack_uninsert(&stack, TYPE_REAL, &type, &value) == INTERNAL_ERROR)
+	if(stack_uninsert(&stack, 999999, &type, &value) == INTERNAL_ERROR)
 	{
 		printf("\t7.1. OK. UNINSERT failed because there is no searched type in the stack.\n");
 	}
@@ -586,6 +585,7 @@ printf("\n7. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	}
 
 	printf("\t7. POPing last node. Stack Should be empty.\n");
+	stack_pop(&stack);
 	stack_pop(&stack);
 
 	if(stack.count==0)
