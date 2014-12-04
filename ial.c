@@ -155,21 +155,38 @@ void ms_swap(char **str1, char **str2)
 
 /**
  * @brief Inicialize binary tree.
- * @param tree to inicialize.
+ * @param pointer to tree to inicialize.
  */
 int tree_init(Tree *tree)
 {
-    if (!tree)
-    {
-		tree = (Tree *)malloc(sizeof(Tree));
-	}
-
 	if (!tree)
     {
+		debug("Can not init Null pointer.\n");
 		return INTERNAL_ERROR;
 	}
 
 	tree->root = tree->last = NULL;
+
+	return SUCCESS;
+}
+
+/**
+ * @brief Creates tree.
+ * @param pointer to pointer to tree to create.
+ */
+int tree_create(Tree **tree)
+{
+    if (!*tree)
+    {
+		*tree = (Tree *)malloc(sizeof(Tree));
+	}
+
+	if (!*tree)
+    {
+		return INTERNAL_ERROR;
+	}
+
+	(*tree)->root = (*tree)->last = NULL;
 
 	return SUCCESS;
 }
