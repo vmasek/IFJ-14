@@ -10,6 +10,7 @@
 #include "ial.h"
 #include "interpreter.h"
 #include "scaner.h"
+#include "variables.h"
 
 typedef struct var_record {
     Value data;
@@ -23,10 +24,10 @@ typedef struct func_record {
     Var_record ret_value;
     Tree *locals;
     bool defined;
-    unsigned index;
+    Instruction *first_instr;
 } Func_record;
 
 int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions,
-               Instruction **next_instr);
+               Variables *global_vars, Instruction **next_instr);
 
 #endif

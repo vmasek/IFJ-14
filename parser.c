@@ -308,29 +308,30 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions)
             CHECK_VALUE(t_symbol(input, PARENTHESIS_R), ret);
             return SUCCESS;
         } else if (token.value.value_keyword == KEYWORD_IF) {
-            CHECK_VALUE(parse_expr(input, locals, globals, functions, NULL),
-                        ret);
+            CHECK_VALUE(parse_expr(input, locals, globals, functions,
+                                   NULL, NULL), ret);
             CHECK_VALUE(t_symbol(input, KEYWORD_THEN), ret);
             CHECK_VALUE(nt_comp_cmd(input, locals, globals, functions), ret);
             CATCH_VALUE(nt_else(input, locals, globals, functions), ret);
             return SUCCESS;
         } else if (token.value.value_keyword == KEYWORD_WHILE) {
-            CHECK_VALUE(parse_expr(input,locals, globals, functions, NULL),
-                        ret);
+            CHECK_VALUE(parse_expr(input,locals, globals, functions,
+                                   NULL, NULL), ret);
             CHECK_VALUE(t_keyword(input, KEYWORD_DO), ret);
             CHECK_VALUE(nt_comp_cmd(input, locals, globals, functions), ret);
             return SUCCESS;
         } else if (token.value.value_keyword == KEYWORD_REPEAT) {
             CHECK_VALUE(nt_cmd_list(input, locals, globals, functions), ret);
             CHECK_VALUE(t_keyword(input, KEYWORD_UNTIL), ret);
-            CHECK_VALUE(parse_expr(input, locals, globals, functions, NULL),
-                        ret);
+            CHECK_VALUE(parse_expr(input, locals, globals, functions,
+                                   NULL, NULL), ret);
             return SUCCESS;
         }
     } else if (token.type == TOKEN_ID) {
         //TODO: array
         CHECK_VALUE(t_symbol(input, ASSIGNMENT), ret);
-        CHECK_VALUE(parse_expr(input, locals, globals, functions, NULL), ret);
+        CHECK_VALUE(parse_expr(input, locals, globals, functions,
+                               NULL, NULL), ret);
     }
     unget_token(&token);
     return RETURNING;
@@ -348,7 +349,8 @@ static int nt_main(FILE *input, Tree *globals, Tree *functions)
 static int nt_arg_list(FILE *input, Tree *locals, Tree *globals, Tree *functions) {
     int ret;
     Token token;
-    CHECK_VALUE(parse_expr(input, locals, globals, functions, NULL), ret);
+    CHECK_VALUE(parse_expr(input, locals, globals, functions,
+                           NULL, NULL), ret);
     CHECK_VALUE(get_token(&token, input), ret);
     if (token.type == TOKEN_SYMBOL &&
         token.value.value_symbol == COMMA) {

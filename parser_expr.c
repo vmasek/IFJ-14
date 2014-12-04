@@ -55,7 +55,7 @@ enum action {
     F   // finish
 };
 
-typedef int Handler(Token **, Stack *, Tree **);
+typedef int Handler(Token **, Stack *, Tree **, Variables *, Instruction **);
 
 struct rule {
     unsigned length;
@@ -68,10 +68,15 @@ struct rule {
 };
 
 /* DECLARATION OF STATIC FUNCTIONS */
+static int gen_instr(Instruction **instr, Instruction_type type, int index,
+                     Instruction *alt_instr);
+static Instruction_type get_instr_type(Token *token);
 static Type get_type(Token *token);
-static enum terminal get_terminal(Token *token);
+static enum terminal get_term(Token *token);
+static Value get_value(Token *token);
 static int hold_token(Token **token, FILE *input);
-static int reduce_rule(Stack *sym_stack, Stack *type_stack, Tree **trees);
+static int reduce_rule(Stack *sym_stack, Stack *type_stack, Tree **trees,
+                       Variables *global_vars, Instruction **next_instr);
 
 /* DECLARATION OF RULE HANDLERS */
 static Handler handle_add;
@@ -127,6 +132,54 @@ const struct rule RULES[RULE_COUNT] = {
 };
 
 /* DEFINITION OF MISCELLANEOUS FUNCTIONS */
+static int gen_instr(Instruction **instr, Instruction_type type, int index,
+                     Instruction *alt_instr)
+{
+    if ((*instr = gc_malloc(GC_INSTR, sizeof(Instruction))) == NULL)
+        return INTERNAL_ERROR;
+
+    (*instr)->instruction = type;
+    (*instr)->index = index;
+    (*instr)->next_instruction = NULL;
+    (*instr)->alt_instruction = alt_instr;
+    *instr = (*instr)->next_instruction;
+
+    return SUCCESS;
+}
+#define I_ERR 0 //TODO ERASE THIS
+static Instruction_type get_instr_type(Token *token)
+{
+    if (token == NULL)
+        return I_ERR;
+
+    switch (get_term(token)) {
+    case TERM_ADD:
+        return I_ADD;
+    case TERM_SUB:
+        return I_SUB;
+    case TERM_MUL:
+        return I_MUL;
+    case TERM_DIV:
+        return I_DIV;
+    case TERM_EQ:
+        return I_EQUAL;
+    case TERM_NEQ:
+        return I_NOT_EQUAL;
+    case TERM_LT:
+        return I_LESS;
+    case TERM_GT:
+        return I_GREATER;
+    case TERM_LEQ:
+        return I_LESS_EQUAL;
+    case TERM_GEQ:
+        return I_GREATER_EQUAL;
+    default:
+        break;
+    }
+
+    return I_ERR;
+}
+
 static Type get_type(Token *token)
 {
     if (token == NULL)
@@ -155,7 +208,7 @@ static Type get_type(Token *token)
     return TYPE_OTHER;
 }
 
-static enum terminal get_terminal(Token *token)
+static enum terminal get_term(Token *token)
 {
     if (token == NULL)
         return TERM_END;
@@ -215,7 +268,29 @@ static enum terminal get_terminal(Token *token)
     return TERM_END;
 }
 
-static int handle_add(Token **tokens, Stack *type_stack, Tree **trees)
+static Value get_value(Token *token)
+{
+    if (token == NULL)
+        return (Value) {.integer = 0};
+
+    switch (get_type(token)) {
+    case TYPE_INT:
+        return (Value) {.integer = token->value.value_int};
+    case TYPE_REAL:
+        return (Value) {.real = token->value.value_float};
+    case TYPE_STRING:
+        return (Value) {.string = token->value.value_string};
+    case TYPE_BOOL:
+        return (Value) {.boolean = token->value.value_keyword == KEYWORD_TRUE};
+    default:
+        return (Value) {.integer = 0};
+    }
+
+    return (Value) {.integer = 0};
+}
+
+static int handle_add(Token **tokens, Stack *type_stack, Tree **trees,
+                      Variables *global_vars, Instruction **next_instr)
 {
     Type op1_type;
     Type op2_type;
@@ -223,6 +298,7 @@ static int handle_add(Token **tokens, Stack *type_stack, Tree **trees)
 
     IGNORE_PARAM(tokens);
     IGNORE_PARAM(trees);
+    IGNORE_PARAM(global_vars);
 
     if (stack_index(type_stack, 1, (int *)&op1_type, NULL) != SUCCESS ||
         stack_index(type_stack, 0, (int *)&op2_type, NULL) != SUCCESS)
@@ -250,17 +326,21 @@ static int handle_add(Token **tokens, Stack *type_stack, Tree **trees)
 
     stack_popping_spree(type_stack, 2);
 
-    if (stack_push(type_stack, result_type, NULL) != SUCCESS)
+    if (stack_push(type_stack, result_type, NULL) != SUCCESS ||
+        gen_instr(next_instr, I_ADD, 0, NULL) != SUCCESS)
         return INTERNAL_ERROR;
 
     return SUCCESS;
 }
 
-static int handle_call(Token **tokens, Stack *type_stack, Tree **trees)
+static int handle_call(Token **tokens, Stack *type_stack, Tree **trees,
+                       Variables *global_vars, Instruction **next_instr)
 {
     Type cur_type;
     Tree_Node *node;
     struct func_record *function;
+
+    IGNORE_PARAM(global_vars);
 
     if ((node = tree_find_key_ch(trees[TREE_FUNCS],
                                  tokens[0]->value.value_name)) == NULL)
@@ -280,20 +360,22 @@ static int handle_call(Token **tokens, Stack *type_stack, Tree **trees)
 
     stack_popping_spree(type_stack, function->param_count + 1);
 
-    if (stack_push(type_stack, function->ret_value.type, NULL)
-        != SUCCESS)
+    if (stack_push(type_stack, function->ret_value.type, NULL) != SUCCESS ||
+        gen_instr(next_instr, I_CALL, function->param_count,
+                  function->first_instr) != SUCCESS)
         return INTERNAL_ERROR;
 
     return SUCCESS;
 }
 
-static int handle_comp(Token **tokens, Stack *type_stack, Tree **trees)
+static int handle_comp(Token **tokens, Stack *type_stack, Tree **trees,
+                       Variables *global_vars, Instruction **next_instr)
 {
     Type op1_type;
     Type op2_type;
 
-    IGNORE_PARAM(tokens); //TODO ERASE - OPERATOR TOKEN WILL BE NEEDED
     IGNORE_PARAM(trees);
+    IGNORE_PARAM(global_vars);
 
     if (stack_index(type_stack, 1, (int *)&op1_type, NULL) != SUCCESS ||
         stack_index(type_stack, 0, (int *)&op2_type, NULL) != SUCCESS)
@@ -304,19 +386,22 @@ static int handle_comp(Token **tokens, Stack *type_stack, Tree **trees)
 
     stack_popping_spree(type_stack, 2);
 
-    if (stack_push(type_stack, TYPE_BOOL, NULL) != SUCCESS)
+    if (stack_push(type_stack, TYPE_BOOL, NULL) != SUCCESS ||
+        gen_instr(next_instr, get_instr_type(tokens[1]), 0, NULL) != SUCCESS)
         return INTERNAL_ERROR;
 
     return SUCCESS;
 }
 
-static int handle_div(Token **tokens, Stack *type_stack, Tree **trees)
+static int handle_div(Token **tokens, Stack *type_stack, Tree **trees,
+                      Variables *global_vars, Instruction **next_instr)
 {
     Type op1_type;
     Type op2_type;
 
     IGNORE_PARAM(tokens);
     IGNORE_PARAM(trees);
+    IGNORE_PARAM(global_vars);
 
     if (stack_index(type_stack, 1, (int *)&op1_type, NULL) != SUCCESS ||
         stack_index(type_stack, 0, (int *)&op2_type, NULL) != SUCCESS)
@@ -328,17 +413,22 @@ static int handle_div(Token **tokens, Stack *type_stack, Tree **trees)
 
     stack_popping_spree(type_stack, 2);
 
-    if (stack_push(type_stack, TYPE_REAL, NULL) != SUCCESS)
+    if (stack_push(type_stack, TYPE_REAL, NULL) != SUCCESS ||
+        gen_instr(next_instr, I_DIV, 0, NULL) != SUCCESS)
         return INTERNAL_ERROR;
 
     return SUCCESS;
 }
 
 
-static int handle_id(Token **tokens, Stack *type_stack, Tree **trees)
+static int handle_id(Token **tokens, Stack *type_stack, Tree **trees,
+                     Variables *global_vars, Instruction **next_instr)
 {
     Tree_Node *node;
+    struct var_record *var;
 
+    IGNORE_PARAM(global_vars);
+    
     if ((trees[TREE_LOCALS] == NULL ||
          (node = tree_find_key_ch(trees[TREE_LOCALS],
                                   tokens[0]->value.value_name)) == NULL) &&
@@ -346,33 +436,41 @@ static int handle_id(Token **tokens, Stack *type_stack, Tree **trees)
                                  tokens[0]->value.value_name)) == NULL)
         return SEMANTIC_ERROR;
 
-    if (stack_push(type_stack, ((struct var_record *)node->data)->type,
-                   NULL) != SUCCESS)
+    var = node->data;
+
+    if (stack_push(type_stack, var->type, NULL) != SUCCESS ||
+        gen_instr(next_instr, I_PUSH, -var->index - 1, NULL) != SUCCESS)
         return INTERNAL_ERROR;
 
     return SUCCESS;
 }
 
-static int handle_literal(Token **tokens, Stack *type_stack, Tree **trees)
+static int handle_literal(Token **tokens, Stack *type_stack, Tree **trees,
+                          Variables *global_vars, Instruction **next_instr)
 {
     Type type = get_type(tokens[0]);
+    unsigned var_index;
 
     IGNORE_PARAM(trees);
 
-    if (stack_push(type_stack, type, NULL) != SUCCESS)
+    if (stack_push(type_stack, type, NULL) != SUCCESS ||
+        variables_add(global_vars, type, get_value(tokens[0]), &var_index)
+        != SUCCESS ||
+        gen_instr(next_instr, I_PUSH, var_index, NULL) != SUCCESS)
         return INTERNAL_ERROR;
 
     return SUCCESS;
 }
 
-static int handle_sub_mul(Token **tokens, Stack *type_stack, Tree **trees)
+static int handle_sub_mul(Token **tokens, Stack *type_stack, Tree **trees,
+                          Variables *global_vars, Instruction **next_instr)
 {
     Type op1_type;
     Type op2_type;
     Type result_type;
 
     IGNORE_PARAM(trees);
-    IGNORE_PARAM(tokens); //TODO ERASE - OPERATOR TOKEN WILL BE NEEDED
+    IGNORE_PARAM(global_vars);
 
     if (stack_index(type_stack, 1, (int *)&op1_type, NULL) != SUCCESS ||
         stack_index(type_stack, 0, (int *)&op2_type, NULL) != SUCCESS)
@@ -395,7 +493,8 @@ static int handle_sub_mul(Token **tokens, Stack *type_stack, Tree **trees)
 
     stack_popping_spree(type_stack, 2);
 
-    if (stack_push(type_stack, result_type, NULL) != SUCCESS)
+    if (stack_push(type_stack, result_type, NULL) != SUCCESS ||
+        gen_instr(next_instr, get_instr_type(tokens[1]), 0, NULL) != SUCCESS)
         return INTERNAL_ERROR;
 
     return SUCCESS;
@@ -412,7 +511,7 @@ static int hold_token(Token **token, FILE *input)
 }
 
 int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions,
-               Instruction **next_instr)
+               Variables *global_vars, Instruction **next_instr)
 {
     int error;
     bool finished = false;
@@ -422,10 +521,8 @@ int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions,
     Stack type_stack;
     Tree *trees[TREE_COUNT];
 
-    IGNORE_PARAM(next_instr); //TODO ERASE THIS
-
     if (input == NULL || globals == NULL || functions == NULL /* TODO ||
-        next_instr == NULL*/)
+        global_vars == NULL || next_instr == NULL*/)
         return INTERNAL_ERROR;
 
     trees[TREE_LOCALS] = locals;
@@ -437,7 +534,7 @@ int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions,
     if ((error = hold_token(&input_token, input)) != SUCCESS)
         goto fail;
 
-    if (get_terminal(input_token) == TERM_END) {
+    if (get_term(input_token) == TERM_END) {
         error = SYNTAX_ERROR;
         goto fail;
     }
@@ -447,15 +544,14 @@ int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions,
 
     while (!finished) {
         stack_read_first_of_type(&sym_stack, SYM_TERM, (void **)&stack_token);
-        switch (PREC_TABLE[get_terminal(stack_token)]
-                          [get_terminal(input_token)]) {
+        switch (PREC_TABLE[get_term(stack_token)][get_term(input_token)]) {
         case I:
             if ((error = stack_insert(&sym_stack, SYM_TERM, SYM_RS, NULL))
                 != SUCCESS)
                 goto fail;
         case P:
-            if (get_terminal(stack_token) == TERM_ID &&
-                get_terminal(input_token) == TERM_LP &&
+            if (get_term(stack_token) == TERM_ID &&
+                get_term(input_token) == TERM_LP &&
                 stack_push(&type_stack, TYPE_OTHER, NULL) != SUCCESS)
                 goto fail;
             if ((error = stack_push(&sym_stack, SYM_TERM, input_token))
@@ -465,7 +561,8 @@ int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions,
                 goto fail;
             break;
         case R:
-            if ((error = reduce_rule(&sym_stack, &type_stack, trees)) != SUCCESS)
+            if ((error = reduce_rule(&sym_stack, &type_stack, trees,
+                                     global_vars, next_instr)) != SUCCESS)
                 goto fail;
             break;
         case F:
@@ -489,7 +586,8 @@ fail:
     return error;
 }
 
-static int reduce_rule(Stack *sym_stack, Stack *type_stack, Tree **trees)
+static int reduce_rule(Stack *sym_stack, Stack *type_stack, Tree **trees,
+                       Variables *global_vars, Instruction **next_instr)
 {
     unsigned count = 0;
     unsigned index;
@@ -510,7 +608,7 @@ static int reduce_rule(Stack *sym_stack, Stack *type_stack, Tree **trees)
                 break;
             if (sym_array[index] == SYM_TERM &&
                 RULES[i].symbols[index].term_type 
-                != get_terminal(token_array[index]))
+                != get_term(token_array[index]))
                 break;
         }
         if (index != count)
@@ -519,7 +617,8 @@ static int reduce_rule(Stack *sym_stack, Stack *type_stack, Tree **trees)
             return INTERNAL_ERROR;
         if (RULES[i].handler == NULL)
             return SUCCESS;
-        return RULES[i].handler(token_array, type_stack, trees);
+        return RULES[i].handler(token_array, type_stack, trees, global_vars,
+                                next_instr);
     }
 
     return SYNTAX_ERROR;
