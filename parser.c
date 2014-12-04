@@ -55,7 +55,7 @@ static int nt_var_section(FILE *input, Tree *vars)
     int ret;
     Token token;
 
-    get_token(&token, input);
+    CHECK_VALUE(get_token(&token, input), ret);
 
     if (token.type == TOKEN_KEYWORD &&
         token.value.value_keyword == KEYWORD_VAR) {
@@ -94,7 +94,7 @@ static int nt_var(FILE *input, Tree *vars, bool eps, Var_record **_var)
     Token token;
     Var_record *var = NULL;
 
-    get_token(&token, input);
+    CHECK_VALUE(get_token(&token, input), ret);
     if (token.type == TOKEN_ID) {
         MALLOC_VAR(var, MODULE);
         tree_insert(vars, cstr_create_str(token.value.value_name), var);
@@ -115,8 +115,10 @@ static int nt_var(FILE *input, Tree *vars, bool eps, Var_record **_var)
 
 static int t_symbol(FILE *input, enum token_symbol symbol)
 {
+    int ret;
     Token token;
-    get_token(&token, input);
+
+    CHECK_VALUE(get_token(&token, input), ret);
     if (token.type == TOKEN_SYMBOL &&
         token.value.value_symbol == symbol) {
         return SUCCESS;
@@ -126,14 +128,15 @@ static int t_symbol(FILE *input, enum token_symbol symbol)
 
 static int nt_type(FILE *input, Type *type)
 {
+    int ret;
     Token token;
 
-    get_token(&token, input);
-    bool ret = (token.type == TOKEN_KEYWORD &&
-               (token.value.value_keyword == KEYWORD_INTEGER ||
-                token.value.value_keyword == KEYWORD_REAL ||
-                token.value.value_keyword == KEYWORD_STRING ||
-                token.value.value_keyword == KEYWORD_BOOLEAN));
+    CHECK_VALUE(get_token(&token, input), ret);
+    ret = (token.type == TOKEN_KEYWORD &&
+          (token.value.value_keyword == KEYWORD_INTEGER ||
+           token.value.value_keyword == KEYWORD_REAL ||
+           token.value.value_keyword == KEYWORD_STRING ||
+           token.value.value_keyword == KEYWORD_BOOLEAN));
     switch (token.value.value_keyword) {
     case KEYWORD_INTEGER:
         *type = TYPE_INT;
@@ -170,7 +173,7 @@ static int nt_func(FILE *input, Tree *globals, Tree *functions)
     //Var_record *params = NULL;
     cstring *id;
 
-    get_token(&token, input);
+    CHECK_VALUE(get_token(&token, input), ret);
     if (token.type == TOKEN_KEYWORD &&
         token.value.value_keyword == KEYWORD_FUNCTION) {
         MALLOC_FUNC(func, MODULE);
@@ -197,7 +200,7 @@ static int t_id(FILE *input, cstring **functions)
     bool ret;
     Token token;
 
-    get_token(&token, input);
+    CHECK_VALUE(get_token(&token, input), ret);
     if ((ret = (token.type == TOKEN_ID))) {
         *functions = cstr_create_str(token.value.value_name);
     }
@@ -234,7 +237,7 @@ static int nt_func_body(FILE *input, Tree *locals, Tree *globals, Tree *function
     int ret;
     Token token;
 
-    get_token(&token, input);
+    CHECK_VALUE(get_token(&token, input), ret);
     if (token.type == TOKEN_KEYWORD &&
         token.value.value_keyword == KEYWORD_FORWARD) {
         CHECK_VALUE(t_symbol(input, SEMICOLON), ret);
@@ -259,8 +262,10 @@ static int nt_comp_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions
 
 static int t_keyword(FILE *input, enum token_keyword keyword)
 {
+    int ret;
     Token token;
-    get_token(&token, input);
+
+    CHECK_VALUE(get_token(&token, input), ret);
     if (token.type == TOKEN_KEYWORD &&
         token.value.value_keyword == keyword) {
         return SUCCESS;
@@ -290,7 +295,7 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions)
 {
     int ret;
     Token token;
-    get_token(&token, input);
+    CHECK_VALUE(get_token(&token, input), ret);
     cstring *id = NULL;
 
     if (token.type == TOKEN_KEYWORD) {
@@ -343,7 +348,7 @@ static int nt_arg_list(FILE *input, Tree *locals, Tree *globals, Tree *functions
     int ret;
     Token token;
     CHECK_VALUE(parse_expr(input, locals, globals, functions), ret);
-    get_token(&token, input);
+    CHECK_VALUE(get_token(&token, input), ret);
     if (token.type == TOKEN_SYMBOL &&
         token.value.value_symbol == COMMA) {
         CHECK_VALUE(nt_arg_list(input, locals, globals, functions),ret);
@@ -357,7 +362,7 @@ static int nt_else(FILE *input, Tree *locals, Tree *globals, Tree *functions) {
     int ret;
     Token token;
 
-    get_token(&token, input);
+    CHECK_VALUE(get_token(&token, input), ret);
     if (token.type == TOKEN_KEYWORD &&
         token.value.value_keyword == KEYWORD_ELSE) {
         CHECK_VALUE(nt_comp_cmd(input, locals, globals, functions), ret);
