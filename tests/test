@@ -237,7 +237,7 @@ if [[ $tests == true || $PROJECT == true  ]]; then
 	fi
 	cd ./tests/             #POZOR make
 
-	#\read -a FILES_SKAL <<< $( find ./files/skal -name '*.pas') #filling up the field of paths to files
+	read -a FILES_SKAL <<< $( find ./files/skal -name '*.pas') #filling up the field of paths to files
 	read -a FILES_OURS <<< $( find ./files/ours -name '*.pas') #filling up the field of paths to files
 
 	#echo "${FILES_SKAL[@]}"
