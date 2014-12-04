@@ -88,7 +88,7 @@ printf("\n\n%s:[test %d.]-------------------------------------------------------
 	stack_push(&calcs, TYPE_INT, &(values[test].integer));
 
 
-	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)
 	{
 		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -131,7 +131,7 @@ test++;
 printf("\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
 	stack_push(&calcs, TYPE_REAL, &(values[test].real));
 
-	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)
 	{
 		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -165,7 +165,7 @@ printf("\n\n%s:[test %d.]-------------------------------------------------------
 
 	stack_push(&calcs, TYPE_BOOL, &(values[test].boolean));
 
-	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)
 	{
 		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -253,7 +253,7 @@ printf("\n\n%s:[test %d.]-------------------------------------------------------
 	stack_push(&calcs, TYPE_INT, &(values[1].integer));
 
 	///zavolanie interpretera
-	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)
 	{
 		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -300,7 +300,7 @@ printf("\n\n%s:[test %d.]-------------------------------------------------------
 	stack_push(&calcs, TYPE_REAL, &(values[4].real));
 
 	///zavolanie interpretera
-	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)
 	{
 		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -348,7 +348,7 @@ printf("\n\n%s:[test %d.]-------------------------------------------------------
 	stack_push(&calcs, TYPE_REAL, &(values[4].real));
 
 	///zavolanie interpretera
-	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)
 	{
 		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -395,7 +395,7 @@ printf("\n\n%s:[test %d.]-------------------------------------------------------
 	stack_push(&calcs, TYPE_INT, &(values[1].integer));
 
 	///zavolanie interpretera
-	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)
 	{
 		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -488,7 +488,7 @@ printf("\n\n%s:[test %d.]-------------------------------------------------------
 	stack_push(&calcs, TYPE_INT, &(values[1].integer));
 
 	///zavolanie interpretera
-	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)
 	{
 		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -535,7 +535,7 @@ printf("\n\n%s:[test %d.]-------------------------------------------------------
 	stack_push(&calcs, TYPE_REAL, &(values[4].real));
 
 	///zavolanie interpretera
-	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)
 	{
 		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -583,7 +583,7 @@ printf("\n\n%s:[test %d.]-------------------------------------------------------
 	stack_push(&calcs, TYPE_REAL, &(values[4].real));
 
 	///zavolanie interpretera
-	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)
 	{
 		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -630,7 +630,7 @@ printf("\n\n%s:[test %d.]-------------------------------------------------------
 	stack_push(&calcs, TYPE_INT, &(values[1].integer));
 
 	///zavolanie interpretera
-	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)
 	{
 		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -713,7 +713,7 @@ printf("\n\n%s:[test %d.]-------------------------------------------------------
 	stack_push(&calcs, TYPE_INT, &(values[1].integer));
 
 	///zavolanie interpretera
-	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)
 	{
 		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -760,7 +760,7 @@ printf("\n\n%s:[test %d.]-------------------------------------------------------
 	stack_push(&calcs, TYPE_REAL, &(values[4].real));
 
 	///zavolanie interpretera
-	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)
 	{
 		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -808,7 +808,7 @@ printf("\n\n%s:[test %d.]-------------------------------------------------------
 	stack_push(&calcs, TYPE_REAL, &(values[4].real));
 
 	///zavolanie interpretera
-	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)
 	{
 		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -855,7 +855,7 @@ printf("\n\n%s:[test %d.]-------------------------------------------------------
 	stack_push(&calcs, TYPE_INT, &(values[1].integer));
 
 	///zavolanie interpretera
-	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)
 	{
 		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -939,7 +939,7 @@ printf("\n\n%s:[test %d.]-------------------------------------------------------
 	stack_push(&calcs, TYPE_INT, &(values[1].integer));
 
 	///zavolanie interpretera
-	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)
 	{
 		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -986,7 +986,7 @@ printf("\n\n%s:[test %d.]-------------------------------------------------------
 	stack_push(&calcs, TYPE_REAL, &(values[4].real));
 
 	///zavolanie interpretera
-	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)
 	{
 		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -1070,7 +1070,7 @@ printf("\n\n%s:[test %d.]-------------------------------------------------------
 	stack_push(&calcs, TYPE_INT, &(values[1].integer));
 
 	///zavolanie interpretera
-	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)
 	{
 		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -1117,7 +1117,7 @@ printf("\n\n%s:[test %d.]-------------------------------------------------------
 	stack_push(&calcs, TYPE_REAL, &(values[4].real));
 
 	///zavolanie interpretera
-	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)
 	{
 		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -1201,7 +1201,7 @@ printf("\n\n%s:[test %d.]-------------------------------------------------------
 	stack_push(&calcs, TYPE_INT, &(values[0].integer));
 
 	///zavolanie interpretera
-	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)
 	{
 		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -1248,7 +1248,7 @@ printf("\n\n%s:[test %d.]-------------------------------------------------------
 	stack_push(&calcs, TYPE_REAL, &(values[3].real));
 
 	///zavolanie interpretera
-	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)
 	{
 		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -1332,7 +1332,7 @@ printf("\n\n%s:[test %d.]-------------------------------------------------------
 	stack_push(&calcs, TYPE_INT, &(values[0].integer));
 
 	///zavolanie interpretera
-	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)
 	{
 		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -1379,7 +1379,7 @@ printf("\n\n%s:[test %d.]-------------------------------------------------------
 	stack_push(&calcs, TYPE_REAL, &(values[3].real));
 
 	///zavolanie interpretera
-	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)
 	{
 		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -1463,7 +1463,7 @@ printf("\n\n%s:[test %d.]-------------------------------------------------------
 	stack_push(&calcs, TYPE_INT, &(values[0].integer));
 
 	///zavolanie interpretera
-	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)
 	{
 		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -1510,7 +1510,7 @@ printf("\n\n%s:[test %d.]-------------------------------------------------------
 	stack_push(&calcs, TYPE_REAL, &(values[3].real));
 
 	///zavolanie interpretera
-	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)
 	{
 		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -1594,7 +1594,7 @@ printf("\n\n%s:[test %d.]-------------------------------------------------------
 	stack_push(&calcs, TYPE_INT, &(values[0].integer));
 
 	///zavolanie interpretera
-	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)
 	{
 		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -1641,7 +1641,7 @@ printf("\n\n%s:[test %d.]-------------------------------------------------------
 	stack_push(&calcs, TYPE_REAL, &(values[3].real));
 
 	///zavolanie interpretera
-	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)
 	{
 		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -1725,7 +1725,7 @@ printf("\n\n%s:[test %d.]-------------------------------------------------------
 	stack_push(&calcs, TYPE_INT, &(values[0].integer));
 
 	///zavolanie interpretera
-	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)
 	{
 		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -1772,7 +1772,7 @@ printf("\n\n%s:[test %d.]-------------------------------------------------------
 	stack_push(&calcs, TYPE_REAL, &(values[3].real));
 
 	///zavolanie interpretera
-	if(interpret(&instruction, &calcs, NULL, NULL) != SUCCESS)
+	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)
 	{
 		printf("%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
