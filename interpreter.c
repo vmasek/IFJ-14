@@ -274,14 +274,14 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
 		{
 			debug("I_LESS - INT\n");
-			result->boolean = values[0].integer < values[1].integer;
-			stack_push(calcs, TYPE_INT, (void *) & (result->integer));
+			result->boolean = values[1].integer < values[0].integer;
+			stack_push(calcs, TYPE_BOOL, (void *) & (result->integer));
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
 		{
 			debug("I_LESS - DOUBLE\n");
-			result->boolean = values[0].real < values[1].real;
-			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
+			result->boolean = values[1].real < values[0].real;
+			stack_push(calcs, TYPE_BOOL, (void *) & (result->real));
 		}
 		else
 			return INCOMPATIBLE_TYPE;
@@ -304,13 +304,13 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		{
 			debug("I_GREATER - INT\n");
 			result->boolean = values[0].integer > values[1].integer;
-			stack_push(calcs, TYPE_INT, (void *) & (result->integer));
+			stack_push(calcs, TYPE_BOOL, (void *) & (result->integer));
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
 		{
 			debug("I_GREATER - DOUBLE\n");
 			result->boolean = values[0].real > values[1].real;
-			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
+			stack_push(calcs, TYPE_BOOL, (void *) & (result->real));
 		}
 		else
 			return INCOMPATIBLE_TYPE;
@@ -333,13 +333,13 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		{
 			debug("I_LESS_EQUAL - INT\n");
 			result->boolean = values[0].integer <= values[1].integer;
-			stack_push(calcs, TYPE_INT, (void *) & (result->integer));
+			stack_push(calcs, TYPE_BOOL, (void *) & (result->integer));
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
 		{
 			debug("I_LESS_EQUAL - DOUBLE\n");
 			result->boolean = values[0].real <= values[1].real;
-			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
+			stack_push(calcs, TYPE_BOOL, (void *) & (result->real));
 		}
 		else
 			return INCOMPATIBLE_TYPE;
@@ -362,13 +362,13 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		{
 			debug("I_GREATER_EQUAL - INT\n");
 			result->boolean = values[0].integer >= values[1].integer;
-			stack_push(calcs, TYPE_INT, (void *) & (result->integer));
+			stack_push(calcs, TYPE_BOOL, (void *) & (result->integer));
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
 		{
 			debug("I_GREATER_EQUAL - DOUBLE\n");
 			result->boolean = values[0].real >= values[1].real;
-			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
+			stack_push(calcs, TYPE_BOOL, (void *) & (result->real));
 		}
 		else
 			return INCOMPATIBLE_TYPE;
@@ -391,13 +391,13 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		{
 			debug("I_EQUAL - INT\n");
 			result->boolean = values[0].integer == values[1].integer;
-			stack_push(calcs, TYPE_INT, (void *) & (result->integer));
+			stack_push(calcs, TYPE_BOOL, (void *) & (result->integer));
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
 		{
 			debug("I_EQUAL - DOUBLE\n");
 			result->boolean = values[0].real == values[1].real;
-			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
+			stack_push(calcs, TYPE_BOOL, (void *) & (result->real));
 		}
 		else if ((types[0] == TYPE_STRING) && (types[1] == TYPE_STRING)) //@Vojto: you know what to do.
 		{
@@ -426,13 +426,13 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		{
 			debug("I_NOT_EQUAL - INT\n");
 			result->boolean = values[0].integer != values[1].integer;
-			stack_push(calcs, TYPE_INT, (void *) & (result->integer));
+			stack_push(calcs, TYPE_BOOL, (void *) & (result->integer));
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
 		{
 			debug("I_NOT_EQUAL - DOUBLE\n");
 			result->boolean = values[0].real != values[1].real;
-			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
+			stack_push(calcs, TYPE_BOOL, (void *) & (result->real));
 		}
 		else if ((types[0] == TYPE_STRING) && (types[1] == TYPE_STRING)) //@Vojto: you know what to do.
 		{
