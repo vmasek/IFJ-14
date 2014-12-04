@@ -174,11 +174,19 @@ cstring *cstr_assign_cstr(cstring *s, cstring const *cstr)
  */
 cstring *cstr_create_chr(const char chr)
 {
-    cstring *s = gc_calloc("cstring", 1, CSTRING_START_SIZE);	///allocates new cstring with size of the CSTRING_START_SIZE
+    cstring *s = gc_calloc("cstring", sizeof(cstring), 1);	///allocates new cstring with size of the CSTRING_START_SIZE
 
     if (!s)
     {
         fprintf(stderr, "Memory allocation for cstrig has failed.\n");
+        return NULL;
+    }
+
+    s->str = gc_calloc("cstring", CSTRING_START_SIZE, 1);
+
+    if (!s->str)
+    {
+        fprintf(stderr, "Memory allocation for cstrig string has failed.\n");
         return NULL;
     }
 
@@ -200,7 +208,7 @@ cstring *cstr_create_chr(const char chr)
  */
 cstring *cstr_create_str(char const *str)
 {
-    cstring *s = gc_calloc("cstring", 1, sizeof(*s));
+    cstring *s = gc_calloc("cstring", sizeof(*s), 1);
 
 	if(!str)
 	{
@@ -226,7 +234,7 @@ cstring *cstr_create_str(char const *str)
  */
 cstring *cstr_create_cstr(cstring const *cstr)
 {
-    cstring *s = gc_calloc("cstring", 1, sizeof(*s));
+    cstring *s = gc_calloc("cstring", sizeof(*s), 1);
 
 	if(!cstr)
 	{
