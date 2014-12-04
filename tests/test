@@ -12,6 +12,10 @@ NO_DELETE=false
 MODULES=false
 PROJECT=false
 
+ALL=true
+OURS=false
+SKAL=false
+
 
 if [ $# -gt 0 ]; then
 
@@ -33,18 +37,24 @@ if [ $# -gt 0 ]; then
 			mem_check=true
 		fi
 
-		if [[ "tests" == "$arg" ]]; then
-			tests=true
-		fi
-
 		if [[ "modules" == "$arg" ]]; then
-			tests=false
 			MODULES=true
+			tests=false
 		fi
 
 		if [[ "project" == "$arg" ]]; then
-			tests=false
 			PROJECT=true
+			tests=false
+		fi
+
+		if [[ "ours" == "$arg" ]]; then			# param "log" to archive all logs
+			OURS=true
+			ALL=false
+		fi
+
+		if [[ "skal" == "$arg" ]]; then			# param "log" to archive all logs
+			SKAL=true
+			ALL=false
 		fi
 
 	done
@@ -227,7 +237,7 @@ if [[ $tests == true || $PROJECT == true  ]]; then
 			fi
 		fi
 
-		if [[ NO_DELETE ==false && ( $OK == true || $DELETE == true ) ]]; then
+		if [[ $NO_DELETE == false && ( $OK == true || $DELETE == true ) ]]; then
 			rm -rf "$file.current.stdout" "$file.current.stderr" "$file.diff.out"
 		fi
 	}
@@ -249,15 +259,18 @@ if [[ $tests == true || $PROJECT == true  ]]; then
 	#echo "${FILES_SKAL[@]}"
 	#echo "${FILES_OURS[@]}"
 
+	if [[ $ALL == true || $OURS == true ]]; then
+		echo "-------------------------------------Our-TESTs--------------------------------------------------------------------------"
+		for file in "${FILES_OURS[@]}"; do
+			run_test $file
+		done
+	fi
 
-	for file in "${FILES_OURS[@]}"; do
-		run_test $file
-	done
-
-	echo "-------------------------------------TESTy od skala---------------------------------------------------------------------"
-
-	for file in "${FILES_SKAL[@]}"; do
-		run_test $file
-	done
+	if [[ $ALL == true || $SKAL == true ]]; then
+		echo "-------------------------------------TESTy-od-skala---------------------------------------------------------------------"
+		for file in "${FILES_SKAL[@]}"; do
+			run_test $file
+		done
+	fi
 
 fi
