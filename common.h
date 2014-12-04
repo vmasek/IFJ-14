@@ -13,6 +13,7 @@
 #include <string.h>
 
 #include "cstring.h"
+#include "scaner.h"
 
 /* GC tag for instructions */
 #define GC_INSTR "instructions"
@@ -37,9 +38,12 @@
 
 #define debug(...) debug_printf(__FILE__, __LINE__, __func__, __VA_ARGS__)
 
+#define debug_token(token) debug_print_token(token)
+
 #else
 
 #define debug(...)
+#define debug_token(token)
 
 #endif
 
@@ -89,5 +93,5 @@ typedef enum
 extern int char_to_int(char c);
 
 extern void debug_printf(const char* file, const int line, const char* func, const char *fmt, ...);
-
+extern void debug_print_token(Token *token);
 #endif //__COMMON_H__

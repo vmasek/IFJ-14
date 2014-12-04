@@ -5,6 +5,7 @@
 
 int main(int argc, char *argv[])
 {
+    int ret;
     FILE *fp;
 
     if (argc < 2) {
@@ -16,7 +17,7 @@ int main(int argc, char *argv[])
         return print_error(INTERNAL_ERROR);
     }
 
+    ret = print_error(parse(fp));
     fclose(fp);
-
-    return print_error(parse(fp));
+    return ret;
 }
