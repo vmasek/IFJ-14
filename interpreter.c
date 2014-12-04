@@ -7,9 +7,7 @@
 #include "interpreter.h"
 
 
-
-
-int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instructions)
+int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instructions, Variables *globals)
 {
 	///!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	IGNORE_PARAM(locals);
@@ -68,6 +66,50 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 			return INTERNAL_ERROR;
 		if (stack_pop(calcs) == INTERNAL_ERROR)                                         ///ACHTUNG! If is only one operand then only one pop
 			return INTERNAL_ERROR;
+
+		///                         Instruction operations
+		if (types[0] == TYPE_INT)
+		{
+			debug("I_ASSIGN - integer\n");
+			result->integer = values[0].integer;
+			stack_push(calcs, TYPE_INT, (void *) & (result->integer));
+		}
+		else if (types[0] == TYPE_REAL)
+		{
+			debug("I_ASSIGN - double\n");
+			result->real = values[0].real;
+			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
+		}
+		else if (types[0] == TYPE_BOOL)
+		{
+			debug("I_ASSIGN - bool\n");
+			result->boolean = values[0].boolean;
+			stack_push(calcs, TYPE_BOOL, (void *) & (result->boolean));
+		}
+		else if (types[0] == TYPE_STRING)
+		{
+			debug("I_ASSIGN - cstring\n");
+			cstr_assign_cstr(result->string, values[0].string);
+			stack_push(calcs, TYPE_STRING, (void *)(result->string));
+		}
+		else
+			return INCOMPATIBLE_TYPE;
+		break;
+
+	case I_PUSH:                                                                                                                                                     ///OK?
+
+		///                         Value operations
+		if(item->index < 0)																		/// index indicates local stack operation
+		{
+			if (stack_index_value(locals, abs(item->index)-1, (int *)&types[0], &values[0]) == INTERNAL_ERROR) ///
+				return INTERNAL_ERROR;
+		}
+		else
+		{
+			if (variables_value(globals, &types[0], &values[0], item->index) == INTERNAL_ERROR)	/// index indicates global variables operation
+				return INTERNAL_ERROR;
+		}
+																								///ACHTUNG! we do not want to pop locals stack
 
 		///                         Instruction operations
 		if (types[0] == TYPE_INT)
@@ -288,7 +330,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		break;
 
 	case I_GREATER:                                                                                                                                             ///OK?
-		
+
 		///                         Stack operations
 		if (stack_index_value(calcs, 0, (int *)&types[0], &values[0]) == INTERNAL_ERROR)
 			return INTERNAL_ERROR;
