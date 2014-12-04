@@ -5,7 +5,9 @@
 DEBUG=false
 mem_check=false
 tests=true
+
 DELETE=false
+NO_DELETE=false
 
 MODULES=false
 PROJECT=false
@@ -17,6 +19,10 @@ if [ $# -gt 0 ]; then
 	do
 		if [[ "delete" == "$arg" ]]; then
 			DELETE=true
+		fi
+
+		if [[ "log" == "$arg" ]]; then			# param "log" to archive all logs
+			NO_DELETE=true
 		fi
 		
 		if [[ "debug" == "$arg" ]]; then
@@ -221,7 +227,7 @@ if [[ $tests == true || $PROJECT == true  ]]; then
 			fi
 		fi
 
-		if [[ $OK == true || $DELETE == true ]]; then
+		if [[ NO_DELETE ==false && ( $OK == true || $DELETE == true ) ]]; then
 			rm -rf "$file.current.stdout" "$file.current.stderr" "$file.diff.out"
 		fi
 	}
