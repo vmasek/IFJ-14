@@ -1,5 +1,8 @@
+#ifndef __INTERPRETER_H__
+#define __INTERPRETER_H__
+
 /**
- * @file    interpreter.c
+ * @file    interpreter.h
  * @brief   Implementation of interpreter
  * @author  Tomas Paulus (xpaulu01), Vojtech Mašek (xmasek15)
  *******************************************************************/
@@ -51,3 +54,4 @@ typedef struct Instruction
 
 int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instructions);
 
+#endif

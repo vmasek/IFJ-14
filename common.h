@@ -14,6 +14,9 @@
 
 #include "cstring.h"
 
+/* GC tag for instructions */
+#define GC_INSTR "instructions"
+
 /* Macro for gcc to stop nagging about unused parameters */
 #define IGNORE_PARAM(id) (void)(id)
 

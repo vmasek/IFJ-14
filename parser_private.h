@@ -6,7 +6,9 @@
 
 #include "common.h"
 #include "errors.h"
+#include "gc.h"
 #include "ial.h"
+#include "interpreter.h"
 #include "scaner.h"
 
 typedef struct var_record {
@@ -24,6 +26,7 @@ typedef struct func_record {
     unsigned index;
 } Func_record;
 
-int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions);
+int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions,
+               Instruction **next_instr);
 
 #endif
