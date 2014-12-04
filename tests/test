@@ -1,14 +1,24 @@
-
+#/bin/bash
 # Test script
 # Vojtech Mašek (xmasek15)
 
 DEBUG=false
 mem_check=false
+tests=true
+DELETE=false
+
+MODULES=false
+PROJECT=false
+
 
 if [ $# -gt 0 ]; then
 
 	for arg in "${@}"
 	do
+		if [[ "delete" == "$arg" ]]; then
+			DELETE=true
+		fi
+		
 		if [[ "debug" == "$arg" ]]; then
 			DEBUG=true
 		fi
@@ -16,6 +26,21 @@ if [ $# -gt 0 ]; then
 		if [[ "mem" == "$arg"  ]]; then
 			mem_check=true
 		fi
+
+		if [[ "tests" == "$arg" ]]; then
+			tests=true
+		fi
+
+		if [[ "modules" == "$arg" ]]; then
+			tests=false
+			MODULES=true
+		fi
+
+		if [[ "project" == "$arg" ]]; then
+			tests=false
+			PROJECT=true
+		fi
+
 	done
 fi
 
@@ -23,7 +48,7 @@ rm ./*.out 2>/dev/null
 
 
 
-BIN="./test_ifj"
+BIN_TEST="./test_ifj"
 
 TESTS=(	#this is array of keys to coded tests (will be used as argument for project)
 			"kmp"
@@ -46,109 +71,187 @@ color='\e[0;34m'
 NC='\e[0m' # No Color
 
 
-if [[ $DEBUG == true ]]; then
-	make -B FLAGS='-DDEBUG -g -Wstrict-prototypes -Wstrict-overflow=5 -Wwrite-strings -Wunreachable-code -Winit-self -Werror-implicit-function-declaration' &>"$test".out
-else
-	make -B FLAGS='-g -Wstrict-prototypes -Wstrict-overflow=5 -Wwrite-strings -Wunreachable-code -Winit-self -Werror-implicit-function-declaration' &>"$test".out
+
+#Tests to verify moduls and functions
+if [[ $tests == true || $MODULES == true  ]]; then
+
+	if [[ $DEBUG == true ]]; then
+		make -B FLAGS='-DDEBUG -g -Wstrict-prototypes -Wstrict-overflow=5 -Wwrite-strings -Wunreachable-code -Winit-self -Werror-implicit-function-declaration' &>"$test".out
+	else
+		make -B FLAGS='-g -Wstrict-prototypes -Wstrict-overflow=5 -Wwrite-strings -Wunreachable-code -Winit-self -Werror-implicit-function-declaration' &>"$test".out
+	fi
+
+
+	rm ./*.o ../*.o .depend ../.depend 2>/dev/null
+
+	valgrind_additonal_opt="-v --track-origins=yes --leak-check=full --malloc-fill=0xFF --free-fill=0xFF"
+
+	for test in "${TESTS[@]}"
+	do
+		#if array contains element
+		if [[ "${FILE_OUT_TESTS[@]}" =~ "${test}" || "${FILE_OUT_TESTS[${#FILE_OUT_TESTS[@]}-1]}" == "${test}" ]]; then
+			#echo "*************************************contained*********************************************************"
+			"$BIN_TEST" "$test" &>"$test".out
+			echo "*** Testing of $test ***"
+
+			if [[ "$(tail "$test".out)" =~ "OK. Everything is fine." ]]; then
+				echo -e "${green}OK.${NC} In $test is everything fine."
+				rm "$test".out
+			else
+				echo -e "${red}ERROR${NC} has occured during test of $test ! ${color2}LOG:${NC} \"$test.out\"  ${color2}Try running:${NC} \"$BIN_TEST $test\" ."
+			fi
+		else
+			result=$("$BIN_TEST" "$test" 2>&1)
+			echo "$result"
+			if [[ "$result" =~ "Result: Failed 0" ]]; then
+				echo -e "${green}OK.${NC} In $test is everything fine."
+			else
+				echo -e "${red}ERROR${NC} has occured during test of $test ! If needed try running \"$BIN_TEST $test\" ."
+			fi
+		fi
+
+		if [[ $mem_check == true ]]; then
+			valgrind_oks=0
+			valgrind --log-file=valgrind."$test".out "$BIN_TEST" "$test" 1>/dev/null 2>/dev/null
+			if [[ $(tail -n 1 valgrind."$test".out) =~ "ERROR SUMMARY: 0 errors" ]]; then
+				echo -e "${green}OK.${NC} valgrind of $test is error free."
+				valgrind "$valgrind_additonal_opt" --log-file=valgrind."$test".out  "$BIN_TEST" "$test" 1>/dev/null 2>/dev/null
+				if [[ $(tail -n 1 valgrind."$test".out) =~ "ERROR SUMMARY: 0 errors" ]]; then
+					echo -e "${green}OK.${NC} Advanced valgrind of $test is error free."
+					valgrind_oks=$((valgrind_oks+1))
+				else
+					echo -e "${red}ERROR${NC} has occured in valgrind of $test ! ${color2}LOG:${NC} \"valgrind.$test.out\" ${color2}Try running:${NC} \"valgrind $valgrind_additonal_opt $BIN_TEST $test\""
+				fi
+			else
+				echo -e "${red}ERROR${NC} has occured in valgrind of $test ! ${color2}LOG:${NC} \"valgrind.$test.out\" ${color2}Try running:${NC} \"valgrind $BIN_TEST $test\""
+			fi
+
+			#valgrinding can be error free but memcheck still could have failed
+			if [[ $valgrind_oks == 1 ]]; then
+
+				result=$(tail valgrind."$test".out)
+				#If all allocations were freed or if there are no allocations memcheck is useless
+				if [[ "$result" =~ "total heap usage: 0" || "$result" =~ "All heap blocks were freed -- no leaks are possible" ]]; then
+					valgrind_oks=6
+				else
+					if [[ "$result" =~ "still reachable: 0" ]]; then
+						valgrind_oks=$((valgrind_oks+1))
+					else
+						echo -e "${red}ERROR${NC} [ ${color}still reachable memory${NC} ] has occured in memcheck of $test !"
+					fi
+
+					if [[ "$result" =~ "suppressed: 0" ]]; then
+						valgrind_oks=$((valgrind_oks+1))
+					else
+						echo -e "${red}ERROR${NC} [ ${color}suppressed memory${NC} ] has occured in memcheck of $test !"
+					fi
+
+					if [[ "$result" =~ "possibly lost: 0" ]]; then
+						valgrind_oks=$((valgrind_oks+1))
+					else
+						echo -e "${red}ERROR${NC} [ ${color}possibly lost memory${NC} ] has occured in memcheck of $test !"
+					fi
+
+					if [[ "$result" =~ "indirectly lost: 0" ]]; then
+						valgrind_oks=$((valgrind_oks+1))
+					else
+						echo -e "${red}ERROR${NC} [ ${color}indirectly lost memory${NC} ] has occured in memcheck of $test !"
+					fi
+
+					if [[ "$result" =~ "definitely lost: 0" ]]; then
+						valgrind_oks=$((valgrind_oks+1))
+					else
+						echo -e "${red}ERROR${NC} [ ${color}definitely lost memory${NC} ] has occured in memcheck of $test !"
+					fi
+				fi
+
+				#Checking how many valgrind errors and warnings has occured.
+				if [[ $valgrind_oks == 6 ]]; then
+					echo -e "${green}OK.${NC} Memcheck of $test is error free."
+					rm valgrind."$test".out
+				else
+						echo -e "${color2}LOG:${NC} \"valgrind.$test.out\" ${color2}Try running:${NC} \"valgrind $valgrind_additonal_opt $BIN_TEST $test\""
+
+				fi
+			fi
+
+
+		fi
+
+	done
+
 fi
 
+#Tests to verify vhole project
+if [[ $tests == true || $PROJECT == true  ]]; then
 
-rm ./*.o ../*.o .depend ../.depend 2>/dev/null
+	function run_test 
+	{
+		local OK=true
+		local source="$1"
+		local dir_name=$(dirname "$source")
+		local file_name=$(basename -s .pas "$source")
+		local file="$dir_name/$file_name"
+		local exit_code_correct=$(tail -n 1 "$file.exit.correct")
 
-valgrind_additonal_opt="-v --track-origins=yes --leak-check=full --malloc-fill=0xFF --free-fill=0xFF"
 
-for test in "${TESTS[@]}"
-do
-	#if array contains element
-	if [[ "${FILE_OUT_TESTS[@]}" =~ "${test}" || "${FILE_OUT_TESTS[${#FILE_OUT_TESTS[@]}-1]}" == "${test}" ]]; then
-		#echo "*************************************contained*********************************************************"
-		"$BIN" "$test" &>"$test".out
-		echo "*** Testing of $test ***"
+		#touch "$file.current.stdout"
 
-		if [[ "$(tail "$test".out)" =~ "OK. Everything is fine." ]]; then
-			echo -e "${green}OK.${NC} In $test is everything fine."
-			rm "$test".out
-		else
-			echo -e "${red}ERROR${NC} has occured during test of $test ! ${color2}LOG:${NC} \"$test.out\"  ${color2}Try running:${NC} \"$BIN $test\" ."
+		"$BIN_PROJECT" "$source" 1>"$file.current.stdout" 2>"$file.current.stderr"
+		exit_code="$?"
+
+		if [ "$exit_code" != "$exit_code_correct" ]; then
+			OK=false
 		fi
+
+		
+		diff "$file.current.stdout" "$file.stdout.correct" >$file.diff.out
+		diff_code=$?
+		if [[ "$diff_code" == "0"  &&  "$exit_code" == "$exit_code_correct" ]]; then
+			echo -e "[ ${green}OK${NC} ]\tfile: $file_name"
+		else
+			echo -e "[ ${red}FAIL${NC} ]\tfile: $file_name"
+
+			if [[ "$exit_code" != "$exit_code_correct" ]]; then
+				echo -e "${color2}\t\tExit code: $exit_code and should be $exit_code_correct ${NC}"
+			fi
+
+			if [[ "$diff_code" != "0" ]]; then
+				echo -e "${color2}\t\tERROR: DIFF is wronng. See $file.diff.out${NC}"
+			fi
+		fi
+
+		if [[ $OK == true || $DELETE == true ]]; then
+			rm -rf "$file.current.stdout" "$file.current.stderr" "$file.diff.out"
+		fi
+	}
+
+
+	BIN_PROJECT="../projekt_ifj"
+
+	cd ..                   #POZOR make
+	if [[ $DEBUG == true ]]; then
+		make -B FLAGS='-DDEBUG -g -Wstrict-prototypes -Wstrict-overflow=5 -Wwrite-strings -Wunreachable-code -Winit-self -Werror-implicit-function-declaration' &>"$test".out
 	else
-		result=$("$BIN" "$test" 2>&1)
-		echo "$result"
-		if [[ "$result" =~ "Result: Failed 0" ]]; then
-			echo -e "${green}OK.${NC} In $test is everything fine."
-		else
-			echo -e "${red}ERROR${NC} has occured during test of $test ! If needed try running \"$BIN $test\" ."
-		fi
+		make -B FLAGS='-g -Wstrict-prototypes -Wstrict-overflow=5 -Wwrite-strings -Wunreachable-code -Winit-self -Werror-implicit-function-declaration' &>"$test".out
 	fi
+	cd ./tests/             #POZOR make
 
-	if [[ $mem_check == true ]]; then
-		valgrind_oks=0
-		valgrind --log-file=valgrind."$test".out "$BIN" "$test" 1>/dev/null 2>/dev/null
-		if [[ $(tail -n 1 valgrind."$test".out) =~ "ERROR SUMMARY: 0 errors" ]]; then
-			echo -e "${green}OK.${NC} valgrind of $test is error free."
-			valgrind "$valgrind_additonal_opt" --log-file=valgrind."$test".out  "$BIN" "$test" 1>/dev/null 2>/dev/null
-			if [[ $(tail -n 1 valgrind."$test".out) =~ "ERROR SUMMARY: 0 errors" ]]; then
-				echo -e "${green}OK.${NC} Advanced valgrind of $test is error free."
-				valgrind_oks=$((valgrind_oks+1))
-			else
-				echo -e "${red}ERROR${NC} has occured in valgrind of $test ! ${color2}LOG:${NC} \"valgrind.$test.out\" ${color2}Try running:${NC} \"valgrind $valgrind_additonal_opt $BIN $test\""
-			fi
-		else
-			echo -e "${red}ERROR${NC} has occured in valgrind of $test ! ${color2}LOG:${NC} \"valgrind.$test.out\" ${color2}Try running:${NC} \"valgrind $BIN $test\""
-		fi
+	#\read -a FILES_SKAL <<< $( find ./files/skal -name '*.pas') #filling up the field of paths to files
+	read -a FILES_OURS <<< $( find ./files/ours -name '*.pas') #filling up the field of paths to files
 
-		#valgrinding can be error free but memcheck still could have failed
-		if [[ $valgrind_oks == 1 ]]; then
-
-			result=$(tail valgrind."$test".out)
-			#If all allocations were freed or if there are no allocations memcheck is useless
-			if [[ "$result" =~ "total heap usage: 0" || "$result" =~ "All heap blocks were freed -- no leaks are possible" ]]; then
-				valgrind_oks=6
-			else
-				if [[ "$result" =~ "still reachable: 0" ]]; then
-					valgrind_oks=$((valgrind_oks+1))
-				else
-					echo -e "${red}ERROR${NC} [ ${color}still reachable memory${NC} ] has occured in memcheck of $test !"
-				fi
-
-				if [[ "$result" =~ "suppressed: 0" ]]; then
-					valgrind_oks=$((valgrind_oks+1))
-				else
-					echo -e "${red}ERROR${NC} [ ${color}suppressed memory${NC} ] has occured in memcheck of $test !"
-				fi
-
-				if [[ "$result" =~ "possibly lost: 0" ]]; then
-					valgrind_oks=$((valgrind_oks+1))
-				else
-					echo -e "${red}ERROR${NC} [ ${color}possibly lost memory${NC} ] has occured in memcheck of $test !"
-				fi
-
-				if [[ "$result" =~ "indirectly lost: 0" ]]; then
-					valgrind_oks=$((valgrind_oks+1))
-				else
-					echo -e "${red}ERROR${NC} [ ${color}indirectly lost memory${NC} ] has occured in memcheck of $test !"
-				fi
-
-				if [[ "$result" =~ "definitely lost: 0" ]]; then
-					valgrind_oks=$((valgrind_oks+1))
-				else
-					echo -e "${red}ERROR${NC} [ ${color}definitely lost memory${NC} ] has occured in memcheck of $test !"
-				fi
-			fi
-
-			#Checking how many valgrind errors and warnings has occured.
-			if [[ $valgrind_oks == 6 ]]; then
-				echo -e "${green}OK.${NC} Memcheck of $test is error free."
-				rm valgrind."$test".out
-			else
-					echo -e "${color2}LOG:${NC} \"valgrind.$test.out\" ${color2}Try running:${NC} \"valgrind $valgrind_additonal_opt $BIN $test\""
-
-			fi
-		fi
+	#echo "${FILES_SKAL[@]}"
+	#echo "${FILES_OURS[@]}"
 
 
-	fi
+	for file in "${FILES_OURS[@]}"; do
+		run_test $file
+	done
 
-done
+	echo "-------------------------------------TESTy od skala---------------------------------------------------------------------"
 
-#rm test_ifj 
+	for file in "${FILES_SKAL[@]}"; do
+		run_test $file
+	done
+
+fi
