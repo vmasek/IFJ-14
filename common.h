@@ -78,14 +78,6 @@ typedef enum
 } Type;
 
 
-typedef struct
-{
-    Value data;
-    Type type;
-} My_value;
-
-
-
 /**
  * @brief Function converts char to int.
  * @param c char that's going to be converted
