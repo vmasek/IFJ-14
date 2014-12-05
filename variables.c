@@ -60,6 +60,36 @@ int variables_init(Variables *vars)
     return SUCCESS;
 }
 
+int variables_occupy(Variables *vars, unsigned count)
+{
+    void *temp;
+
+    if (vars == NULL)
+        return INTERNAL_ERROR;
+
+    if (!count)
+        return SUCCESS;
+
+    if ((temp = realloc(vars->values, (vars->count + count) * sizeof(Value)))
+        == NULL)
+        return INTERNAL_ERROR;
+
+    vars->values = temp;
+
+    if ((temp = realloc(vars->types, (vars->count + count) * sizeof(Type)))
+        == NULL)
+        return INTERNAL_ERROR;
+
+    vars->types = temp;
+
+    while (count--) {
+        vars->types[vars->count] = TYPE_OTHER;
+        vars->count++;
+    }
+
+    return SUCCESS;
+}
+
 int variables_print(Variables *vars)
 {
     if (vars == NULL) {

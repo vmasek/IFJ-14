@@ -59,6 +59,7 @@ static int nt_program(FILE *input, Tree *globals, Tree *functions,
     int ret;
     int global_count;
     CATCH_VALUE(nt_var_section(input, globals, &global_count), ret);
+    variables_occupy(vars, global_count);
     CATCH_VALUE(nt_func_section(input, globals, functions, vars), ret);
     CHECK_VALUE(nt_main(input, globals, functions, first_instr, vars), ret);
 
