@@ -23,8 +23,8 @@ int variables_add(Variables *vars, Type type, Value value, unsigned *index);
 int variables_free(Variables *vars);
 int variables_init(Variables *vars);
 int variables_print(Variables *vars);
-int variables_value(Variables*, Type*, Value*, unsigned int);
-
+int variables_value_read(Variables*, Type*, Value*, unsigned int);
+int variables_value_write(Variables*, Value*, unsigned int);
 
 
 #endif //__VARIABLES_H__

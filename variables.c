@@ -99,7 +99,7 @@ int variables_print(Variables *vars)
     return SUCCESS;
 }
 
-int variables_value(Variables *variables, Type *type, Value *value, unsigned int index)
+int variables_value_read(Variables *variables, Type *type, Value *value, unsigned int index)
 {
 	if (!value)
     {
@@ -107,7 +107,15 @@ int variables_value(Variables *variables, Type *type, Value *value, unsigned int
 		return INTERNAL_ERROR;
 	}
 
-	*type = variables->types[index];
+	if (!variables)
+    {
+		debug("not Variables field given.\n");
+		return INTERNAL_ERROR;
+	}
+
+	if(type)
+		*type = variables->types[index];
+
 
 	if (variables->types[index] == TYPE_INT)
 	{
@@ -134,6 +142,26 @@ int variables_value(Variables *variables, Type *type, Value *value, unsigned int
 		debug("bad type\n");
 		return INTERNAL_ERROR;
 	}
+
+	return SUCCESS;
+}
+
+int variables_value_write(Variables *variables, Value *value, unsigned int index)
+{
+	if (!value)
+    {
+		debug("not Value given.\n");
+		return INTERNAL_ERROR;
+	}
+
+	if (!variables)
+    {
+		debug("not Variables field given.\n");
+		return INTERNAL_ERROR;
+	}
+
+
+	variables->values[index] = *value;
 
 	return SUCCESS;
 }
