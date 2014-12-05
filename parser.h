@@ -5,6 +5,6 @@
 #include "ial.h"
 #include "interpreter.h"
 
-int parse(FILE *input, Instruction *first_instr);
+int parse(FILE *input, Instruction *first_instr, Variables *vars);
 
 #endif

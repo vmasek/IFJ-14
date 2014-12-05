@@ -12,6 +12,9 @@ int main(int argc, char *argv[])
         .next_instruction = NULL,
         .alt_instruction = NULL
     };
+    Variables global_vars;
+
+    variables_init(&global_vars);
 
     if (argc < 2) {
         return print_error(INTERNAL_ERROR);
@@ -22,7 +25,13 @@ int main(int argc, char *argv[])
         return print_error(INTERNAL_ERROR);
     }
 
-    ret = print_error(parse(fp, &start));
+    ret = print_error(parse(fp, &start, &global_vars));
+
     fclose(fp);
+
+    //TODO interpretation here
+
+    variables_free(&global_vars);
+
     return ret;
 }
