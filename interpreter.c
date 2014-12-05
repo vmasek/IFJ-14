@@ -9,15 +9,11 @@
 
 int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instructions, Variables *globals)
 {
-	///!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	IGNORE_PARAM(locals);
-	IGNORE_PARAM(instructions);
+	IGNORE_PARAM(instructions);																						// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	Value values[2];
 	Type  types[2];
 	Value *result = calloc(sizeof(Value), 1);
-
-	//void *tmp_ptr= NULL;
 
 
 	switch (item->instruction)
@@ -70,9 +66,15 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 
 		///                         Stack operations
 		if (stack_index_value(calcs, 0, (int *)&types[0], result) == INTERNAL_ERROR)
+		{
+			debug("Invalid read from calcs\n");
 			return INTERNAL_ERROR;
+		}
 		if (stack_pop(calcs) == INTERNAL_ERROR)                                         ///ACHTUNG! If is only one operand then only one pop
+		{
+			debug("Popping spree calcs error\n");
 			return INTERNAL_ERROR;
+		}
 
 		///                         Instruction operations
 		if(item->index < 0)																		/// index indicates locals stack operation
@@ -150,14 +152,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 	case I_ADD:                                                                                                                                                     ///OK?
 
 		///                         Stack operations
-		if (stack_index_value(calcs, 0, (int *)&types[0], &values[0]) == INTERNAL_ERROR)
-			return INTERNAL_ERROR;
-
-		if (stack_index_value(calcs, 1, (int *)&types[1], &values[1]) == INTERNAL_ERROR)
-			return INTERNAL_ERROR;
-
-		if (stack_popping_spree(calcs, 2) == INTERNAL_ERROR)
-			return INTERNAL_ERROR;
+		STACK_OPERATIONS();
 
 		///                         Instruction operations
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
@@ -200,14 +195,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 	case I_SUB:
 
 		///                         Stack operations
-		if (stack_index_value(calcs, 0, (int *)&types[0], &values[0]) == INTERNAL_ERROR)
-			return INTERNAL_ERROR;
-
-		if (stack_index_value(calcs, 1, (int *)&types[1], &values[1]) == INTERNAL_ERROR)
-			return INTERNAL_ERROR;
-
-		if (stack_popping_spree(calcs, 2) == INTERNAL_ERROR)
-			return INTERNAL_ERROR;
+		STACK_OPERATIONS();
 
 		///                         Instruction operations
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
@@ -246,14 +234,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 	case I_MUL:
 
 		///                         Stack operations
-		if (stack_index_value(calcs, 0, (int *)&types[0], &values[0]) == INTERNAL_ERROR)
-			return INTERNAL_ERROR;
-
-		if (stack_index_value(calcs, 1, (int *)&types[1], &values[1]) == INTERNAL_ERROR)
-			return INTERNAL_ERROR;
-
-		if (stack_popping_spree(calcs, 2) == INTERNAL_ERROR)
-			return INTERNAL_ERROR;
+		STACK_OPERATIONS();
 
 		///                         Instruction operations
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
@@ -290,14 +271,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 	case I_DIV:                                                                                                                                             ///OK?
 
 		///                         Stack operations
-		if (stack_index_value(calcs, 0, (int *)&types[0], &values[0]) == INTERNAL_ERROR)
-			return INTERNAL_ERROR;
-
-		if (stack_index_value(calcs, 1, (int *)&types[1], &values[1]) == INTERNAL_ERROR)
-			return INTERNAL_ERROR;
-
-		if (stack_popping_spree(calcs, 2) == INTERNAL_ERROR)
-			return INTERNAL_ERROR;
+		STACK_OPERATIONS();
 
 		///                         Instruction operations
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
@@ -322,14 +296,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 	case I_LESS:                                                                                                                                                ///OK?
 
 		///                         Stack operations
-		if (stack_index_value(calcs, 0, (int *)&types[0], &values[0]) == INTERNAL_ERROR)
-			return INTERNAL_ERROR;
-
-		if (stack_index_value(calcs, 1, (int *)&types[1], &values[1]) == INTERNAL_ERROR)
-			return INTERNAL_ERROR;
-
-		if (stack_popping_spree(calcs, 2) == INTERNAL_ERROR)
-			return INTERNAL_ERROR;
+		STACK_OPERATIONS();
 
 		///                         Instruction operations
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
@@ -354,14 +321,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 	case I_GREATER:                                                                                                                                             ///OK?
 
 		///                         Stack operations
-		if (stack_index_value(calcs, 0, (int *)&types[0], &values[0]) == INTERNAL_ERROR)
-			return INTERNAL_ERROR;
-
-		if (stack_index_value(calcs, 1, (int *)&types[1], &values[1]) == INTERNAL_ERROR)
-			return INTERNAL_ERROR;
-
-		if (stack_popping_spree(calcs, 2) == INTERNAL_ERROR)
-			return INTERNAL_ERROR;
+		STACK_OPERATIONS();
 
 		///                         Instruction operations
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
@@ -386,14 +346,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 	case I_LESS_EQUAL:                                                                                                                                              ///OK?
 
 		///                         Stack operations
-		if (stack_index_value(calcs, 0, (int *)&types[0], &values[0]) == INTERNAL_ERROR)
-			return INTERNAL_ERROR;
-
-		if (stack_index_value(calcs, 1, (int *)&types[1], &values[1]) == INTERNAL_ERROR)
-			return INTERNAL_ERROR;
-
-		if (stack_popping_spree(calcs, 2) == INTERNAL_ERROR)
-			return INTERNAL_ERROR;
+		STACK_OPERATIONS();
 
 		///                         Instruction operations
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
@@ -418,14 +371,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 	case I_GREATER_EQUAL:                                                                                                                                               ///OK?
 
 		///                         Stack operations
-		if (stack_index_value(calcs, 0, (int *)&types[0], &values[0]) == INTERNAL_ERROR)
-			return INTERNAL_ERROR;
-
-		if (stack_index_value(calcs, 1, (int *)&types[1], &values[1]) == INTERNAL_ERROR)
-			return INTERNAL_ERROR;
-
-		if (stack_popping_spree(calcs, 2) == INTERNAL_ERROR)
-			return INTERNAL_ERROR;
+		STACK_OPERATIONS();
 
 		///                         Instruction operations
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
@@ -450,14 +396,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 	case I_EQUAL:                                                                                                                                               ///OK?
 
 		///                         Stack operations
-		if (stack_index_value(calcs, 0, (int *)&types[0], &values[0]) == INTERNAL_ERROR)
-			return INTERNAL_ERROR;
-
-		if (stack_index_value(calcs, 1, (int *)&types[1], &values[1]) == INTERNAL_ERROR)
-			return INTERNAL_ERROR;
-
-		if (stack_popping_spree(calcs, 2) == INTERNAL_ERROR)
-			return INTERNAL_ERROR;
+		STACK_OPERATIONS();
 
 		///                         Instruction operations
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
@@ -488,14 +427,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 	case I_NOT_EQUAL:                                                                                                                                               ///OK?
 
 		///                         Stack operations
-		if (stack_index_value(calcs, 0, (int *)&types[0], &values[0]) == INTERNAL_ERROR)
-			return INTERNAL_ERROR;
-
-		if (stack_index_value(calcs, 1, (int *)&types[1], &values[1]) == INTERNAL_ERROR)
-			return INTERNAL_ERROR;
-
-		if (stack_popping_spree(calcs, 2) == INTERNAL_ERROR)
-			return INTERNAL_ERROR;
+		STACK_OPERATIONS();
 
 		///                         Instruction operations
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))

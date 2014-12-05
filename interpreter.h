@@ -61,4 +61,34 @@ typedef struct Instruction
 
 int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instructions, Variables *globals);
 
+
+
+
+/**
+ * @brief Macro for operations over calcs stack.
+ * @return INTERNAL_ERROR if anything is wrong.
+ *
+ * Macro that is used to get values from top and top- of stack and pops once.
+ * Will print debug message if something is wrong.
+ */
+#define STACK_OPERATIONS()                                                    \
+if(stack_index_value(calcs, 0, (int*)&types[0], &values[0])==INTERNAL_ERROR)  \
+{                                                                             \
+	debug("Invalid read from calcs\n");                                       \
+	return INTERNAL_ERROR;                                                    \
+}                                                                             \
+if(stack_index_value(calcs, 1, (int*)&types[1], &values[1])==INTERNAL_ERROR)  \
+{                                                                             \
+	debug("Invalid read from calcs\n");                                       \
+	return INTERNAL_ERROR;                                                    \
+}                                                                             \
+if(stack_popping_spree(calcs, 2)==INTERNAL_ERROR)                             \
+{                                                                             \
+	debug("Popping spree calcs error\n");                                     \
+	return INTERNAL_ERROR;                                                    \
+}                                                                             \
+
+
+
+
 #endif
