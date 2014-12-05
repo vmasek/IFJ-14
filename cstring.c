@@ -343,6 +343,24 @@ int cstr_cmp(cstring const *s1, cstring const *s2)
     return strcmp(s1->str, s2->str);
 }
 
+/**
+ * @brief Compares cstring to string.
+ * @param s1 cstring to compare
+ * @param str string to compare
+ * @return int value, if cstring and string are same returns 0, else <>0
+ *
+ * Uses strcmp to compare "str" value of cstring and string.
+ */
+int cstr_cmp_str(cstring const *s1, const char *str)
+{
+	if(!s1||!str)
+	{
+		debug("one of strings to compare not given.");
+	}
+
+    return strcmp(s1->str, str);
+}
+
 
 /**
  * @brief Prints whole cstring.

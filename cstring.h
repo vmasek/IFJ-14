@@ -23,7 +23,9 @@ void        print_cstr_all(cstring const *);
 
 /* Copying and Comparing */
 int         cstr_cmp(cstring const *, cstring const *);
+int         cstr_cmp_str(cstring const *, const char *);
 cstring     *cstr_copy(cstring const *);
+
 
 
 /* Allocation and copying */
