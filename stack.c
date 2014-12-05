@@ -99,6 +99,7 @@ int stack_index(Stack *stack, unsigned int index, int *type, void **value)
     return SUCCESS;
 }
 
+
 int stack_index_value(Stack *stack, unsigned int index, int *type, Value *value)
 {
     Stack_Node *node = stack->top;
@@ -143,7 +144,56 @@ int stack_index_value(Stack *stack, unsigned int index, int *type, Value *value)
 		}
 	}
 
+    return SUCCESS;
+}
 
+
+int stack_index_insert_value(Stack *stack, unsigned int index, int type, Value *value)
+{
+    Stack_Node *node = stack->top;
+
+    if (stack == NULL || stack->top == NULL)
+        return INTERNAL_ERROR;
+
+	while (index--) {
+		if ((node = node->next) == NULL)
+			return INTERNAL_ERROR;
+	}
+
+
+	node->type = type;
+
+	if (!value)
+	{
+		debug("Value not given\n");
+		return INTERNAL_ERROR;
+	}
+
+	if (type == TYPE_INT)
+	{
+		debug("integer\n");
+		*(int *)node->value = value->integer;
+	}
+	else if (type == TYPE_REAL)
+	{
+		debug("double\n");
+		*(double *)node->value = value->real;
+	}
+	else if (type == TYPE_STRING)
+	{
+		debug("string\n");
+		cstr_assign_cstr((cstring *)node->value, value->string);
+	}
+	else if (type == TYPE_BOOL)
+	{
+		debug("bool\n");
+		*(bool *)node->value = value->boolean;
+	}
+	else
+	{
+		debug("not Value value\n");
+		return INTERNAL_ERROR;
+	}
 
     return SUCCESS;
 }

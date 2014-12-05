@@ -1,6 +1,5 @@
 /**
  * @file    stack.h
- * @name    Stack datatype (header)
  * @author  Vojtech Mašek (xmasek15)
  * @brief   Implementation of Stack datatype for IFJ projekt
  ****************************************************************************/
@@ -43,12 +42,14 @@ int    stack_top(Stack*, int*, void**);
 
 /* Advanced operations */
 int    stack_read_first_of_type(Stack*, int, void**);
-int    stack_insert(Stack*, int, int, void*);
-int    stack_uninsert(Stack*, int, int*, void**);
-int    stack_index(Stack*, unsigned, int*, void**);
-int    stack_index_value(Stack *, unsigned, int*, Value*);
+int    stack_insert(Stack*, int, int, void*);							///Inserting before first of type
+int    stack_uninsert(Stack*, int, int*, void**);						///Uninserting from before first of type
 int    stack_popping_spree(Stack *, unsigned int);
 
+/* Index operations with stack */
+int    stack_index(Stack*, unsigned, int*, void**);						///Gets values from index like type and and void*
+int    stack_index_value(Stack*, unsigned, int*, Value*);				///Gets values from index like Value struct
+int    stack_index_insert_value(Stack*, unsigned int, int, Value*);	///Inserts values from Value to index
 
 /* Printing */
 void   stack_print(Stack*);
