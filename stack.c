@@ -80,14 +80,26 @@ int stack_top(Stack *stack, int *type, void **value)
 
 int stack_index(Stack *stack, unsigned int index, int *type, void **value)
 {
-    Stack_Node *node = stack->top;
-
     if (stack == NULL || stack->top == NULL)
-        return INTERNAL_ERROR;
+    {
+		debug("not stack or stack top\n");
+		return INTERNAL_ERROR;
+	}
+
+	if(index>stack->count)
+	{
+		debug("Stack index %u is out of range\n", index);
+		return INTERNAL_ERROR;
+	}
+
+    Stack_Node *node = stack->top;
 
 	while (index--) {
 		if ((node = node->next) == NULL)
+		{
+			debug("node was not found on that index\n");
 			return INTERNAL_ERROR;
+		}
 	}
 
     if (type != NULL)
@@ -102,14 +114,26 @@ int stack_index(Stack *stack, unsigned int index, int *type, void **value)
 
 int stack_index_value(Stack *stack, unsigned int index, int *type, Value *value)
 {
-    Stack_Node *node = stack->top;
-
     if (stack == NULL || stack->top == NULL)
-        return INTERNAL_ERROR;
+    {
+		debug("not stack or stack top\n");
+		return INTERNAL_ERROR;
+	}
+
+	if(index>stack->count)
+	{
+		debug("Stack index %u is out of range\n", index);
+		return INTERNAL_ERROR;
+	}
+
+	Stack_Node *node = stack->top;
 
 	while (index--) {
 		if ((node = node->next) == NULL)
+		{
+			debug("node was not found on that index\n");
 			return INTERNAL_ERROR;
+		}
 	}
 
     if (type != NULL)
@@ -150,10 +174,19 @@ int stack_index_value(Stack *stack, unsigned int index, int *type, Value *value)
 
 int stack_index_insert_value(Stack *stack, unsigned int index, int type, Value *value)
 {
-    Stack_Node *node = stack->top;
-
     if (stack == NULL || stack->top == NULL)
-        return INTERNAL_ERROR;
+    {
+		debug("not stack or stack top\n");
+		return INTERNAL_ERROR;
+	}
+
+	if(index>stack->count)
+	{
+		debug("Stack index %u is out of range\n", index);
+		return INTERNAL_ERROR;
+	}
+
+    Stack_Node *node = stack->top;
 
 	while (index--) {
 		if ((node = node->next) == NULL)
