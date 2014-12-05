@@ -19,6 +19,7 @@ typedef struct var_record {
 } Var_record;
 
 typedef struct func_record {
+    unsigned local_count;
     unsigned param_count;
     Var_record **params;
     Var_record ret_value;
@@ -28,6 +29,6 @@ typedef struct func_record {
 } Func_record;
 
 int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions,
-               Variables *global_vars, Instruction **next_instr);
+               Variables *global_vars, Instruction **instr_ptr);
 
 #endif
