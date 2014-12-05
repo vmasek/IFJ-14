@@ -135,7 +135,7 @@ const struct rule RULES[RULE_COUNT] = {
 static int gen_instr(Instruction **instr_ptr, Instruction_type type, int index,
                      unsigned locals_count, Instruction *alt_instr)
 {
-    if (((*instr_ptr)->next_instruction = gc_malloc(GC_INSTR, 
+    if (((*instr_ptr)->next_instruction = gc_malloc(GC_INSTR,
                                                     sizeof(Instruction)))
         == NULL)
         return INTERNAL_ERROR;
@@ -223,7 +223,7 @@ static enum terminal get_term(Token *token)
         switch (token->value.value_symbol) {
         case ADDITION:
             return TERM_ADD;
-        case SUBSTRACTION:
+        case SUBTRACTION:
             return TERM_SUB;
         case MULTIPLICATION:
             return TERM_MUL;
@@ -433,7 +433,7 @@ static int handle_id(Token **tokens, Stack *type_stack, Tree **trees,
     struct var_record *var;
 
     IGNORE_PARAM(global_vars);
-    
+
     if ((trees[TREE_LOCALS] == NULL ||
          (node = tree_find_key_ch(trees[TREE_LOCALS],
                                   tokens[0]->value.value_name)) == NULL) &&
@@ -612,7 +612,7 @@ static int reduce_rule(Stack *sym_stack, Stack *type_stack, Tree **trees,
             if (RULES[i].symbols[index].sym_type != sym_array[index])
                 break;
             if (sym_array[index] == SYM_TERM &&
-                RULES[i].symbols[index].term_type 
+                RULES[i].symbols[index].term_type
                 != get_term(token_array[index]))
                 break;
         }

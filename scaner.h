@@ -21,7 +21,7 @@
 
 /* List of all possible keywords. */
 enum token_keyword {
-    NOT_A_KEYWORD = 0,   
+    NOT_A_KEYWORD = 0,
     KEYWORD_BEGIN,      // b
     KEYWORD_BOOLEAN,
     KEYWORD_DO,         // d
@@ -50,7 +50,7 @@ enum token_keyword {
 /* List of operations and other symbols */
 enum token_symbol {
     ADDITION,       // +
-    SUBSTRACTION,   // -
+    SUBTRACTION,   // -
     MULTIPLICATION, // *
     DIVISION,       // /
     COMPARISON,     // =
@@ -90,7 +90,7 @@ typedef struct {
         int                 value_int;
         double              value_float;
         char                value_name[TOKEN_IDENTIFIER_MAX_LENGTH];
-        cstring            *value_string; 
+        cstring            *value_string;
         enum token_keyword  value_keyword;
         enum token_symbol   value_symbol;
     } value;

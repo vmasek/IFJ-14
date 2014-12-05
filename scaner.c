@@ -314,7 +314,7 @@ int get_token(Token *token, FILE *input) {
                 state = LEXER_STR_LOAD;
                 break;
             }
-    
+
             if (symbol =='#') {
                 state = LEXER_STR_SPEC;
                 break;
@@ -500,7 +500,7 @@ void unget_token(Token *token)
     token_register(token, true);
 }
 
-/* 
+/*
  * Just for testing purpose
  */
 /*
