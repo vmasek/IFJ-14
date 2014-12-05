@@ -394,7 +394,7 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
             CHECK_VALUE(t_symbol(input, PARENTHESIS_R), ret);
             return SUCCESS;
         } else if (token.value.value_keyword == KEYWORD_IF) {
-            CHECK_VALUE(parse_expr(input, locals, globals, functions, vars, NULL, NULL),
+            CHECK_VALUE(parse_expr(input, locals, globals, functions, vars, instr, NULL),
                         ret);
             CHECK_VALUE(t_symbol(input, KEYWORD_THEN), ret);
             CHECK_VALUE(gen_instr(instr, I_JMP, 0, 0, NULL), ret);
