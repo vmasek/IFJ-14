@@ -357,35 +357,35 @@ static int handle_call(Token **tokens, Stack *type_stack, Tree **trees,
 
     IGNORE_PARAM(global_vars);
 
-    if (!strcmp(tokens[0]->value->value_name, BIF_COPY)) {
-        if (stack_index(type_stack, 2, (int *)cur_type, NULL) != SUCCESS ||
+    if (!strcmp(tokens[0]->value.value_name, BIF_COPY)) {
+        if (stack_index(type_stack, 2, (int *)&cur_type, NULL) != SUCCESS ||
             cur_type != TYPE_STRING ||
-            stack_index(type_stack, 1, (int *)cur_type, NULL) != SUCCESS ||
+            stack_index(type_stack, 1, (int *)&cur_type, NULL) != SUCCESS ||
             cur_type != TYPE_INT ||
-            stack_index(type_stack, 0, (int *)cur_type, NULL) != SUCCESS ||
+            stack_index(type_stack, 0, (int *)&cur_type, NULL) != SUCCESS ||
             cur_type != TYPE_INT)
             return INCOMPATIBLE_TYPE;
         instr_type = I_COPY;
         param_count = 3;
         ret_type = TYPE_STRING;
-    } else if (!strcmp(tokens[0]->value->value_name, BIF_FIND)) {
-        if (stack_index(type_stack, 1, (int *)cur_type, NULL) != SUCCESS ||
+    } else if (!strcmp(tokens[0]->value.value_name, BIF_FIND)) {
+        if (stack_index(type_stack, 1, (int *)&cur_type, NULL) != SUCCESS ||
             cur_type != TYPE_STRING ||
-            stack_index(type_stack, 0, (int *)cur_type, NULL) != SUCCESS ||
+            stack_index(type_stack, 0, (int *)&cur_type, NULL) != SUCCESS ||
             cur_type != TYPE_STRING)
             return INCOMPATIBLE_TYPE;
         instr_type = I_FIND;
         param_count = 2;
         ret_type = TYPE_INT;
-    } else if (!strcmp(tokens[0]->value->value_name, BIF_LENGTH)) {
-        if (stack_top(type_stack, (int *)cur_type, NULL) != SUCCESS ||
+    } else if (!strcmp(tokens[0]->value.value_name, BIF_LENGTH)) {
+        if (stack_top(type_stack, (int *)&cur_type, NULL) != SUCCESS ||
             cur_type != TYPE_STRING)
             return INCOMPATIBLE_TYPE;
-        instr_type = I_LENGTH;
+        instr_type = I_LEN;
         param_count = 1;
         ret_type = TYPE_INT;
-    } else if (!strcmp(tokens[0]->value->value_name, BIF_SORT)) {
-        if (stack_top(type_stack, (int *)cur_type, NULL) != SUCCESS ||
+    } else if (!strcmp(tokens[0]->value.value_name, BIF_SORT)) {
+        if (stack_top(type_stack, (int *)&cur_type, NULL) != SUCCESS ||
             cur_type != TYPE_STRING)
             return INCOMPATIBLE_TYPE;
         instr_type = I_SORT;
@@ -403,7 +403,7 @@ static int handle_call(Token **tokens, Stack *type_stack, Tree **trees,
         first_instr = function->first_instr;
         for (unsigned i = 0; i < param_count; i++) {
             if (stack_index(type_stack, i, (int *)&cur_type, NULL) != SUCCESS ||
-                cur_type != (function->params[param_count - i - 1]->type)
+                cur_type != function->params[param_count - i - 1]->type)
                 return INCOMPATIBLE_TYPE;
         }
     }
@@ -486,14 +486,14 @@ static int handle_id(Token **tokens, Stack *type_stack, Tree **trees,
     if (trees[TREE_LOCALS] != NULL &&
         (node = tree_find_key_ch(trees[TREE_LOCALS],
                                  tokens[0]->value.value_name)) != NULL) {
-        index = -((struct var_record *)(tree->node))->index - 1;
-    } else if ((node = tree_find_key_ch(trees[TREE_GLOBALS])
-                                 tokens[0]->value.value_name) != NULL) {
-        index = ((struct var_record *)(tree->node))->index;
+        index = -((struct var_record *)(node->data))->index - 1;
+    } else if ((node = tree_find_key_ch(trees[TREE_GLOBALS],
+                                 tokens[0]->value.value_name)) != NULL) {
+        index = ((struct var_record *)(node->data))->index;
     } else
         return UNDEFINED_IDENTIFIER;
 
-    if (stack_push(type_stack, ((struct var_record *)(tree->node))->type, NULL)
+    if (stack_push(type_stack, ((struct var_record *)(node->data))->type, NULL)
         != SUCCESS ||
         gen_instr(instr_ptr, I_PUSH, index, 0, NULL) != SUCCESS)
         return INTERNAL_ERROR;
@@ -635,7 +635,7 @@ int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions,
         error = INCOMPATIBLE_TYPE;
 
     if (type != NULL)
-        stack_top(&type_stack, type, NULL);
+        stack_top(&type_stack, (int *)type, NULL);
 
 fail:
     stack_free(&sym_stack);
