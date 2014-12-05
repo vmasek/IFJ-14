@@ -205,6 +205,7 @@ static int nt_func_section(FILE *input, Tree *globals, Tree *functions)
 static int nt_func(FILE *input, Tree *globals, Tree *functions)
 {
     int ret;
+    int count = 0;
     Token token;
     Func_record *func = NULL;
     //Var_record *params = NULL;
@@ -220,7 +221,7 @@ static int nt_func(FILE *input, Tree *globals, Tree *functions)
 
         CHECK_VALUE(t_id(input, &id), ret);
         CHECK_VALUE(t_symbol(input, PARENTHESIS_L), ret);
-        CATCH_VALUE(nt_paramlist(input, func, 0), ret);
+        CATCH_VALUE(nt_paramlist(input, func, &count), ret);
         CHECK_VALUE(t_symbol(input, PARENTHESIS_R), ret);
         CHECK_VALUE(nt_type(input, &(func->ret_value.type)), ret);
         tree_insert(func->locals, id, &(func->ret_value));
