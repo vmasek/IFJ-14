@@ -3,7 +3,8 @@
 
 #include <stdio.h>
 #include "ial.h"
+#include "interpreter.h"
 
-int parse(FILE *input);
+int parse(FILE *input, Instruction *first_instr);
 
 #endif

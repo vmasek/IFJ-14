@@ -7,6 +7,11 @@ int main(int argc, char *argv[])
 {
     int ret;
     FILE *fp;
+    Instruction start = {
+        .instruction = I_NOP,
+        .next_instruction = NULL,
+        .alt_instruction = NULL
+    };
 
     if (argc < 2) {
         return print_error(INTERNAL_ERROR);
@@ -17,7 +22,7 @@ int main(int argc, char *argv[])
         return print_error(INTERNAL_ERROR);
     }
 
-    ret = print_error(parse(fp));
+    ret = print_error(parse(fp, &start));
     fclose(fp);
     return ret;
 }

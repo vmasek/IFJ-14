@@ -24,7 +24,6 @@ typedef struct func_record {
     Var_record **params;
     Var_record ret_value;
     Tree *locals;
-    bool defined;
     Instruction *first_instr;
 } Func_record;
 
