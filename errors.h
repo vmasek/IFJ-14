@@ -1,7 +1,6 @@
 /**
  * @file    errors.h
- * @name    Chybove hlasky
- * @authors Tomas Paulus (xpaulu01), Vojtech Mašek (xmasek15)
+ * @author  Tomas Paulus (xpaulu01), Vojtech Mašek (xmasek15)
  * @brief   Error messages and error return codes for IFJ2014
  */
 
