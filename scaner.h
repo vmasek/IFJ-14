@@ -28,7 +28,6 @@ enum token_keyword {
     KEYWORD_ELSE,       // e
     KEYWORD_END,
     KEYWORD_FALSE,      // f
-    KEYWORD_FIND,
     KEYWORD_FORWARD,
     KEYWORD_FUNCTION,
     KEYWORD_IF,         // i
@@ -36,8 +35,7 @@ enum token_keyword {
     KEYWORD_READLN,     // r
     KEYWORD_REAL,
     KEYWORD_REPEAT,
-    KEYWORD_SORT,       // s
-    KEYWORD_STRING,
+    KEYWORD_STRING,     // s
     KEYWORD_THEN,       // t
     KEYWORD_TRUE,
     KEYWORD_UNTIL,      // u

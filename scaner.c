@@ -80,9 +80,6 @@ static enum token_keyword _get_keyword(char *name) {
         if (!strcmp(name, "false"))
             return KEYWORD_FALSE;
 
-        if (!strcmp(name, "find"))
-            return KEYWORD_FIND;
-
         if (!strcmp(name, "forward"))
             return KEYWORD_FORWARD;
 
@@ -110,9 +107,6 @@ static enum token_keyword _get_keyword(char *name) {
         break;
 
     case 's':
-        if (!strcmp(name, "sort"))
-            return KEYWORD_SORT;
-
         if (!strcmp(name, "string"))
             return KEYWORD_STRING;
 
