@@ -53,7 +53,7 @@ void        cstr_gc_free_all(void);
 
 /* Other */
 cstring    *cstr_read_line(cstring *);
-
+void        cstr_to_lower(cstring *);
 
 
 #endif //__CSTRING_H__

@@ -10,6 +10,7 @@
 #include    "common.h"
 #include    <string.h>
 #include    <stdlib.h>
+#include    <ctype.h>
 
 
 /**
@@ -320,8 +321,8 @@ void cstr_gc_free_all(void)
  */
 void print_cstr(cstring const *s)
 {
-    //printf("%s\n",s->str);
-    puts(s->str);
+    printf("%s",s->str);
+    //puts(s->str);
 }
 
 
@@ -359,6 +360,24 @@ int cstr_cmp_str(cstring const *s1, const char *str)
 	}
 
     return strcmp(s1->str, str);
+}
+
+/**
+ * @brief Lowers cstring chars.
+ * @param s cstring to lower.
+ */
+void cstr_to_lower(cstring *s)
+{
+	if(!s)
+	{
+		debug("Cstring to lower not given.");
+		return;
+	}
+
+	for(unsigned int i = 0; s->str[i] != '\0'; i++)
+    {
+        s->str[i]=tolower(s->str[i]);
+    }
 }
 
 
