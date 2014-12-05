@@ -206,7 +206,7 @@ int get_token(Token *token, FILE *input) {
 
             case '-':
                 token->type = TOKEN_SYMBOL;
-                token->value.value_symbol = SUBSTRACTION;
+                token->value.value_symbol = SUBTRACTION;
                 return SUCCESS;
 
             case '*':
@@ -403,7 +403,7 @@ int get_token(Token *token, FILE *input) {
                 token->value.value_float = (double)token->value.value_int;
                 break;
 
-            } else if (symbol == 'e') {
+            } else if ((symbol == 'e') || (symbol == 'E')) {
                 strcatc(buffer, symbol);
                 state = LEXER_FLOAT_EXP_LOADING_FIRST;
                 token->type = TOKEN_FLOAT;
@@ -428,7 +428,7 @@ int get_token(Token *token, FILE *input) {
             break;
 
         case LEXER_FLOAT_LOADING:
-            if (symbol == 'e') {
+            if ((symbol == 'e') || (symbol == 'E')) {
                 strcatc(buffer, symbol);
                 state = LEXER_FLOAT_EXP_LOADING_FIRST;
                 token->type = TOKEN_FLOAT;
