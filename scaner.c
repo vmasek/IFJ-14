@@ -474,7 +474,7 @@ int get_token(Token *token, FILE *input) {
                 ungetc(symbol, input);
                 return SUCCESS;
             } else {
-                token->value.value_name[token_name_pos] = symbol;
+                token->value.value_name[token_name_pos] = tolower(symbol);
                 token_name_pos ++;
                 break;
             }
