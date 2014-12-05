@@ -20,6 +20,11 @@
 #define TREE_GLOBALS 1
 #define TREE_FUNCS 2
 
+#define BIF_COPY "copy"
+#define BIF_FIND "find"
+#define BIF_LENGTH "length"
+#define BIF_SORT "sort"
+
 /* TYPES */
 enum symbol {
     SYM_SNT,        // scalar non-terminal symbol
@@ -343,31 +348,75 @@ static int handle_call(Token **tokens, Stack *type_stack, Tree **trees,
 {
     Type cur_type;
     Tree_Node *node;
+    Instruction_type instr_type;
     struct func_record *function;
+    unsigned param_count = 0;
+    unsigned local_count = 0;
+    Instruction *first_instr = NULL;
+    Type ret_type;
 
     IGNORE_PARAM(global_vars);
 
-    if ((node = tree_find_key_ch(trees[TREE_FUNCS],
-                                 tokens[0]->value.value_name)) == NULL)
-        return SEMANTIC_ERROR;
-
-    function = node->data;
-
-    for (unsigned i = 0; i < function->param_count; i++) {
-        if (stack_index(type_stack, i, (int *)&cur_type, NULL) != SUCCESS ||
-            cur_type != function->params[function->param_count - i - 1]->type)
+    if (!strcmp(tokens[0]->value->value_name, BIF_COPY)) {
+        if (stack_index(type_stack, 2, (int *)cur_type, NULL) != SUCCESS ||
+            cur_type != TYPE_STRING ||
+            stack_index(type_stack, 1, (int *)cur_type, NULL) != SUCCESS ||
+            cur_type != TYPE_INT ||
+            stack_index(type_stack, 0, (int *)cur_type, NULL) != SUCCESS ||
+            cur_type != TYPE_INT)
             return INCOMPATIBLE_TYPE;
+        instr_type = I_COPY;
+        param_count = 3;
+        ret_type = TYPE_STRING;
+    } else if (!strcmp(tokens[0]->value->value_name, BIF_FIND)) {
+        if (stack_index(type_stack, 1, (int *)cur_type, NULL) != SUCCESS ||
+            cur_type != TYPE_STRING ||
+            stack_index(type_stack, 0, (int *)cur_type, NULL) != SUCCESS ||
+            cur_type != TYPE_STRING)
+            return INCOMPATIBLE_TYPE;
+        instr_type = I_FIND;
+        param_count = 2;
+        ret_type = TYPE_INT;
+    } else if (!strcmp(tokens[0]->value->value_name, BIF_LENGTH)) {
+        if (stack_top(type_stack, (int *)cur_type, NULL) != SUCCESS ||
+            cur_type != TYPE_STRING)
+            return INCOMPATIBLE_TYPE;
+        instr_type = I_LENGTH;
+        param_count = 1;
+        ret_type = TYPE_INT;
+    } else if (!strcmp(tokens[0]->value->value_name, BIF_SORT)) {
+        if (stack_top(type_stack, (int *)cur_type, NULL) != SUCCESS ||
+            cur_type != TYPE_STRING)
+            return INCOMPATIBLE_TYPE;
+        instr_type = I_SORT;
+        param_count = 1;
+        ret_type = TYPE_STRING;
+    } else { 
+        if ((node = tree_find_key_ch(trees[TREE_FUNCS],
+                                     tokens[0]->value.value_name)) == NULL)
+            return SEMANTIC_ERROR;
+        function = node->data;
+        instr_type = I_CALL;
+        param_count = function->param_count;
+        local_count = function->local_count;
+        ret_type = function->ret_value.type;
+        first_instr = function->first_instr;
+        for (unsigned i = 0; i < param_count; i++) {
+            if (stack_index(type_stack, i, (int *)&cur_type, NULL) != SUCCESS ||
+                cur_type != (function->params[param_count - i - 1]->type)
+                return INCOMPATIBLE_TYPE;
+        }
     }
 
-    if (stack_index(type_stack, function->param_count, (int *)&cur_type, NULL)
+    if (stack_index(type_stack, param_count, (int *)&cur_type, NULL)
         != SUCCESS || cur_type != TYPE_OTHER)
         return INCOMPATIBLE_TYPE;
 
-    stack_popping_spree(type_stack, function->param_count + 1);
+    stack_popping_spree(type_stack, param_count + 1);
 
-    if (stack_push(type_stack, function->ret_value.type, NULL) != SUCCESS ||
-        gen_instr(instr_ptr, I_CALL, function->param_count,
-                  function->local_count, function->first_instr) != SUCCESS)
+    if (stack_push(type_stack, ret_type, NULL) != SUCCESS ||
+        gen_instr(instr_ptr, instr_type, param_count, local_count, first_instr)
+        != SUCCESS)
         return INTERNAL_ERROR;
 
     return SUCCESS;
@@ -430,21 +479,23 @@ static int handle_id(Token **tokens, Stack *type_stack, Tree **trees,
                      Variables *global_vars, Instruction **instr_ptr)
 {
     Tree_Node *node;
-    struct var_record *var;
+    int index;
 
     IGNORE_PARAM(global_vars);
 
-    if ((trees[TREE_LOCALS] == NULL ||
-         (node = tree_find_key_ch(trees[TREE_LOCALS],
-                                  tokens[0]->value.value_name)) == NULL) &&
-        (node = tree_find_key_ch(trees[TREE_GLOBALS],
-                                 tokens[0]->value.value_name)) == NULL)
-        return SEMANTIC_ERROR;
+    if (trees[TREE_LOCALS] != NULL &&
+        (node = tree_find_key_ch(trees[TREE_LOCALS],
+                                 tokens[0]->value.value_name)) != NULL) {
+        index = -((struct var_record *)(tree->node))->index - 1;
+    } else if ((node = tree_find_key_ch(trees[TREE_GLOBALS])
+                                 tokens[0]->value.value_name) != NULL) {
+        index = ((struct var_record *)(tree->node))->index;
+    } else
+        return UNDEFINED_IDENTIFIER;
 
-    var = node->data;
-
-    if (stack_push(type_stack, var->type, NULL) != SUCCESS ||
-        gen_instr(instr_ptr, I_PUSH, -var->index - 1, 0, NULL) != SUCCESS)
+    if (stack_push(type_stack, ((struct var_record *)(tree->node))->type, NULL)
+        != SUCCESS ||
+        gen_instr(instr_ptr, I_PUSH, index, 0, NULL) != SUCCESS)
         return INTERNAL_ERROR;
 
     return SUCCESS;
@@ -516,7 +567,7 @@ static int hold_token(Token **token, FILE *input)
 }
 
 int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions,
-               Variables *global_vars, Instruction **instr_ptr)
+               Variables *global_vars, Instruction **instr_ptr, Type *type)
 {
     int error;
     bool finished = false;
@@ -526,8 +577,8 @@ int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions,
     Stack type_stack;
     Tree *trees[TREE_COUNT];
 
-    if (input == NULL || globals == NULL || functions == NULL /* TODO ||
-        global_vars == NULL || instr_ptr == NULL*/)
+    if (input == NULL || globals == NULL || functions == NULL ||
+        global_vars == NULL || instr_ptr == NULL)
         return INTERNAL_ERROR;
 
     trees[TREE_LOCALS] = locals;
@@ -580,8 +631,11 @@ int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions,
         }
     }
 
-    if (type_stack.count != 1)
+    if (type_stack.count != 1) //TODO IS THIS NECESSARY?
         error = INCOMPATIBLE_TYPE;
+
+    if (type != NULL)
+        stack_top(&type_stack, type, NULL);
 
 fail:
     stack_free(&sym_stack);
