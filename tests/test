@@ -198,12 +198,14 @@ if [[ $tests == true || $MODULES == true  ]]; then
 
 fi
 
+
 #Tests to verify vhole project
 if [[ $tests == true || $PROJECT == true  ]]; then
 
+
 	function run_test 
 	{
-		local OK=true
+		local OK=false
 		local source="$1"
 		local dir_name=$(dirname "$source")
 		local file_name=$(basename -s .pas "$source")
@@ -216,15 +218,14 @@ if [[ $tests == true || $PROJECT == true  ]]; then
 		"$BIN_PROJECT" "$source" 1>"$file.current.stdout" 2>"$file.current.stderr"
 		exit_code="$?"
 
-		if [ "$exit_code" != "$exit_code_correct" ]; then
-			OK=false
-		fi
 
 		
 		diff "$file.current.stdout" "$file.stdout.correct" >$file.diff.out
 		diff_code=$?
 		if [[ "$diff_code" == "0"  &&  "$exit_code" == "$exit_code_correct" ]]; then
 			echo -e "[ ${green}OK${NC} ]\tfile: $file_name"
+			OK=true
+			((OK_count++))
 		else
 			echo -e "[ ${red}FAIL${NC} ]\tfile: $file_name"
 
@@ -259,18 +260,38 @@ if [[ $tests == true || $PROJECT == true  ]]; then
 	#echo "${FILES_SKAL[@]}"
 	#echo "${FILES_OURS[@]}"
 
+
+
+	
+
 	if [[ $ALL == true || $OURS == true ]]; then
+
+		counter=0
+		OK_count=0
 		echo "-------------------------------------Our-TESTs--------------------------------------------------------------------------"
 		for file in "${FILES_OURS[@]}"; do
 			run_test $file
+			((counter++))
 		done
+		
+		echo -e "TESTS:\t\t${green}PASSED: $OK_count ${NC} of $counter"
 	fi
 
+
+
+	counter=0
 	if [[ $ALL == true || $SKAL == true ]]; then
+
+		counter=0
+		OK_count=0
 		echo "-------------------------------------TESTy-od-skala---------------------------------------------------------------------"
 		for file in "${FILES_SKAL[@]}"; do
 			run_test $file
+			((counter++))
 		done
+
+		echo -e "TESTS:\t\t${green}PASSED: $OK_count ${NC} of $counter"
+
 	fi
 
 fi
