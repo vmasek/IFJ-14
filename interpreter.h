@@ -45,6 +45,7 @@ typedef enum
 	I_JMP,				// jump
 	I_CALL,				// call
 	I_HALT,				// halt
+	I_NOP,				// nop
 } Instruction_type;
 
 
