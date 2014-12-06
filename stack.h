@@ -23,7 +23,7 @@ typedef enum {
 } Stack_type;
 
 typedef struct {
-    Stack_type type; 
+    Stack_type type;
     struct stack_node *top;
     unsigned int count;
 } Stack;
@@ -50,5 +50,9 @@ int stack_uninsert(Stack *stack, int searched_type, int *type, void *value);
 
 /* PRINTING FUNCTIONS */
 int stack_print_types(Stack *stack);
+
+///docasne
+void stack_print(Stack*);
+void stack_print_node(int, void*);
 
 #endif //__STACK_H__

@@ -224,7 +224,7 @@ int stack_insert(Stack *stack, int searched_type, int type, void *value)
 {
     struct stack_node **found_ptr;
     struct stack_node *new_node;
-    
+
     if (stack == NULL) {
         debug("No stack given\n");
         return INTERNAL_ERROR;
@@ -347,4 +347,10 @@ int stack_print_types(Stack *stack)
     fprintf(stderr, "</stack>\n");
 
     return SUCCESS;
+}
+
+void stack_print(Stack *stack)
+{
+	IGNORE_PARAM(stack);
+	printf("toto by malo printnut stack ...\n");
 }
