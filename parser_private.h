@@ -29,5 +29,8 @@ typedef struct func_record {
 
 int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions,
                Variables *global_vars, Instruction **instr_ptr, Type *type);
+int parse_expr_inarg(FILE *input, Tree *locals, Tree *globals, Tree *functions,
+                     Variables *global_vars, Instruction **instr_ptr,
+                     Type *type);
 
 #endif

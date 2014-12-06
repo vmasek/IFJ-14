@@ -463,7 +463,7 @@ static int nt_arg_list_write(FILE *input, Tree *locals, Tree *globals, Tree *fun
     int ret;
     Token token;
 
-    CHECK_VALUE(parse_expr(input, locals, globals, functions, vars, instr, NULL), ret);
+    CHECK_VALUE(parse_expr_inarg(input, locals, globals, functions, vars, instr, NULL), ret);
     CHECK_VALUE(gen_instr(instr, I_WRITE, 1337, 0, NULL), ret);
     CHECK_VALUE(get_token(&token, input), ret);
     debug_token(&token);

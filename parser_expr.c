@@ -311,8 +311,10 @@ static int handle_add(Token **tokens, Stack *type_stack, Tree **trees,
     IGNORE_PARAM(global_vars);
 
     if (stack_index(type_stack, 1, (int *)&op1_type, NULL) != SUCCESS ||
-        stack_index(type_stack, 0, (int *)&op2_type, NULL) != SUCCESS)
+        stack_index(type_stack, 0, (int *)&op2_type, NULL) != SUCCESS) {
+        debug("Syntax error\n");
         return SYNTAX_ERROR;
+    }
 
     switch (op1_type) {
     case TYPE_INT:
@@ -432,8 +434,10 @@ static int handle_comp(Token **tokens, Stack *type_stack, Tree **trees,
     IGNORE_PARAM(global_vars);
 
     if (stack_index(type_stack, 1, (int *)&op1_type, NULL) != SUCCESS ||
-        stack_index(type_stack, 0, (int *)&op2_type, NULL) != SUCCESS)
+        stack_index(type_stack, 0, (int *)&op2_type, NULL) != SUCCESS) {
+        debug("Syntax error\n");
         return SYNTAX_ERROR;
+    }
 
     if (op1_type != op2_type)
         return INCOMPATIBLE_TYPE;
@@ -458,8 +462,10 @@ static int handle_div(Token **tokens, Stack *type_stack, Tree **trees,
     IGNORE_PARAM(global_vars);
 
     if (stack_index(type_stack, 1, (int *)&op1_type, NULL) != SUCCESS ||
-        stack_index(type_stack, 0, (int *)&op2_type, NULL) != SUCCESS)
+        stack_index(type_stack, 0, (int *)&op2_type, NULL) != SUCCESS) {
+        debug("Syntax error\n");
         return SYNTAX_ERROR;
+    }
 
     if ((op1_type != TYPE_INT && op1_type != TYPE_REAL) ||
         (op2_type != TYPE_INT && op2_type != TYPE_REAL))
@@ -473,7 +479,6 @@ static int handle_div(Token **tokens, Stack *type_stack, Tree **trees,
 
     return SUCCESS;
 }
-
 
 static int handle_id(Token **tokens, Stack *type_stack, Tree **trees,
                      Variables *global_vars, Instruction **instr_ptr)
@@ -529,8 +534,10 @@ static int handle_sub_mul(Token **tokens, Stack *type_stack, Tree **trees,
     IGNORE_PARAM(global_vars);
 
     if (stack_index(type_stack, 1, (int *)&op1_type, NULL) != SUCCESS ||
-        stack_index(type_stack, 0, (int *)&op2_type, NULL) != SUCCESS)
+        stack_index(type_stack, 0, (int *)&op2_type, NULL) != SUCCESS) {
+        debug("Syntax error\n");
         return SYNTAX_ERROR;
+    }
 
     switch (op1_type) {
     case TYPE_INT:
@@ -566,8 +573,9 @@ static int hold_token(Token **token, FILE *input)
     return SUCCESS;
 }
 
-int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions,
-               Variables *global_vars, Instruction **instr_ptr, Type *type)
+static int parse(FILE *input, Tree *locals, Tree *globals, Tree *functions,
+                 Variables *global_vars, Instruction **instr_ptr, Type *type,
+                 bool in_arg)
 {
     int error;
     bool finished = false;
@@ -576,10 +584,12 @@ int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions,
     Stack sym_stack;
     Stack type_stack;
     Tree *trees[TREE_COUNT];
+    enum terminal stack_term;
+    enum terminal input_term;
 
     if (input == NULL || globals == NULL || functions == NULL ||
         global_vars == NULL || instr_ptr == NULL)
-        return INTERNAL_ERROR;
+        return INTERNAL_ERROR; 
 
     trees[TREE_LOCALS] = locals;
     trees[TREE_GLOBALS] = globals;
@@ -592,6 +602,7 @@ int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions,
 
     if (get_term(input_token) == TERM_END) {
         error = SYNTAX_ERROR;
+        debug("Syntax error\n");
         goto fail;
     }
 
@@ -600,14 +611,15 @@ int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions,
 
     while (!finished) {
         stack_read_first_of_type(&sym_stack, SYM_TERM, (void **)&stack_token);
-        switch (PREC_TABLE[get_term(stack_token)][get_term(input_token)]) {
+        stack_term = get_term(stack_token);
+        input_term = get_term(input_token);
+        switch (PREC_TABLE[stack_term][input_term]) {
         case I:
             if ((error = stack_insert(&sym_stack, SYM_TERM, SYM_RS, NULL))
                 != SUCCESS)
                 goto fail;
         case P:
-            if (get_term(stack_token) == TERM_ID &&
-                get_term(input_token) == TERM_LP &&
+            if (stack_term == TERM_ID && input_term == TERM_LP &&
                 stack_push(&type_stack, TYPE_OTHER, NULL) != SUCCESS)
                 goto fail;
             if ((error = stack_push(&sym_stack, SYM_TERM, input_token))
@@ -621,13 +633,18 @@ int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions,
                                      global_vars, instr_ptr)) != SUCCESS)
                 goto fail;
             break;
-        case F:
+        case E:
+            if (!in_arg ||
+                (input_term != TERM_COMMA && input_term != TERM_RP)) {
+                error = SYNTAX_ERROR;
+                debug("Syntax error - prec_table[%u][%u]\n", stack_term,
+                      input_term);
+                goto fail;
+            }
+        default:
             unget_token(input_token);
             finished = true;
             break;
-        default:
-            error = SYNTAX_ERROR;
-            goto fail;
         }
     }
 
@@ -641,8 +658,25 @@ fail:
     stack_free(&sym_stack);
     stack_free(&type_stack);
     gc_free(__FILE__);
+    debug("parse_expr() finished %s\n",
+          finished ? "successfully" : "unsuccessfully");
 
     return error;
+}
+
+int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions,
+                 Variables *global_vars, Instruction **instr_ptr, Type *type)
+{
+    return parse(input, locals, globals, functions, global_vars, instr_ptr,
+                 type, false);
+}
+
+int parse_expr_inarg(FILE *input, Tree *locals, Tree *globals, Tree *functions,
+                     Variables *global_vars, Instruction **instr_ptr,
+                     Type *type)
+{
+    return parse(input, locals, globals, functions, global_vars, instr_ptr,
+                 type, true);
 }
 
 static int reduce_rule(Stack *sym_stack, Stack *type_stack, Tree **trees,
@@ -679,6 +713,8 @@ static int reduce_rule(Stack *sym_stack, Stack *type_stack, Tree **trees,
         return RULES[i].handler(token_array, type_stack, trees, global_vars,
                                 instr_ptr);
     }
+
+    debug("Syntax error\n");
 
     return SYNTAX_ERROR;
 }
