@@ -43,7 +43,10 @@ int stack_push(Stack *stack, int type, void *value)
 
 	tmp->type = type;
 
-	if(!value) {debug("pushing NULL pointer as the value\n");}
+	if(!value)
+	{
+		debug("pushing NULL pointer as the value\n");
+	}
 
 	tmp->value = value;
 	tmp->next = stack->top; ///towards
@@ -86,7 +89,7 @@ int stack_index(Stack *stack, unsigned int index, int *type, void **value)
 		return INTERNAL_ERROR;
 	}
 
-	if(index>stack->count)
+	if(index >= stack->count)
 	{
 		debug("Stack index %u is out of range\n", index);
 		return INTERNAL_ERROR;
@@ -120,7 +123,7 @@ int stack_index_value(Stack *stack, unsigned int index, int *type, Value *value)
 		return INTERNAL_ERROR;
 	}
 
-	if(index>stack->count)
+	if(index >= stack->count)
 	{
 		debug("Stack index %u is out of range\n", index);
 		return INTERNAL_ERROR;
@@ -180,7 +183,7 @@ int stack_index_insert_value(Stack *stack, unsigned int index, int type, Value *
 		return INTERNAL_ERROR;
 	}
 
-	if(index>stack->count)
+	if(index >= stack->count)
 	{
 		debug("Stack index %u is out of range\n", index);
 		return INTERNAL_ERROR;
@@ -190,7 +193,10 @@ int stack_index_insert_value(Stack *stack, unsigned int index, int type, Value *
 
 	while (index--) {
 		if ((node = node->next) == NULL)
+		{
+			debug("node was not found on that index\n");
 			return INTERNAL_ERROR;
+		}
 	}
 
 
@@ -215,7 +221,7 @@ int stack_index_insert_value(Stack *stack, unsigned int index, int type, Value *
 	else if (type == TYPE_STRING)
 	{
 		debug("string\n");
-		cstr_assign_cstr((cstring *)node->value, value->string);
+		cstr_assign_cstr(((cstring *)(node->value)), value->string);
 	}
 	else if (type == TYPE_BOOL)
 	{
