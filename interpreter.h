@@ -72,12 +72,12 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
  * Will print debug message if something is wrong.
  */
 #define STACK_OPERATIONS()                                                    \
-if(stack_index_value(calcs, 0, (int*)&types[0], &values[0])==INTERNAL_ERROR)  \
+if(stack_index(calcs, 0, (int*)&types[0], &values[0])==INTERNAL_ERROR)        \
 {                                                                             \
 	debug("Invalid read from calcs\n");                                       \
 	return INTERNAL_ERROR;                                                    \
 }                                                                             \
-if(stack_index_value(calcs, 1, (int*)&types[1], &values[1])==INTERNAL_ERROR)  \
+if(stack_index(calcs, 1, (int*)&types[1], &values[1])==INTERNAL_ERROR)        \
 {                                                                             \
 	debug("Invalid read from calcs\n");                                       \
 	return INTERNAL_ERROR;                                                    \

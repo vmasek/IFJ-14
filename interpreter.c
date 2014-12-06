@@ -13,7 +13,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 
 	Value values[2];
 	Type  types[2];
-	Value *result = calloc(sizeof(Value), 1);
+	Value result;
 
 
 	switch (item->instruction)
@@ -23,14 +23,14 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		debug("I_ASSIGN\n");
 
 		///                         Stack operations
-		if (stack_index_value(calcs, 0, (int *)&types[0], result) == INTERNAL_ERROR)
+		if (stack_index(calcs, 0, (int *)&types[0], &result) == INTERNAL_ERROR)
 		{
 			debug("Invalid read from calcs\n");
 			return INTERNAL_ERROR;
 		}
 		if (stack_pop(calcs) == INTERNAL_ERROR)                                         ///ACHTUNG! If is only one operand then only one pop
 		{
-			debug("Popping spree calcs error\n");
+			debug("Pop of calcs error\n");
 			return INTERNAL_ERROR;
 		}
 
@@ -38,7 +38,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		if(item->index < 0)																		/// index indicates locals stack operation
 		{
 			debug("I_ASSIGN - locals stack\n");
-			if (stack_index_insert_value(locals, (-(item->index+1)), types[0], result) == INTERNAL_ERROR)
+			if (stack_update(locals, (-(item->index+1)), (int)types[0], &result) == INTERNAL_ERROR)
 			{
 				debug("I_ASSIGN - locals stack error.\n");
 				return INTERNAL_ERROR;
@@ -47,7 +47,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		else
 		{
 			debug("I_ASSIGN - globals field\n");
-			if (variables_value_write(globals, result, item->index) == INTERNAL_ERROR)	/// index indicates global variables field operation
+			if (variables_value_write(globals, &result, item->index) == INTERNAL_ERROR)	/// index indicates global variables field operation
 			{
 				debug("I_ASSIGN - globals field error.\n");
 				return INTERNAL_ERROR;
@@ -62,15 +62,15 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		if(item->index < 0)																		/// index indicates local stack operation
 		{
 			debug("I_PUSH - locals stack\n");
-			//if (stack_index_value(locals, (-(item->index+1)), (int *)&types[0], &values[0]) == INTERNAL_ERROR) ///
-			if (stack_index_value(locals, (-(item->index+1)), (int *)&types[0], result) == INTERNAL_ERROR) ///
+			//if (stack_index(locals, (-(item->index+1)), (int *)&types[0], &values[0]) == INTERNAL_ERROR) ///
+			if (stack_index(locals, (-(item->index+1)), (int *)&types[0], &result) == INTERNAL_ERROR) ///
 				return INTERNAL_ERROR;
 		}
 		else
 		{
 			debug("I_PUSH - globals field\n");
 			//if (variables_value(globals, &types[0], &values[0], item->index) == INTERNAL_ERROR)	/// index indicates global variables operation
-			if (variables_value_read(globals, &types[0], result, item->index) == INTERNAL_ERROR)		/// index indicates global variables field operation
+			if (variables_value_read(globals, &types[0], &result, item->index) == INTERNAL_ERROR)		/// index indicates global variables field operation
 				return INTERNAL_ERROR;
 		}
 		///ACHTUNG! do not pop or change locals or globals
@@ -79,26 +79,26 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		if (types[0] == TYPE_INT)
 		{
 			debug("I_PUSH - integer\n");
-			//result->integer = values[0].integer;
-			stack_push(calcs, TYPE_INT, (void *) & (result->integer));
+			//result.integer = values[0].integer;
+			stack_push(calcs, TYPE_INT, &result);
 		}
 		else if (types[0] == TYPE_REAL)
 		{
 			debug("I_PUSH - double\n");
-			//result->real = values[0].real;
-			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
+			//result.real = values[0].real;
+			stack_push(calcs, TYPE_REAL, &(result));
 		}
 		else if (types[0] == TYPE_BOOL)
 		{
 			debug("I_PUSH - bool\n");
-			//result->boolean = values[0].boolean;
-			stack_push(calcs, TYPE_BOOL, (void *) & (result->boolean));
+			//result.boolean = values[0].boolean;
+			stack_push(calcs, TYPE_BOOL, &(result));
 		}
 		else if (types[0] == TYPE_STRING)
 		{
 			debug("I_PUSH - cstring\n");
-			//cstr_assign_cstr(result->string, values[0].string);
-			stack_push(calcs, TYPE_STRING, (void *)(result->string));
+			//cstr_assign_cstr(result.string, values[0].string);
+			stack_push(calcs, TYPE_STRING, &(result));
 		}
 		else
 		{
@@ -116,31 +116,32 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
 		{
 			debug("I_ADD for ints\n");
-			result->integer = values[1].integer + values[0].integer;
-			stack_push(calcs, TYPE_INT, (void *) & (result->integer));
+			result.integer = values[1].integer + values[0].integer;
+			stack_push(calcs, TYPE_INT, &result);
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
 		{
 			debug("I_ADD for reals\n");
-			result->real = values[1].real + values[0].real;
-			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
+			result.real = values[1].real + values[0].real;
+			stack_push(calcs, TYPE_REAL, &(result));
 		}
 		else if ((types[0] == TYPE_INT) && (types[1] == TYPE_REAL))
 		{
 			debug("I_ADD for real + int\n");
-			result->real = values[1].real + values[0].integer;
-			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
+			result.real = values[1].real + values[0].integer;
+			stack_push(calcs, TYPE_REAL, &(result));
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_INT))
 		{
 			debug("I_ADD for int + real\n");
-			result->real = values[1].integer + values[0].real;
-			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
+			result.real = values[1].integer + values[0].real;
+			stack_push(calcs, TYPE_REAL, &(result));
 		}
 		else if ((types[0] == TYPE_STRING) && (types[1] == TYPE_STRING))				/// WARNING: !!!!!!!!!!!! TAKE BIG CARE WHEN RECASTING CSTRING* TO VOID*
 		{
 			debug("I_ADD for strings\n");
-			stack_push(calcs, TYPE_STRING, (void *)cstr_append_cstr(cstr_create_cstr(values[1].string), values[0].string));
+			result.string = cstr_append_cstr(cstr_create_cstr(values[1].string), values[0].string);
+			stack_push(calcs, TYPE_STRING, &(result));
 		}
 		else
 		{
@@ -158,26 +159,26 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
 		{
 			debug("I_SUB for ints\n");
-			result->integer = values[1].integer - values[0].integer;
-			stack_push(calcs, TYPE_INT, (void *) & (result->integer));
+			result.integer = values[1].integer - values[0].integer;
+			stack_push(calcs, TYPE_INT, &result);
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
 		{
 			debug("I_SUB for reals\n");
-			result->real = values[1].real - values[0].real;
-			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
+			result.real = values[1].real - values[0].real;
+			stack_push(calcs, TYPE_REAL, &(result));
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_INT))
 		{
 			debug("I_SUB for int - real\n");
-			result->real = values[1].integer - values[0].real;
-			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
+			result.real = values[1].integer - values[0].real;
+			stack_push(calcs, TYPE_REAL, &(result));
 		}
 		else if ((types[0] == TYPE_INT) && (types[1] == TYPE_REAL))
 		{
 			debug("I_SUB for real - int\n");
-			result->real = values[1].real - values[0].integer;
-			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
+			result.real = values[1].real - values[0].integer;
+			stack_push(calcs, TYPE_REAL, &(result));
 		}
 		else
 		{
@@ -195,26 +196,26 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
 		{
 			debug("I_MULTIPLY - INT\n");
-			result->integer = values[1].integer * values[0].integer;
-			stack_push(calcs, TYPE_INT, (void *) & (result->integer));
+			result.integer = values[1].integer * values[0].integer;
+			stack_push(calcs, TYPE_INT, &result);
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
 		{
 			debug("I_MULTIPLY - DOUBLE\n");
-			result->real = values[1].real * values[0].real;
-			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
+			result.real = values[1].real * values[0].real;
+			stack_push(calcs, TYPE_REAL, &(result));
 		}
 		else if ((types[0] == TYPE_INT) && (types[1] == TYPE_REAL))
 		{
 			debug("I_MULTIPLY for real * int\n");
-			result->real = values[1].real * values[0].integer;
-			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
+			result.real = values[1].real * values[0].integer;
+			stack_push(calcs, TYPE_REAL, &(result));
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_INT))
 		{
 			debug("I_MULTIPLY for int * real\n");
-			result->real = values[1].integer * values[0].real;
-			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
+			result.real = values[1].integer * values[0].real;
+			stack_push(calcs, TYPE_REAL, &(result));
 		}
 		else
 		{
@@ -237,8 +238,8 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 				debug("Dividing by zero !");
 				return RUNTIME_DIV_BY_ZERO;
 			}
-			result->integer = values[1].integer / values[0].integer;
-			stack_push(calcs, TYPE_INT, (void *) & (result->integer));
+			result.integer = values[1].integer / values[0].integer;
+			stack_push(calcs, TYPE_INT, &result);
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
 		{
@@ -248,8 +249,8 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 				debug("Dividing by zero !");
 				return RUNTIME_DIV_BY_ZERO;
 			}
-			result->real = values[1].real / values[0].real;
-			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
+			result.real = values[1].real / values[0].real;
+			stack_push(calcs, TYPE_REAL, &(result));
 		}
 		else if ((types[0] == TYPE_INT) && (types[1] == TYPE_REAL))
 		{
@@ -259,8 +260,8 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 				debug("Dividing by zero !");
 				return RUNTIME_DIV_BY_ZERO;
 			}
-			result->real = values[1].real / values[0].integer;
-			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
+			result.real = values[1].real / values[0].integer;
+			stack_push(calcs, TYPE_REAL, &(result));
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_INT))
 		{
@@ -270,8 +271,8 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 				debug("Dividing by zero !");
 				return RUNTIME_DIV_BY_ZERO;
 			}
-			result->real = values[1].integer / values[0].real;
-			stack_push(calcs, TYPE_REAL, (void *) & (result->real));
+			result.real = values[1].integer / values[0].real;
+			stack_push(calcs, TYPE_REAL, &(result));
 		}
 		else
 		{
@@ -289,26 +290,26 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
 		{
 			debug("I_LESS - INT\n");
-			result->boolean = values[1].integer < values[0].integer;
-			stack_push(calcs, TYPE_BOOL, (void *) & (result->boolean));
+			result.boolean = values[1].integer < values[0].integer;
+			stack_push(calcs, TYPE_BOOL, &(result));
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
 		{
 			debug("I_LESS - DOUBLE\n");
-			result->boolean = values[1].real < values[0].real;
-			stack_push(calcs, TYPE_BOOL, (void *) & (result->boolean));
+			result.boolean = values[1].real < values[0].real;
+			stack_push(calcs, TYPE_BOOL, &(result));
 		}
 		else if ((types[0] == TYPE_BOOL) && (types[1] == TYPE_BOOL))
 		{
 			debug("I_LESS - BOOL\n");
-			result->boolean = values[1].boolean < values[0].boolean;
-			stack_push(calcs, TYPE_BOOL, (void *) & (result->boolean));
+			result.boolean = values[1].boolean < values[0].boolean;
+			stack_push(calcs, TYPE_BOOL, &(result));
 		}
 		else if ((types[0] == TYPE_STRING) && (types[1] == TYPE_STRING))
 		{
 			debug("I_LESS - STRING\n");
-			result->boolean = (cstr_cmp(values[1].string, values[0].string) < 0) ;
-			stack_push(calcs, TYPE_BOOL, (void *) & (result->boolean));
+			result.boolean = (cstr_cmp(values[1].string, values[0].string) < 0) ;
+			stack_push(calcs, TYPE_BOOL, &(result));
 		}
 		else
 		{
@@ -326,27 +327,27 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
 		{
 			debug("I_GREATER - INT\n");
-			result->boolean = values[1].integer > values[0].integer;
-			stack_push(calcs, TYPE_BOOL, (void *) & (result->integer));
+			result.boolean = values[1].integer > values[0].integer;
+			stack_push(calcs, TYPE_BOOL, &result);
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
 		{
 			debug("I_GREATER - DOUBLE\n");
-			result->boolean = values[1].real > values[0].real;
-			stack_push(calcs, TYPE_BOOL, (void *) & (result->real));
+			result.boolean = values[1].real > values[0].real;
+			stack_push(calcs, TYPE_BOOL, &(result));
 		}
 		else if ((types[0] == TYPE_BOOL) && (types[1] == TYPE_BOOL))
 		{
 			debug("I_GREATER - BOOL\n");
-			result->boolean = values[1].boolean > values[0].boolean;
-			stack_push(calcs, TYPE_BOOL, (void *) & (result->boolean));
+			result.boolean = values[1].boolean > values[0].boolean;
+			stack_push(calcs, TYPE_BOOL, &(result));
 		}
 		else if ((types[0] == TYPE_STRING) && (types[1] == TYPE_STRING))
 		{
 			debug("I_GREATER - STRING\n");
-			result->boolean = (cstr_cmp(values[1].string, values[0].string) > 0) ;
+			result.boolean = (cstr_cmp(values[1].string, values[0].string) > 0) ;
 			debug("bool je %d", cstr_cmp(values[1].string, values[0].string));
-			stack_push(calcs, TYPE_BOOL, (void *) & (result->boolean));
+			stack_push(calcs, TYPE_BOOL, &(result));
 		}
 		else
 		{
@@ -364,26 +365,26 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
 		{
 			debug("I_LESS_EQUAL - INT\n");
-			result->boolean = values[1].integer <= values[0].integer;
-			stack_push(calcs, TYPE_BOOL, (void *) & (result->integer));
+			result.boolean = values[1].integer <= values[0].integer;
+			stack_push(calcs, TYPE_BOOL, &result);
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
 		{
 			debug("I_LESS_EQUAL - DOUBLE\n");
-			result->boolean = values[1].real <= values[0].real;
-			stack_push(calcs, TYPE_BOOL, (void *) & (result->real));
+			result.boolean = values[1].real <= values[0].real;
+			stack_push(calcs, TYPE_BOOL, &(result));
 		}
 		else if ((types[0] == TYPE_BOOL) && (types[1] == TYPE_BOOL))
 		{
 			debug("I_LESS_EQUAL - BOOL\n");
-			result->boolean = values[1].boolean <= values[0].boolean;
-			stack_push(calcs, TYPE_BOOL, (void *) & (result->boolean));
+			result.boolean = values[1].boolean <= values[0].boolean;
+			stack_push(calcs, TYPE_BOOL, &(result));
 		}
 		else if ((types[0] == TYPE_STRING) && (types[1] == TYPE_STRING))
 		{
 			debug("I_LESS_EQUAL - STRING\n");
-			result->boolean = (cstr_cmp(values[1].string, values[0].string) <= 0) ;
-			stack_push(calcs, TYPE_BOOL, (void *) & (result->boolean));
+			result.boolean = (cstr_cmp(values[1].string, values[0].string) <= 0) ;
+			stack_push(calcs, TYPE_BOOL, &(result));
 		}
 		else
 		{
@@ -401,26 +402,26 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
 		{
 			debug("I_GREATER_EQUAL - INT\n");
-			result->boolean = values[1].integer >= values[0].integer;
-			stack_push(calcs, TYPE_BOOL, (void *) & (result->integer));
+			result.boolean = values[1].integer >= values[0].integer;
+			stack_push(calcs, TYPE_BOOL, &result);
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
 		{
 			debug("I_GREATER_EQUAL - DOUBLE\n");
-			result->boolean = values[1].real >= values[0].real;
-			stack_push(calcs, TYPE_BOOL, (void *) & (result->real));
+			result.boolean = values[1].real >= values[0].real;
+			stack_push(calcs, TYPE_BOOL, &(result));
 		}
 		else if ((types[0] == TYPE_BOOL) && (types[1] == TYPE_BOOL))
 		{
 			debug("I_GREATER_EQUAL - BOOL\n");
-			result->boolean = values[1].boolean >= values[0].boolean;
-			stack_push(calcs, TYPE_BOOL, (void *) & (result->boolean));
+			result.boolean = values[1].boolean >= values[0].boolean;
+			stack_push(calcs, TYPE_BOOL, &(result));
 		}
 		else if ((types[0] == TYPE_STRING) && (types[1] == TYPE_STRING))
 		{
 			debug("I_GREATER_EQUAL - STRING\n");
-			result->boolean = (cstr_cmp(values[1].string, values[0].string) >= 0) ;
-			stack_push(calcs, TYPE_BOOL, (void *) & (result->boolean));
+			result.boolean = (cstr_cmp(values[1].string, values[0].string) >= 0) ;
+			stack_push(calcs, TYPE_BOOL, &(result));
 		}
 		else
 		{
@@ -438,26 +439,26 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
 		{
 			debug("I_EQUAL - INT\n");
-			result->boolean = values[1].integer == values[0].integer;
-			stack_push(calcs, TYPE_BOOL, (void *) & (result->integer));
+			result.boolean = values[1].integer == values[0].integer;
+			stack_push(calcs, TYPE_BOOL, &result);
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
 		{
 			debug("I_EQUAL - DOUBLE\n");
-			result->boolean = values[1].real == values[0].real;
-			stack_push(calcs, TYPE_BOOL, (void *) & (result->real));
+			result.boolean = values[1].real == values[0].real;
+			stack_push(calcs, TYPE_BOOL, &(result));
 		}
 		else if ((types[0] == TYPE_BOOL) && (types[1] == TYPE_BOOL))
 		{
 			debug("I_EQUAL - BOOL\n");
-			result->boolean = values[1].boolean == values[0].boolean;
-			stack_push(calcs, TYPE_BOOL, (void *) & (result->boolean));
+			result.boolean = values[1].boolean == values[0].boolean;
+			stack_push(calcs, TYPE_BOOL, &(result));
 		}
 		else if ((types[0] == TYPE_STRING) && (types[1] == TYPE_STRING))
 		{
 			debug("I_EQUAL - STRING\n");
-			result->boolean = (cstr_cmp(values[1].string, values[0].string) == 0) ;
-			stack_push(calcs, TYPE_BOOL, (void *) & (result->boolean));
+			result.boolean = (cstr_cmp(values[1].string, values[0].string) == 0) ;
+			stack_push(calcs, TYPE_BOOL, &(result));
 		}
 		else
 		{
@@ -475,26 +476,26 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
 		{
 			debug("I_NOT_EQUAL - INT\n");
-			result->boolean = values[1].integer != values[0].integer;
-			stack_push(calcs, TYPE_BOOL, (void *) & (result->integer));
+			result.boolean = values[1].integer != values[0].integer;
+			stack_push(calcs, TYPE_BOOL, &result);
 		}
 		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
 		{
 			debug("I_NOT_EQUAL - DOUBLE\n");
-			result->boolean = values[1].real != values[0].real;
-			stack_push(calcs, TYPE_BOOL, (void *) & (result->real));
+			result.boolean = values[1].real != values[0].real;
+			stack_push(calcs, TYPE_BOOL, &(result));
 		}
 		else if ((types[0] == TYPE_BOOL) && (types[1] == TYPE_BOOL))
 		{
 			debug("I_NOT_EQUAL - BOOL\n");
-			result->boolean = values[1].boolean != values[0].boolean;
-			stack_push(calcs, TYPE_BOOL, (void *) & (result->boolean));
+			result.boolean = values[1].boolean != values[0].boolean;
+			stack_push(calcs, TYPE_BOOL, &(result));
 		}
 		else if ((types[0] == TYPE_STRING) && (types[1] == TYPE_STRING))
 		{
 			debug("I_NOT_EQUAL - STRING\n");
-			result->boolean = (cstr_cmp(values[1].string, values[0].string) != 0) ;
-			stack_push(calcs, TYPE_BOOL, (void *) & (result->boolean));
+			result.boolean = (cstr_cmp(values[1].string, values[0].string) != 0) ;
+			stack_push(calcs, TYPE_BOOL, &(result));
 		}
 		else
 		{
@@ -506,7 +507,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 	case I_WRITE:
 
 		///                         Stack operations
-		if (stack_index_value(calcs, 0, (int *)&types[0], result) == INTERNAL_ERROR)
+		if (stack_index(calcs, 0, (int *)&types[0], &result) == INTERNAL_ERROR)
 		{
 			debug("Invalid read from calcs\n");
 			return INTERNAL_ERROR;
@@ -520,22 +521,22 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		if (types[0] == TYPE_INT)
 		{
 			debug("I_WRITE - INT\n");
-			printf("%d\n", (result->integer));
+			printf("%d\n", result.integer);
 		}
 		else if (types[0] == TYPE_REAL)
 		{
 			debug("I_WRITE - REAL\n");
-			printf("%f\n", result->real);
+			printf("%f\n", result.real);
 		}
 		else if (types[0] == TYPE_STRING)
 		{
 			debug("I_WRITE - STRING\n");
-			printf("%s\n", result->string->str);
+			printf("%s\n", result.string->str);
 		}
 		else if (types[0] == TYPE_BOOL)
 		{
 			debug("I_WRITE - BOOL\n");
-			printf("%s\n", result->boolean ? "true" : "false");
+			printf("%s\n", result.boolean ? "true" : "false");
 		}
 		else
 		{
@@ -549,20 +550,20 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		if (types[0] == TYPE_INT)
 		{
 			debug("I_READLN - integer\n");
-			//item->result->type = TYPE_INT;
-			//scanf("%d", &(item->result->data.integer));
+			//item->result.type = TYPE_INT;
+			//scanf("%d", &(item->result.data.integer));
 		}
 		else if (types[0] == TYPE_REAL)
 		{
 			debug("I_READLN - double\n");
-			//item->result->type = TYPE_REAL;
-			//scanf("%lf", &(item->result->data.real));
+			//item->result.type = TYPE_REAL;
+			//scanf("%lf", &(item->result.data.real));
 		}
 		else if (types[0] == TYPE_STRING)
 		{
 			debug("I_READLN - cstring\n");
-			//item->result->type = TYPE_STRING;
-			//cstr_read_line(item->result->data.string = cstr_create_str(""));
+			//item->result.type = TYPE_STRING;
+			//cstr_read_line(item->result.data.string = cstr_create_str(""));
 		}
 		else
 		{
@@ -574,7 +575,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		if(item->index < 0)																		/// index indicates locals stack operation
 		{
 			debug("I_ASSIGN - locals stack\n");
-			if (stack_index_insert_value(locals, (-(item->index+1)), types[0], result) == INTERNAL_ERROR)
+			if (stack_update(locals, (-(item->index+1)), types[0], &result) == INTERNAL_ERROR)
 			{
 				debug("I_ASSIGN - locals stack error.\n");
 				return INTERNAL_ERROR;
@@ -583,7 +584,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		else
 		{
 			debug("I_ASSIGN - globals field\n");
-			if (variables_value_write(globals, result, item->index) == INTERNAL_ERROR)	/// index indicates global variables field operation
+			if (variables_value_write(globals, &result, item->index) == INTERNAL_ERROR)	/// index indicates global variables field operation
 			{
 				debug("I_ASSIGN - globals field error.\n");
 				return INTERNAL_ERROR;
@@ -598,10 +599,10 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		{
 			debug("I_LEN - string\n");
 			stack_popping_spree(calcs, 2);
-			result->integer = values[0].integer + values[1].integer;
-			stack_push(calcs, TYPE_INT, (void *) & (result->integer));
-			//item->result->type = TYPE_INT;
-			//item->result->data.integer = length(values[0].string);
+			result.integer = values[0].integer + values[1].integer;
+			stack_push(calcs, TYPE_INT, &result);
+			//item->result.type = TYPE_INT;
+			//item->result.data.integer = length(values[0].string);
 		}
 		else
 		{
@@ -614,8 +615,8 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		if (types[0] == TYPE_STRING)
 		{
 			debug("I_COPY - string\n");
-			//item->result->type = TYPE_STRING;
-			//item->result->data.string = copy(values[0].string, values[1].integer, values[1].integer); ///pozor toto bude zmenene na viac operatorov
+			//item->result.type = TYPE_STRING;
+			//item->result.data.string = copy(values[0].string, values[1].integer, values[1].integer); ///pozor toto bude zmenene na viac operatorov
 		}
 		else
 		{
@@ -628,10 +629,10 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		if (types[0] == TYPE_STRING)
 		{
 			debug("I_FIND - string\n");
-			result->integer = values[0].integer + values[1].integer; // ?
-			stack_push(calcs, TYPE_INT, (void *) & (result->integer)); // ?
-			//item->result->type = TYPE_INT;
-			//item->result->data.integer = find(values[0].string, values[1].string);
+			result.integer = values[0].integer + values[1].integer; // ?
+			stack_push(calcs, TYPE_INT, &result); // ?
+			//item->result.type = TYPE_INT;
+			//item->result.data.integer = find(values[0].string, values[1].string);
 		}
 		else
 		{
@@ -644,8 +645,8 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		if (types[0] == TYPE_STRING)
 		{
 			debug("I_FIND - string\n");
-			//item->result->type = TYPE_STRING;
-			//item->result->data.string = sort(values[0].string);
+			//item->result.type = TYPE_STRING;
+			//item->result.data.string = sort(values[0].string);
 		}
 		else
 		{
