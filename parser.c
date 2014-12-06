@@ -211,7 +211,6 @@ static int nt_func(FILE *input, Tree *globals, Tree *functions, Variables *vars)
     int count = 0;
     Token token;
     Func_record *func = NULL;
-    //Var_record *params = NULL;
     cstring *id;
 
     CHECK_VALUE(get_token(&token, input), ret);
@@ -220,7 +219,6 @@ static int nt_func(FILE *input, Tree *globals, Tree *functions, Variables *vars)
         token.value.value_keyword == KEYWORD_FUNCTION) {
         MALLOC_FUNC(func, __FILE__);
         tree_create(&(func->locals));
-        func->first_instr = NULL;
 
         CHECK_VALUE(t_id(input, &id), ret);
         CHECK_VALUE(t_symbol(input, PARENTHESIS_L), ret);
@@ -228,7 +226,10 @@ static int nt_func(FILE *input, Tree *globals, Tree *functions, Variables *vars)
         CHECK_VALUE(t_symbol(input, PARENTHESIS_R), ret);
         CHECK_VALUE(nt_type(input, &(func->ret_value.type)), ret);
         tree_insert(func->locals, id, &(func->ret_value));
+        func->ret_value.index = count;
+        count++;
         CHECK_VALUE(t_symbol(input, SEMICOLON), ret);
+
         CHECK_VALUE(nt_func_body(input, func->locals, globals, functions,
                                  func->first_instr, &(func->local_count), vars), ret);
         func->local_count += func->param_count;
