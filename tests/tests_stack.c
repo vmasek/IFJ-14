@@ -7,7 +7,7 @@
 #include "tests.h"
 
 
-
+/*
 int test_stack(void)
 {
 	return test_stack_complex();
@@ -21,7 +21,7 @@ int test_stack_complex(void)
 
 	printf("\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 	Stack stack;
-	stack_init(&stack);
+	stack_init(&stack, VALUE_STACK);
 
 	stack_print(&stack);	//This print should print nothing
 
@@ -125,7 +125,7 @@ printf("\n2. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	value = (void*)NULL;
 
 	type = TYPE_REAL;
-	stack_read_first_of_type(&stack, type, &value);
+	stack_read_first(&stack, type, &value);
 	printf("\n\n\t2. reading the first of type DOUBLE:");
 	stack_print_node(type, value);
 
@@ -160,13 +160,13 @@ printf("\n3. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		break;
 	}
 
-///*******************
+
 	stack_pop(&stack);
 
 	if(stack.count==(_N_)-2)			// (_N_) is default so afer 2 pops its "-2"
 	{
 		///readind top of stack by using direct stack access
-		if(stack.top->type == TYPE_OTHER && (!strcmp((char*)(stack.top->value), "other data as string")))
+		if(stack.top->type == TYPE_OTHER && (!strcmp((char*)(stack.top->value->value.integer), "other data as string")))
 			printf("\t3.1.1. POP was OK. top is: [other (with int* value)]\n");
 		else
 		{
@@ -192,7 +192,6 @@ printf("\n3. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	}
 	printf("\n");
 
-///*******************
 	stack_pop(&stack);
 
 	if(stack.count==(_N_)-3)			// (_N_) is default so afer 3 pops its "-3"
@@ -223,7 +222,7 @@ printf("\n3. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		break;
 	}
 	printf("\n");
-///*******************
+
 
 	///PUSH
 	type = TYPE_INT;
@@ -259,7 +258,6 @@ printf("\n3. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		break;
 	}
 	printf("\n");
-///*******************
 
 	stack_pop(&stack);
 	stack_pop(&stack);
@@ -292,7 +290,7 @@ printf("\n3. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		break;
 	}
 	printf("\n");
-///*******************
+
 
 ///STACK INSERT
 	double ddd = 99.99;
@@ -391,7 +389,7 @@ printf("\n3. +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	printf("\n");
 
-///*******************
+
 
 ///pop all to the last one
 	printf("\t3.7. POPing all exept last two.\n");
@@ -633,3 +631,4 @@ printf("\n\n");
 
 	return errors;
 }
+*/

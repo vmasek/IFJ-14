@@ -92,6 +92,9 @@ void test_interpreter(int argc, char* argv)
 
 void test_I_ASSIGN(void)
 {
+	Type typ;
+	Value temp;
+
 	int test = 0, errors = 1;
 
 ///-----declarations-of-needed-structs----------------------------------------
@@ -106,19 +109,16 @@ void test_I_ASSIGN(void)
 
 ///-----Stack locals--------------
 	Stack locals;
-	stack_init(&locals);
+	stack_init(&locals, VALUE_STACK);
 
 ///-----Stack calcs---------------
 	Stack calcs;
-	stack_init(&calcs);
+	stack_init(&calcs, VALUE_STACK);
 
-	Value values[4];
+	Value values[10];
 
 	///tu je potrebne si popridavat values pre testy
 
-	bool b = true;
-	double d = 1.5;
-	cstring *cstr = cstr_create_str("globals text");
 
 	values[0].integer	= 42;
 	values[1].real		= 16.125;
@@ -126,11 +126,15 @@ void test_I_ASSIGN(void)
 	values[3].string	= cstr_create_str("text");
 	values[4].integer	= 1234;
 
+	values[7].boolean   = true;
+	values[8].real      = 1.5;
+	values[9].string    = cstr_create_str("globals text");
+
 	variables_add(&globals, TYPE_INT, values[0], NULL);
 
-	stack_push(&locals, TYPE_REAL, &(d));
-	stack_push(&locals, TYPE_BOOL, &(b));
-	stack_push(&locals, TYPE_STRING, cstr);
+	stack_push(&locals, TYPE_REAL, &(values[8]));
+	stack_push(&locals, TYPE_BOOL, &(values[7]));
+	stack_push(&locals, TYPE_STRING, &values[9]);
 	stack_print(&locals);
 ///---------------------------------------------------------------------------
 
@@ -142,7 +146,7 @@ BEGINE_OF_TEST();
 	instruction.index		= 0;									 ///bude zapis do globals index 0
 
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
-	if(stack_push(&calcs, TYPE_INT, &(values[test].integer)) == INTERNAL_ERROR)
+	if(stack_push(&calcs, TYPE_INT, &(values[test])) == INTERNAL_ERROR)
 	{
 		debug("stack push sa dorafal !");
 		break;
@@ -167,12 +171,13 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 
 	if(calcs.count==0 && globals.count==1)
 	{
-		///readind top of stack by using direct stack access
 		if(globals.types[0] == TYPE_INT && globals.values[0].integer == values[test].integer)
 			printf("\n%s:[test %d.] ASSIGN was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, *(int*)(calcs.top->value), values[test].integer);
+			Value temp;
+			variables_value_read(&globals, NULL, &temp, 0);
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.integer, values[test].integer);
 			break;
 		}
 	}
@@ -191,7 +196,7 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 
 	instruction.index		= -3;									 ///bude zapis do locals index 2 "( -(index+1) )"
 
-	stack_push(&calcs, TYPE_REAL, &(values[test].real));
+	stack_push(&calcs, TYPE_REAL, &(values[test]));
 
 	if(interpret(&instruction, &calcs, &locals, NULL, &globals) != SUCCESS)
 	{
@@ -203,12 +208,12 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 
 	if(calcs.count==0 && locals.count==3)
 	{
-		///readind top of stack by using direct stack access
-		if(locals.top->next->next->type == TYPE_REAL && (*(double*)(locals.top->next->next->value) == values[test].real))
+		stack_index(&locals, 2, (int*)&typ, &temp);
+		if(typ == TYPE_REAL && temp.real == values[test].real)
 			printf("\n%s:[test %d.] ASSIGN was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, *(double*)(locals.top->next->next->value), values[test].real);
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, values[test].real);
 			break;
 		}
 	}
@@ -226,7 +231,7 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 
 instruction.index		= -2;
 
-	stack_push(&calcs, TYPE_BOOL, &(values[test].boolean));
+	stack_push(&calcs, TYPE_BOOL, &(values[test]));
 
 	if(interpret(&instruction, &calcs, &locals, NULL, &globals) != SUCCESS)
 	{
@@ -238,12 +243,12 @@ instruction.index		= -2;
 
 	if(calcs.count==0 && locals.count==3)
 	{
-		///readind top of stack by using direct stack access
-		if(locals.top->next->type == TYPE_BOOL && (*(bool*)(locals.top->next->value) == values[test].boolean))
+		stack_index(&locals, 1, (int*)&typ, &temp);
+		if(typ == TYPE_BOOL && temp.boolean == values[test].boolean)
 			printf("\n%s:[test %d.] ASSIGN was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is (bool)%d and should be (bool)%d\n", __func__, test, *(bool*)(locals.top->next->value), values[test].boolean);
+			printf("\n%s:[test %d.] ERROR: stack value is (bool)%d and should be (bool)%d\n", __func__, test, temp.boolean, values[test].boolean);
 			break;
 		}
 	}
@@ -262,7 +267,7 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 
 instruction.index		= -1;
 	stack_print(&locals);
-	stack_push(&calcs, TYPE_STRING, values[test].string);
+	stack_push(&calcs, TYPE_STRING, &values[test]);
 
 	if(interpret(&instruction, &calcs, &locals, NULL, &globals) != SUCCESS)
 	{
@@ -274,12 +279,12 @@ instruction.index		= -1;
 
 	if(calcs.count==0 && locals.count==3)
 	{
-		///readind top of stack by using direct stack access
-		if(locals.top->type == TYPE_STRING && !cstr_cmp((cstring*)(locals.top->value), values[test].string))
+		stack_index(&locals, 0, (int*)&typ, &temp);
+		if(typ == TYPE_STRING && !cstr_cmp(temp.string, values[test].string))
 			printf("\n%s:[test %d.] ASSIGN was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is (cstring) \"%s\" and should be (cstring) \"%s\"\n", __func__, test, ((cstring*)(locals.top->value))->str, values[test].string->str);
+			printf("\n%s:[test %d.] ERROR: stack value is (cstring) \"%s\" and should be (cstring) \"%s\"\n", __func__, test, temp.string->str, values[test].string->str);
 			break;
 		}
 	}
@@ -302,7 +307,7 @@ instruction.index		= -1;
 stack_print(&locals);
 
 
-	stack_push(&calcs, TYPE_INT, &(values[test].integer));
+	stack_push(&calcs, TYPE_INT, &(values[test]));
 
 	if(interpret(&instruction, &calcs, &locals, NULL, &globals) != SUCCESS)
 	{
@@ -314,7 +319,7 @@ stack_print(&locals);
 
 	if(calcs.count==0 && locals.count==4)
 	{
-		///readind top of stack by using direct stack access
+		stack_index(&calcs, 0, (int*)&typ, &temp);
 		if(locals.top->type == TYPE_INT && (*(int*)(locals.top->value) == values[test].integer))
 			printf("\n%s:[test %d.] ASSIGN was OK.\n", __func__, test);
 		else
@@ -338,6 +343,9 @@ END_OF_TEST();
 
 void test_I_ADD(void)
 {
+	Type typ;
+	Value temp;
+
 	int test = 0, errors = 1;
 
 ///-----declarations-of-needed-structs----------------------------------------
@@ -345,7 +353,7 @@ void test_I_ADD(void)
 	instruction.instruction = I_ADD;
 
 	Stack calcs;
-	stack_init(&calcs);
+	stack_init(&calcs, VALUE_STACK);
 
 	Value values[10];
 
@@ -369,8 +377,8 @@ BEGINE_OF_TEST();
 
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
 	///push dvoch int values ktore budeme scitat
-	stack_push(&calcs, TYPE_INT, &(values[0].integer));
-	stack_push(&calcs, TYPE_INT, &(values[1].integer));
+	stack_push(&calcs, TYPE_INT, &(values[0]));
+	stack_push(&calcs, TYPE_INT, &(values[1]));
 
 	///zavolanie interpretera
 	CALL_INTERPRET();
@@ -378,12 +386,12 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	///kontrola velkosti stacku, boli pushnute dve hodnoty, tie su v inter. popnute a je pushnuty result
 	if(calcs.count==1)
 	{
-		///readind top of stack by using direct stack access
-		if(calcs.top->type == TYPE_INT && (*(int*)(calcs.top->value) == ( values[0].integer + values[1].integer )))
+		stack_index(&calcs, 0, (int*)&typ, &temp);
+		if(typ == TYPE_INT && (temp.integer == ( values[0].integer + values[1].integer )))
 			printf("\n%s:[test %d.] ADD was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, *(int*)(calcs.top->value), values[0].integer + values[1].integer);
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.integer, values[0].integer + values[1].integer);
 			break;
 		}
 	}
@@ -403,8 +411,8 @@ test++;
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
 
 
-	stack_push(&calcs, TYPE_REAL, &(values[3].real));
-	stack_push(&calcs, TYPE_REAL, &(values[4].real));
+	stack_push(&calcs, TYPE_REAL, &(values[3]));
+	stack_push(&calcs, TYPE_REAL, &(values[4]));
 
 	///zavolanie interpretera
 	CALL_INTERPRET();
@@ -412,12 +420,12 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	///kontrola velkosti stacku, boli pushnute dve hodnoty, tie su v inter. popnute a je pushnuty result
 	if(calcs.count==1)
 	{
-		///readind top of stack by using direct stack access
-		if(calcs.top->type == TYPE_REAL && (*(double*)(calcs.top->value) == ( values[3].real + values[4].real )))
+		stack_index(&calcs, 0, (int*)&typ, &temp);
+		if(typ == TYPE_REAL && (temp.real == ( values[3].real + values[4].real )))
 			printf("\n%s:[test %d.] ADD was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, *(double*)(calcs.top->value), (values[3].real - values[4].real));
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, (values[3].real - values[4].real));
 			break;
 		}
 	}
@@ -438,8 +446,8 @@ test++;
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
 
 
-	stack_push(&calcs, TYPE_INT, &(values[1].integer));
-	stack_push(&calcs, TYPE_REAL, &(values[4].real));
+	stack_push(&calcs, TYPE_INT, &(values[1]));
+	stack_push(&calcs, TYPE_REAL, &(values[4]));
 
 	///zavolanie interpretera
 	CALL_INTERPRET();
@@ -447,12 +455,12 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	///kontrola velkosti stacku, boli pushnute dve hodnoty, tie su v inter. popnute a je pushnuty result
 	if(calcs.count==1)
 	{
-		///readind top of stack by using direct stack access
-		if(calcs.top->type == TYPE_REAL && (*(double*)(calcs.top->value) == ( values[1].integer + values[4].real )))
+		stack_index(&calcs, 0, (int*)&typ, &temp);
+		if(typ == TYPE_REAL && (temp.real == ( values[1].integer + values[4].real )))
 			printf("\n%s:[test %d.] ADD was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, *(double*)(calcs.top->value), (values[1].integer + values[4].real));
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, (values[1].integer + values[4].real));
 			break;
 		}
 	}
@@ -472,8 +480,8 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 test++;
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
 
-	stack_push(&calcs, TYPE_REAL, &(values[3].real));
-	stack_push(&calcs, TYPE_INT, &(values[1].integer));
+	stack_push(&calcs, TYPE_REAL, &(values[3]));
+	stack_push(&calcs, TYPE_INT, &(values[1]));
 
 	///zavolanie interpretera
 	CALL_INTERPRET();
@@ -481,12 +489,12 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	///kontrola velkosti stacku, boli pushnute dve hodnoty, tie su v inter. popnute a je pushnuty result
 	if(calcs.count==1)
 	{
-		///readind top of stack by using direct stack access
-		if(calcs.top->type == TYPE_REAL && (*(double*)(calcs.top->value) == ( values[3].real + values[1].integer )))
+		stack_index(&calcs, 0, (int*)&typ, &temp);
+		if(typ == TYPE_REAL && (temp.real == ( values[3].real + values[1].integer )))
 			printf("\n%s:[test %d.] ADD was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, *(double*)(calcs.top->value), (values[3].real + values[1].integer));
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, (values[3].real + values[1].integer));
 			break;
 		}
 	}
@@ -506,8 +514,8 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 test++;
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
 
-	stack_push(&calcs, TYPE_STRING, values[5].string);
-	stack_push(&calcs, TYPE_STRING, values[6].string); ///ten isty 5 potom dat na 6!!!
+	stack_push(&calcs, TYPE_STRING, &values[5]);
+	stack_push(&calcs, TYPE_STRING, &values[6]); ///ten isty 5 potom dat na 6!!!
 
 	///zavolanie interpretera
 	CALL_INTERPRET();
@@ -517,12 +525,12 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	///kontrola velkosti stacku, boli pushnute dve hodnoty, tie su v inter. popnute a je pushnuty result
 	if(calcs.count==1)
 	{
-		///readind top of stack by using direct stack access
-		if(calcs.top->type == TYPE_STRING && ( !cstr_cmp_str((cstring*)(calcs.top->value), "text1text2") ) )
+		stack_index(&calcs, 0, (int*)&typ, &temp);
+		if(typ == TYPE_STRING && ( !cstr_cmp_str(temp.string, "text1text2") ) )
 			printf("\n%s:[test %d.] ADD was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %s and should be %s\n", __func__, test, ((cstring*)(calcs.top->value))->str, "text1text2");
+			printf("\n%s:[test %d.] ERROR: stack value is %s and should be %s\n", __func__, test, (temp.string)->str, "text1text2");
 			break;
 		}
 	}
@@ -545,6 +553,9 @@ END_OF_TEST();
 
 void test_I_SUB(void)
 {
+	Type typ;
+	Value temp;
+
 	int test = 0, errors = 1;
 
 ///-----declarations-of-needed-structs----------------------------------------
@@ -552,7 +563,7 @@ void test_I_SUB(void)
 	instruction.instruction = I_SUB;
 
 	Stack calcs;
-	stack_init(&calcs);
+	stack_init(&calcs, VALUE_STACK);
 
 	Value values[10];
 
@@ -572,8 +583,8 @@ BEGINE_OF_TEST();
 ///PRVY test na sub
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
 	///push dvoch int values ktore budeme odcitat
-	stack_push(&calcs, TYPE_INT, &(values[0].integer));
-	stack_push(&calcs, TYPE_INT, &(values[1].integer));
+	stack_push(&calcs, TYPE_INT, &(values[0]));
+	stack_push(&calcs, TYPE_INT, &(values[1]));
 
 	///zavolanie interpretera
 	CALL_INTERPRET();
@@ -581,12 +592,12 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	///kontrola velkosti stacku, boli pushnute dve hodnoty, tie su v inter. popnute a je pushnuty result
 	if(calcs.count==1)
 	{
-		///readind top of stack by using direct stack access
-		if(calcs.top->type == TYPE_INT && (*(int*)(calcs.top->value) == ( values[0].integer - values[1].integer )))
+		stack_index(&calcs, 0, (int*)&typ, &temp);
+		if(typ == TYPE_INT && (temp.integer == ( values[0].integer - values[1].integer )))
 			printf("\n%s:[test %d.] SUB was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, *(int*)(calcs.top->value), values[0].integer - values[1].integer);
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.integer, values[0].integer - values[1].integer);
 			break;
 		}
 	}
@@ -606,8 +617,8 @@ test++;
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
 
 
-	stack_push(&calcs, TYPE_REAL, &(values[3].real));
-	stack_push(&calcs, TYPE_REAL, &(values[4].real));
+	stack_push(&calcs, TYPE_REAL, &(values[3]));
+	stack_push(&calcs, TYPE_REAL, &(values[4]));
 
 	///zavolanie interpretera
 	CALL_INTERPRET();
@@ -615,12 +626,12 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	///kontrola velkosti stacku, boli pushnute dve hodnoty, tie su v inter. popnute a je pushnuty result
 	if(calcs.count==1)
 	{
-		///readind top of stack by using direct stack access
-		if(calcs.top->type == TYPE_REAL && (*(double*)(calcs.top->value) == ( values[3].real - values[4].real )))
+		stack_index(&calcs, 0, (int*)&typ, &temp);
+		if(typ == TYPE_REAL && (temp.real == ( values[3].real - values[4].real )))
 			printf("\n%s:[test %d.] SUB was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, *(double*)(calcs.top->value), (values[3].real - values[4].real));
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, (values[3].real - values[4].real));
 			break;
 		}
 	}
@@ -641,8 +652,8 @@ test++;
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
 
 
-	stack_push(&calcs, TYPE_INT, &(values[1].integer));
-	stack_push(&calcs, TYPE_REAL, &(values[4].real));
+	stack_push(&calcs, TYPE_INT, &(values[1]));
+	stack_push(&calcs, TYPE_REAL, &(values[4]));
 
 	///zavolanie interpretera
 	CALL_INTERPRET();
@@ -650,12 +661,12 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	///kontrola velkosti stacku, boli pushnute dve hodnoty, tie su v inter. popnute a je pushnuty result
 	if(calcs.count==1)
 	{
-		///readind top of stack by using direct stack access
-		if(calcs.top->type == TYPE_REAL && (*(double*)(calcs.top->value) == ( values[1].integer - values[4].real )))
+		stack_index(&calcs, 0, (int*)&typ, &temp);
+		if(typ == TYPE_REAL && (temp.real == ( values[1].integer - values[4].real )))
 			printf("\n%s:[test %d.] SUB was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, *(double*)(calcs.top->value), (values[1].integer - values[4].real));
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, (values[1].integer - values[4].real));
 			break;
 		}
 	}
@@ -675,8 +686,8 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 test++;
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
 
-	stack_push(&calcs, TYPE_REAL, &(values[3].real));
-	stack_push(&calcs, TYPE_INT, &(values[1].integer));
+	stack_push(&calcs, TYPE_REAL, &(values[3]));
+	stack_push(&calcs, TYPE_INT, &(values[1]));
 
 	///zavolanie interpretera
 	CALL_INTERPRET();
@@ -684,12 +695,12 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	///kontrola velkosti stacku, boli pushnute dve hodnoty, tie su v inter. popnute a je pushnuty result
 	if(calcs.count==1)
 	{
-		///readind top of stack by using direct stack access
-		if(calcs.top->type == TYPE_REAL && (*(double*)(calcs.top->value) == ( values[3].real - values[1].integer )))
+		stack_index(&calcs, 0, (int*)&typ, &temp);
+		if(typ == TYPE_REAL && (temp.real == ( values[3].real - values[1].integer )))
 			printf("\n%s:[test %d.] SUB was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, *(double*)(calcs.top->value), (values[3].real - values[1].integer));
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, (values[3].real - values[1].integer));
 			break;
 		}
 	}
@@ -710,6 +721,9 @@ END_OF_TEST();
 
 void test_I_MUL(void)
 {
+	Type typ;
+	Value temp;
+
 	int test = 0, errors = 1;
 
 ///-----declarations-of-needed-structs----------------------------------------
@@ -717,7 +731,7 @@ void test_I_MUL(void)
 	instruction.instruction = I_MUL;
 
 	Stack calcs;
-	stack_init(&calcs);
+	stack_init(&calcs, VALUE_STACK);
 
 	Value values[10];
 
@@ -737,8 +751,8 @@ BEGINE_OF_TEST();
 ///PRVY test na mul
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
 	///push dvoch int values ktore budeme nasobit
-	stack_push(&calcs, TYPE_INT, &(values[0].integer));
-	stack_push(&calcs, TYPE_INT, &(values[1].integer));
+	stack_push(&calcs, TYPE_INT, &(values[0]));
+	stack_push(&calcs, TYPE_INT, &(values[1]));
 
 	///zavolanie interpretera
 	CALL_INTERPRET();
@@ -746,12 +760,12 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	///kontrola velkosti stacku, boli pushnute dve hodnoty, tie su v inter. popnute a je pushnuty result
 	if(calcs.count==1)
 	{
-		///readind top of stack by using direct stack access
-		if(calcs.top->type == TYPE_INT && (*(int*)(calcs.top->value) == ( values[0].integer * values[1].integer )))
+		stack_index(&calcs, 0, (int*)&typ, &temp);
+		if(typ == TYPE_INT && (temp.integer == ( values[0].integer * values[1].integer )))
 			printf("\n%s:[test %d.] MUL was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, *(int*)(calcs.top->value), values[0].integer * values[1].integer);
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.integer, values[0].integer * values[1].integer);
 			break;
 		}
 	}
@@ -771,8 +785,8 @@ test++;
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
 
 
-	stack_push(&calcs, TYPE_REAL, &(values[3].real));
-	stack_push(&calcs, TYPE_REAL, &(values[4].real));
+	stack_push(&calcs, TYPE_REAL, &(values[3]));
+	stack_push(&calcs, TYPE_REAL, &(values[4]));
 
 	///zavolanie interpretera
 	CALL_INTERPRET();
@@ -780,12 +794,12 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	///kontrola velkosti stacku, boli pushnute dve hodnoty, tie su v inter. popnute a je pushnuty result
 	if(calcs.count==1)
 	{
-		///readind top of stack by using direct stack access
-		if(calcs.top->type == TYPE_REAL && (*(double*)(calcs.top->value) == ( values[3].real * values[4].real )))
+		stack_index(&calcs, 0, (int*)&typ, &temp);
+		if(typ == TYPE_REAL && (temp.real == ( values[3].real * values[4].real )))
 			printf("\n%s:[test %d.] MUL was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, *(double*)(calcs.top->value), (values[3].real * values[4].real));
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, (values[3].real * values[4].real));
 			break;
 		}
 	}
@@ -806,8 +820,8 @@ test++;
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
 
 
-	stack_push(&calcs, TYPE_INT, &(values[1].integer));
-	stack_push(&calcs, TYPE_REAL, &(values[4].real));
+	stack_push(&calcs, TYPE_INT, &(values[1]));
+	stack_push(&calcs, TYPE_REAL, &(values[4]));
 
 	///zavolanie interpretera
 	CALL_INTERPRET();
@@ -815,12 +829,12 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	///kontrola velkosti stacku, boli pushnute dve hodnoty, tie su v inter. popnute a je pushnuty result
 	if(calcs.count==1)
 	{
-		///readind top of stack by using direct stack access
-		if(calcs.top->type == TYPE_REAL && (*(double*)(calcs.top->value) == ( values[1].integer * values[4].real )))
+		stack_index(&calcs, 0, (int*)&typ, &temp);
+		if(typ == TYPE_REAL && (temp.real == ( values[1].integer * values[4].real )))
 			printf("\n%s:[test %d.] MUL was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, *(double*)(calcs.top->value), (values[1].integer * values[4].real));
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, (values[1].integer * values[4].real));
 			break;
 		}
 	}
@@ -840,8 +854,8 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 test++;
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
 
-	stack_push(&calcs, TYPE_REAL, &(values[3].real));
-	stack_push(&calcs, TYPE_INT, &(values[1].integer));
+	stack_push(&calcs, TYPE_REAL, &(values[3]));
+	stack_push(&calcs, TYPE_INT, &(values[1]));
 
 	///zavolanie interpretera
 	CALL_INTERPRET();
@@ -849,12 +863,12 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	///kontrola velkosti stacku, boli pushnute dve hodnoty, tie su v inter. popnute a je pushnuty result
 	if(calcs.count==1)
 	{
-		///readind top of stack by using direct stack access
-		if(calcs.top->type == TYPE_REAL && (*(double*)(calcs.top->value) == ( values[3].real * values[1].integer )))
+		stack_index(&calcs, 0, (int*)&typ, &temp);
+		if(typ == TYPE_REAL && (temp.real == ( values[3].real * values[1].integer )))
 			printf("\n%s:[test %d.] MUL was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, *(double*)(calcs.top->value), (values[3].real * values[1].integer));
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, (values[3].real * values[1].integer));
 			break;
 		}
 	}
@@ -875,6 +889,9 @@ END_OF_TEST();
 
 void test_I_DIV(void)
 {
+	Type typ;
+	Value temp;
+
 	int test = 0, errors = 1;
 
 ///-----declarations-of-needed-structs----------------------------------------
@@ -882,7 +899,7 @@ void test_I_DIV(void)
 	instruction.instruction = I_DIV;
 
 	Stack calcs;
-	stack_init(&calcs);
+	stack_init(&calcs, VALUE_STACK);
 
 	Value values[10];
 
@@ -902,8 +919,8 @@ BEGINE_OF_TEST();
 ///PRVY test na mul
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
 	///push dvoch int values ktore budeme delit
-	stack_push(&calcs, TYPE_INT, &(values[0].integer));
-	stack_push(&calcs, TYPE_INT, &(values[1].integer));
+	stack_push(&calcs, TYPE_INT, &(values[0]));
+	stack_push(&calcs, TYPE_INT, &(values[1]));
 
 	///zavolanie interpretera
 	CALL_INTERPRET();
@@ -911,12 +928,12 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	///kontrola velkosti stacku, boli pushnute dve hodnoty, tie su v inter. popnute a je pushnuty result
 	if(calcs.count==1)
 	{
-		///readind top of stack by using direct stack access
-		if(calcs.top->type == TYPE_INT && (*(int*)(calcs.top->value) == ( values[0].integer / values[1].integer )))
+		stack_index(&calcs, 0, (int*)&typ, &temp);
+		if(typ == TYPE_INT && (temp.integer == ( values[0].integer / values[1].integer )))
 			printf("\n%s:[test %d.] DIV was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, *(int*)(calcs.top->value), values[0].integer / values[1].integer);
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.integer, values[0].integer / values[1].integer);
 			break;
 		}
 	}
@@ -936,8 +953,8 @@ test++;
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
 
 
-	stack_push(&calcs, TYPE_REAL, &(values[3].real));
-	stack_push(&calcs, TYPE_REAL, &(values[4].real));
+	stack_push(&calcs, TYPE_REAL, &(values[3]));
+	stack_push(&calcs, TYPE_REAL, &(values[4]));
 
 	///zavolanie interpretera
 	CALL_INTERPRET();
@@ -945,12 +962,12 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	///kontrola velkosti stacku, boli pushnute dve hodnoty, tie su v inter. popnute a je pushnuty result
 	if(calcs.count==1)
 	{
-		///readind top of stack by using direct stack access
-		if(calcs.top->type == TYPE_REAL && (*(double*)(calcs.top->value) == ( values[3].real / values[4].real )))
+		stack_index(&calcs, 0, (int*)&typ, &temp);
+		if(typ == TYPE_REAL && (temp.real == ( values[3].real / values[4].real )))
 			printf("\n%s:[test %d.] DIV was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, *(double*)(calcs.top->value), (values[3].real / values[4].real));
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, (values[3].real / values[4].real));
 			break;
 		}
 	}
@@ -970,8 +987,8 @@ test++;
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
 
 
-	stack_push(&calcs, TYPE_INT, &(values[1].integer));
-	stack_push(&calcs, TYPE_REAL, &(values[4].real));
+	stack_push(&calcs, TYPE_INT, &(values[1]));
+	stack_push(&calcs, TYPE_REAL, &(values[4]));
 
 	///zavolanie interpretera
 	CALL_INTERPRET();
@@ -979,12 +996,12 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	///kontrola velkosti stacku, boli pushnute dve hodnoty, tie su v inter. popnute a je pushnuty result
 	if(calcs.count==1)
 	{
-		///readind top of stack by using direct stack access
-		if(calcs.top->type == TYPE_REAL && (*(double*)(calcs.top->value) == ( values[1].integer / values[4].real )))
+		stack_index(&calcs, 0, (int*)&typ, &temp);
+		if(typ == TYPE_REAL && (temp.real == ( values[1].integer / values[4].real )))
 			printf("\n%s:[test %d.] DIV int / real was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, *(double*)(calcs.top->value), (values[1].integer / values[4].real));
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, (values[1].integer / values[4].real));
 			break;
 		}
 	}
@@ -1004,8 +1021,8 @@ test++;
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
 
 
-	stack_push(&calcs, TYPE_REAL, &(values[3].real));
-	stack_push(&calcs, TYPE_INT, &(values[1].integer));
+	stack_push(&calcs, TYPE_REAL, &(values[3]));
+	stack_push(&calcs, TYPE_INT, &(values[1]));
 
 	///zavolanie interpretera
 	CALL_INTERPRET();
@@ -1013,12 +1030,12 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	///kontrola velkosti stacku, boli pushnute dve hodnoty, tie su v inter. popnute a je pushnuty result
 	if(calcs.count==1)
 	{
-		///readind top of stack by using direct stack access
-		if(calcs.top->type == TYPE_REAL && (*(double*)(calcs.top->value) == ( values[3].real / values[1].integer )))
+		stack_index(&calcs, 0, (int*)&typ, &temp);
+		if(typ == TYPE_REAL && (temp.real == ( values[3].real / values[1].integer )))
 			printf("\n%s:[test %d.] DIV real / int was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, *(double*)(calcs.top->value), (values[3].real / values[1].integer));
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, (values[3].real / values[1].integer));
 			break;
 		}
 	}
@@ -1038,7 +1055,7 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 
 Value nula = { .real=0.0 };
 
-	stack_push(&calcs, TYPE_REAL, &(values[3].real));
+	stack_push(&calcs, TYPE_REAL, &(values[3]));
 	stack_push(&calcs, TYPE_REAL, &(nula.real));
 
 	///zavolanie interpretera na delenie nulou

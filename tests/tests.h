@@ -114,11 +114,13 @@ errors=0;                                                                     \
 
 
 #define TEST_OF_COMPARE(operation, operator, instruct)                        \
+	Type typ;                                                                 \
+	Value temp;                                                               \
 	int test = 0, errors = 1;                                                 \
 	Instruction instruction;                                                  \
 	instruction.instruction = instruct;                                       \
 	Stack calcs;                                                              \
-	stack_init(&calcs);                                                       \
+	stack_init(&calcs, VALUE_STACK);                                          \
 	Value values[12];                                                         \
 	values[0].integer	= 8;                                                    \
 	values[1].integer	= 100;                                                  \
@@ -135,16 +137,17 @@ errors=0;                                                                     \
 	values[11].string	= cstr_create_str("text2");                             \
 BEGINE_OF_TEST();                                                             \
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);\
-	stack_push(&calcs, TYPE_INT, &(values[0].integer));                       \
-	stack_push(&calcs, TYPE_INT, &(values[1].integer));                       \
+	stack_push(&calcs, TYPE_INT, &(values[0]));                       \
+	stack_push(&calcs, TYPE_INT, &(values[1]));                       \
 	CALL_INTERPRET();                                                         \
 	if(calcs.count==1)                                                        \
 	{                                                                         \
-		if(calcs.top->type == TYPE_BOOL && (*(bool*)(calcs.top->value) == ( values[0].integer operator values[1].integer )))\
+	stack_index(&calcs, 0, (int*)&typ, &temp);                                                                      \
+		if(typ == TYPE_BOOL && (temp.boolean == ( values[0].integer operator values[1].integer )))\
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, operation);\
 		else                                                                  \
 		{                                                                     \
-			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, *(bool*)(calcs.top->value), values[0].integer operator values[1].integer);\
+			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, temp.boolean, values[0].integer operator values[1].integer);\
 			break;                                                            \
 		}                                                                     \
 	}                                                                         \
@@ -157,16 +160,17 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	POP_OUT_LAST();                                                           \
 test++;                                                                       \
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);\
-	stack_push(&calcs, TYPE_REAL, &(values[3].real));                         \
-	stack_push(&calcs, TYPE_REAL, &(values[4].real));                         \
+	stack_push(&calcs, TYPE_REAL, &(values[3]));                         \
+	stack_push(&calcs, TYPE_REAL, &(values[4]));                         \
 	CALL_INTERPRET();                                                         \
 	if(calcs.count==1)                                                        \
 	{                                                                         \
-		if(calcs.top->type == TYPE_BOOL && (*(bool*)(calcs.top->value) == ( values[3].real operator values[4].real )))\
+	stack_index(&calcs, 0, (int*)&typ, &temp);                                                                      \
+		if(typ == TYPE_BOOL && (temp.boolean == ( values[3].real operator values[4].real )))\
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, operation);\
 		else                                                                  \
 		{                                                                     \
-			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, *(bool*)(calcs.top->value), (values[3].real operator values[4].real));\
+			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, temp.boolean, (values[3].real operator values[4].real));\
 			break;                                                            \
 		}                                                                     \
 	}                                                                         \
@@ -179,16 +183,17 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	POP_OUT_LAST();                                                           \
 test++;                                                                       \
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);\
-	stack_push(&calcs, TYPE_BOOL, &(values[5].boolean));                      \
-	stack_push(&calcs, TYPE_BOOL, &(values[6].boolean));                      \
+	stack_push(&calcs, TYPE_BOOL, &(values[5]));                      \
+	stack_push(&calcs, TYPE_BOOL, &(values[6]));                      \
 	CALL_INTERPRET();                                                         \
 	if(calcs.count==1)                                                        \
-	{\
-		if(calcs.top->type == TYPE_BOOL && (*(bool*)(calcs.top->value) == ( values[5].boolean operator values[6].boolean )))\
+	{                                                                         \
+		stack_index(&calcs, 0, (int*)&typ, &temp);                            \
+		if(typ == TYPE_BOOL && (temp.boolean == ( values[5].boolean operator values[6].boolean )))\
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, operation);\
 		else                                                                  \
 		{                                                                     \
-			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, *(bool*)(calcs.top->value), (values[5].boolean operator values[6].boolean));\
+			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, temp.boolean, (values[5].boolean operator values[6].boolean));\
 			break;                                                            \
 		}                                                                     \
 	}                                                                         \
@@ -201,16 +206,17 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	POP_OUT_LAST();                                                           \
 test++;                                                                       \
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);\
-	stack_push(&calcs, TYPE_BOOL, &(values[5].boolean));                      \
-	stack_push(&calcs, TYPE_BOOL, &(values[7].boolean));                      \
+	stack_push(&calcs, TYPE_BOOL, &(values[5]));                      \
+	stack_push(&calcs, TYPE_BOOL, &(values[7]));                      \
 	CALL_INTERPRET();                                                         \
 	if(calcs.count==1)                                                        \
 	{                                                                         \
-		if(calcs.top->type == TYPE_BOOL && (*(bool*)(calcs.top->value) == ( values[5].boolean operator values[7].boolean )))\
+	stack_index(&calcs, 0, (int*)&typ, &temp);                                                                      \
+		if(typ == TYPE_BOOL && (temp.boolean == ( values[5].boolean operator values[7].boolean )))\
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, operation);\
 		else                                                                  \
 		{                                                                     \
-			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, *(bool*)(calcs.top->value), (values[5].boolean operator values[7].boolean));\
+			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, temp.boolean, (values[5].boolean operator values[7].boolean));\
 			break;                                                            \
 		}                                                                     \
 	}                                                                         \
@@ -223,16 +229,17 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	POP_OUT_LAST();                                                           \
 test++;                                                                       \
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);\
-	stack_push(&calcs, TYPE_REAL, &(values[3].real));                         \
-	stack_push(&calcs, TYPE_REAL, &(values[5].real));                         \
+	stack_push(&calcs, TYPE_REAL, &(values[3]));                         \
+	stack_push(&calcs, TYPE_REAL, &(values[5]));                         \
 	CALL_INTERPRET();                                                         \
 	if(calcs.count==1)                                                        \
 	{                                                                         \
-		if(calcs.top->type == TYPE_BOOL && (*(bool*)(calcs.top->value) == ( values[3].boolean operator values[5].boolean )))\
+	stack_index(&calcs, 0, (int*)&typ, &temp);                                                                      \
+		if(typ == TYPE_BOOL && (temp.boolean == ( values[3].boolean operator values[5].boolean )))\
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, operation);\
 		else                                                                  \
 		{                                                                     \
-			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, *(bool*)(calcs.top->value), (values[3].boolean operator values[5].boolean));\
+			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, temp.boolean, (values[3].boolean operator values[5].boolean));\
 			break;                                                            \
 		}                                                                     \
 	}                                                                         \
@@ -245,16 +252,17 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	POP_OUT_LAST();                                                           \
 test++;                                                                       \
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);\
-	stack_push(&calcs, TYPE_REAL, &(values[3].real));                         \
-	stack_push(&calcs, TYPE_REAL, &(values[5].real));                         \
+	stack_push(&calcs, TYPE_REAL, &(values[3]));                         \
+	stack_push(&calcs, TYPE_REAL, &(values[5]));                         \
 	CALL_INTERPRET();                                                         \
 	if(calcs.count==1)                                                        \
 	{                                                                         \
-		if(calcs.top->type == TYPE_BOOL && (*(bool*)(calcs.top->value) == ( values[3].boolean operator values[5].boolean )))\
+	stack_index(&calcs, 0, (int*)&typ, &temp);                                                                      \
+		if(typ == TYPE_BOOL && (temp.boolean == ( values[3].boolean operator values[5].boolean )))\
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, operation);\
 		else                                                                  \
 		{                                                                     \
-			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, *(bool*)(calcs.top->value), (values[3].boolean operator values[5].boolean));\
+			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, temp.boolean, (values[3].boolean operator values[5].boolean));\
 			break;                                                            \
 		}                                                                     \
 	}                                                                         \
@@ -267,16 +275,17 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	POP_OUT_LAST();                                                           \
 	test++;                                                                   \
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);\
-	stack_push(&calcs, TYPE_STRING, values[9].string);                        \
-	stack_push(&calcs, TYPE_STRING, values[10].string);                       \
+	stack_push(&calcs, TYPE_STRING, &values[9]);                        \
+	stack_push(&calcs, TYPE_STRING, &values[10]);                       \
 	CALL_INTERPRET();                                                         \
 	if(calcs.count==1)                                                        \
 	{                                                                         \
-		if(calcs.top->type == TYPE_BOOL && (*(bool*)(calcs.top->value) == (cstr_cmp(values[9].string, values[10].string) operator 0) ))\
+	stack_index(&calcs, 0, (int*)&typ, &temp);                                                                      \
+		if(typ == TYPE_BOOL && (temp.boolean == (cstr_cmp(values[9].string, values[10].string) operator 0) ))\
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, operation);\
 		else                                                                  \
 		{                                                                     \
-			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, *(bool*)(calcs.top->value), (cstr_cmp(values[9].string, values[10].string) operator 0));\
+			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, temp.boolean, (cstr_cmp(values[9].string, values[10].string) operator 0));\
 			break;                                                            \
 		}                                                                     \
 	}                                                                         \
@@ -289,16 +298,17 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	POP_OUT_LAST();                                                           \
 	test++;                                                                   \
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);\
-	stack_push(&calcs, TYPE_STRING, values[10].string);                       \
-	stack_push(&calcs, TYPE_STRING, values[11].string);                       \
+	stack_push(&calcs, TYPE_STRING, &values[10]);                       \
+	stack_push(&calcs, TYPE_STRING, &values[11]);                       \
 	CALL_INTERPRET();                                                         \
 	if(calcs.count==1)                                                        \
 	{                                                                         \
-		if(calcs.top->type == TYPE_BOOL && (*(bool*)(calcs.top->value) == (cstr_cmp(values[10].string, values[11].string) operator 0) ))\
+	stack_index(&calcs, 0, (int*)&typ, &temp);                                                                      \
+		if(typ == TYPE_BOOL && (temp.boolean == (cstr_cmp(values[10].string, values[11].string) operator 0) ))\
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, operation);\
 		else                                                                  \
 		{                                                                     \
-			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, *(bool*)(calcs.top->value), (cstr_cmp(values[10].string, values[11].string) operator 0));\
+			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, temp.boolean, (cstr_cmp(values[10].string, values[11].string) operator 0));\
 			break;                                                            \
 		}                                                                     \
 	}                                                                         \

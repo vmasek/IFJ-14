@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 			test_kmp_substr();
 		if(!argc || !strcmp(argv[i], "stack"))
 		{
-			test_stack();
+			//test_stack();
 		}
 		if(!argc || !strcmp(argv[i], "tree"))
 		{
