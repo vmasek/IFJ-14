@@ -66,18 +66,35 @@ rm ./*.out 2>/dev/null
 
 BIN_TEST="./test_ifj"
 
+I_TESTS=(	#this is array of keys to coded tests of instructions(will be used as argument for project)
+			"I_ASSIGN"
+			"I_ADD"
+			"I_SUB"
+			"I_MUL"
+			"I_DIV"
+			"I_LESS"
+			"I_GREATER"
+			"I_LESS_EQUAL"
+			"I_GREATER_EQUAL"
+			"I_EQUAL"
+			"I_NOT_EQUAL"
+		)
+
 TESTS=(	#this is array of keys to coded tests (will be used as argument for project)
 			"kmp"
 			"cstring"
 			"stack"
 			"tree"
 			"buildin"
+			"inter"
+			
 		)
 
 FILE_OUT_TESTS=(	#this is array of keys to tests that need file redirection
 					"cstring"
 					"stack"
 					"tree"
+					"inter" #inter // interpreter
 				)
 
 red='\e[0;31m'
@@ -107,14 +124,29 @@ if [[ $tests == true || $MODULES == true  ]]; then
 		#if array contains element
 		if [[ "${FILE_OUT_TESTS[@]}" =~ "${test}" || "${FILE_OUT_TESTS[${#FILE_OUT_TESTS[@]}-1]}" == "${test}" ]]; then
 			#echo "*************************************contained*********************************************************"
-			"$BIN_TEST" "$test" &>"$test".out
 			echo "*** Testing of $test ***"
+			if [[ "inter" == "${test}" ]]; then
 
-			if [[ "$(tail "$test".out)" =~ "OK. Everything is fine." ]]; then
-				echo -e "${green}OK.${NC} In $test is everything fine."
-				rm "$test".out
+				for inst in "${I_TESTS[@]}"; do
+					"$BIN_TEST" "$test" "$inst" &>"$test"."$inst".out
+					if [[ "$(tail "$test"."$inst".out)" =~ "OK. Everything is fine." ]]; then
+						echo -e "${green}OK.${NC} $inst is correct."
+						rm "$test"."$inst".out
+					else
+						echo -e "${red}ERROR${NC} has occured during test of $test $inst ! \t ${color2}LOG:${NC} \"$test.$inst.out\"  ${color2}Try running:${NC} \"$BIN_TEST $test $inst\" ."
+					fi
+
+				done
+
 			else
-				echo -e "${red}ERROR${NC} has occured during test of $test ! ${color2}LOG:${NC} \"$test.out\"  ${color2}Try running:${NC} \"$BIN_TEST $test\" ."
+				"$BIN_TEST" "$test" &>"$test".out
+				if [[ "$(tail "$test".out)" =~ "OK. Everything is fine." ]]; then
+					echo -e "${green}OK.${NC} In $test is everything fine."
+					rm "$test".out
+				else
+					echo -e "${red}ERROR${NC} has occured during test of $test ! \t ${color2}LOG:${NC} \"$test.out\"  ${color2}Try running:${NC} \"$BIN_TEST $test\" ."
+				fi
+
 			fi
 		else
 			result=$("$BIN_TEST" "$test" 2>&1)
@@ -295,3 +327,17 @@ if [[ $tests == true || $PROJECT == true  ]]; then
 	fi
 
 fi
+
+
+
+# I_ASSIGN
+# I_ADD
+# I_SUB
+# I_MUL
+# I_DIV
+# I_LESS
+# I_GREATER
+# I_LESS_EQUAL
+# I_GREATER_EQUAL
+# I_EQUAL
+# I_NOT_EQUAL
