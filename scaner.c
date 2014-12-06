@@ -283,6 +283,7 @@ int get_token(Token *token, FILE *input) {
 
         case LEXER_STR_START:
             if (symbol == '\'') {
+                token->value.value_string = cstr_create_str(NULL);
                 state = LEXER_STR_AP;
                 break;
             }
