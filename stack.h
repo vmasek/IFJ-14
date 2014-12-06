@@ -18,7 +18,8 @@ struct stack_node;
 
 typedef enum {
     VALUE_STACK,
-    TOKEN_STACK
+    TOKEN_STACK,
+    INSTR_STACK
 } Stack_type;
 
 typedef struct {

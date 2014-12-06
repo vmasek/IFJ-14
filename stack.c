@@ -5,6 +5,9 @@
  * @brief   Implementation of Stack datatype for IFJ projekt
  ****************************************************************************/
 
+#include "common.h"
+#include "interpreter.h"
+#include "scaner.h"
 #include "stack.h"
 
 struct stack_node {
@@ -12,6 +15,7 @@ struct stack_node {
     union {
         Value value;
         Token token;
+        Instruction *instr;
     } value;
     struct stack_node *next;
 };
@@ -22,10 +26,17 @@ static void get_value(Stack *stack, struct stack_node *node, void *value)
     if (value == NULL)
         return;
 
-    if (stack->type == VALUE_STACK)
+    switch (stack->type) {
+    case VALUE_STACK:
         *(Value *)value = node->value.value;
-    else
+        break;
+    case TOKEN_STACK:
         *(Token *)value = node->value.token;
+        break;
+    default:
+        *(Instruction **)value = node->value.instr;
+        break;
+    }
 }
 
 static void set_value(Stack *stack, struct stack_node *node, void *value)
@@ -33,10 +44,17 @@ static void set_value(Stack *stack, struct stack_node *node, void *value)
     if (value == NULL)
         return;
 
-    if (stack->type == VALUE_STACK)
+    switch (stack->type) {
+    case VALUE_STACK:
         node->value.value = *(Value *)value;
-    else
+        break;
+    case TOKEN_STACK:
         node->value.token = *(Token *)value;
+        break;
+    default:
+        node->value.instr = *(Instruction **)value;
+        break;
+    }
 }
 
 /* BASIC OPERATIONS */
@@ -67,7 +85,7 @@ int stack_init(Stack *stack, Stack_type type)
         return INTERNAL_ERROR;
     }
 
-    if (type != VALUE_STACK && type != TOKEN_STACK) {
+    if (type != VALUE_STACK && type != TOKEN_STACK && type != INSTR_STACK) {
         debug("Invalid type of stack\n");
         return INTERNAL_ERROR;
     }
