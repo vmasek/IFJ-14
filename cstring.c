@@ -44,12 +44,15 @@ static cstring *append(cstring *s, char const *str, unsigned long size)
      *     return NULL; @endcode
      */
 	if (size >= s->tab_size && cstr_resize(s, size))
+	{
+		debug("resize error\n");
 		return NULL;
+	}
 
-    if (s->size == 0) // ak je retazec cstring prazdny
-        strcpy(s->str, str); // tak sa str prekopiruje
+    if (s->size == 0) /// if str of cstring is empty
+        strcpy(s->str, str); /// str will be copied
     else
-        strcat(s->str, str); // inak bude vlozeny na koniec
+        strcat(s->str, str); /// else it will be appended to end
 
     s->size = size;
     return s;
@@ -96,7 +99,10 @@ cstring *cstr_append_chr(cstring *s, char c)
 {
 	/** As long as false is evaluated in the first condition resize will not be called, the principe is essentially the same as for @see append() but with modifications excluding unnecessary operations */
     if (s->size + 1 >= s->tab_size && cstr_quick_resize(s))
-        return NULL;
+    {
+		debug("resize error\n");
+		return NULL;
+	}
 
     s->str[s->size]      = c;
     s->str[s->size += 1] = '\0';
@@ -115,6 +121,16 @@ cstring *cstr_append_chr(cstring *s, char c)
  */
 cstring *cstr_append_str(cstring *s, char const *str)
 {
+	if (!s)
+    {
+        debug("Cstring where to append is not given.\n");
+        return NULL;
+    }
+    if (!str)
+    {
+        debug("Cstring which will be appended is not given.\n");
+        return NULL;
+    }
     return append(s, str, s->size + strlen(str));
 }
 
@@ -130,6 +146,17 @@ cstring *cstr_append_str(cstring *s, char const *str)
  */
 cstring *cstr_append_cstr(cstring *s, cstring const *cstr)
 {
+	if (!s)
+    {
+        debug("Cstring where to append is not given.\n");
+        return NULL;
+    }
+    if (!cstr)
+    {
+        debug("Cstring which will be appended is not given.\n");
+        return NULL;
+    }
+
     return append(s, cstr->str, s->size + cstr->size);
 }
 
@@ -161,6 +188,17 @@ cstring *cstr_assign_str(cstring *s, char const *str)
  */
 cstring *cstr_assign_cstr(cstring *s, cstring const *cstr)
 {
+	if (!s)
+    {
+        debug("Cstring where to assigne is not given.\n");
+        return NULL;
+    }
+    if (!cstr)
+    {
+        debug("Cstring which will be assigned is not given.\n");
+        return NULL;
+    }
+
     cstr_clear(s);
     return append(s, cstr->str, cstr->size);
 }
@@ -179,7 +217,7 @@ cstring *cstr_create_chr(const char chr)
 
     if (!s)
     {
-        fprintf(stderr, "Memory allocation for cstrig has failed.\n");
+        debug("Memory allocation for cstrig has failed.\n");
         return NULL;
     }
 
@@ -187,7 +225,7 @@ cstring *cstr_create_chr(const char chr)
 
     if (!s->str)
     {
-        fprintf(stderr, "Memory allocation for cstrig string has failed.\n");
+        debug("Memory allocation for cstrig has failed.\n");
         return NULL;
     }
 
@@ -221,7 +259,7 @@ cstring *cstr_create_str(char const *str)
     if (s)
         return cstr_append_str(s, str);
 
-    fprintf(stderr, "Memory allocation for cstrig has failed.\n");
+    debug("Memory allocation for cstrig has failed.\n");
     return NULL;
 }
 
@@ -239,14 +277,16 @@ cstring *cstr_create_cstr(cstring const *cstr)
 
 	if(!cstr)
 	{
-		debug("str not given.");
+		debug("str not given. was created.");
 		return s;
 	}
+
+
 
     if (s)
         return cstr_append_cstr(s, cstr);
 
-    fprintf(stderr, "Memory allocation for cstrig has failed.\n");
+    debug("Memory allocation for cstrig has failed.\n");
     return NULL;
 }
 
@@ -261,6 +301,11 @@ cstring *cstr_create_cstr(cstring const *cstr)
  */
 cstring *cstr_copy(cstring const *cstr)
 {
+	if(!cstr)
+	{
+		debug("str not given.");
+		return NULL;
+	}
     return cstr_create_str(cstr->str);
 }
 
@@ -278,9 +323,13 @@ int cstr_resize(cstring *s, unsigned long size)
     unsigned long new_size = s->tab_size ? size : CSTRING_START_SIZE;
     char  *tmp;
 
-    new_size *= (size + 1) / new_size + 1; /** zmensi alebo zvecsi new_size na potrebnu hodnotu */
+    new_size *= (size + 1) / new_size + 1; /** lowers alebo enlarges new_size to needed value */
+    debug("old size %d\tnew size %d\n", size, new_size);
     if (!(tmp = gc_realloc("cstring", s->str, new_size)))
-        return -1;
+    {
+		debug("resize went wrong\tnew size %d\n", new_size);
+		return -1;
+	}
     s->str = tmp;
     s->tab_size = new_size;
     return 0;
@@ -297,11 +346,11 @@ void cstr_clear(cstring *s)
 {
 	if(!s)
 	{
-		debug("cstirng to clear not given.");
+		debug("Cstirng to clear not given.\n");
 		return;
 	}
     s->str[0] = '\0';
-    s->size = 0;
+    s->size   =   0 ;
 }
 
 
@@ -311,6 +360,7 @@ void cstr_clear(cstring *s)
  */
 void cstr_gc_free_all(void)
 {
+	debug("Freeing all cstrings with GC.\n");
     gc_free("cstring");
 }
 
@@ -321,6 +371,11 @@ void cstr_gc_free_all(void)
  */
 void print_cstr(cstring const *s)
 {
+	if(!s)
+	{
+		debug("Cstrings to print not given.");
+		return;
+	}
     printf("%s",s->str);
     //puts(s->str);
 }
@@ -405,7 +460,10 @@ void print_cstr_all(cstring const *s)
 cstring *cstr_read_line(cstring *cstr)
 {
 	if(!cstr)
+	{
+		debug("cstirng not given.");
 		return NULL;
+	}
 
 	int ch;
 	cstr_clear(cstr);
