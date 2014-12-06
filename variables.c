@@ -143,6 +143,12 @@ int variables_value_read(Variables *variables, Type *type, Value *value, unsigne
 		return INTERNAL_ERROR;
 	}
 
+	if(index >= variables->count)
+	{
+		debug("Variables index %u is out of range\n", index);
+		return INTERNAL_ERROR;
+	}
+
 	if(type)
 		*type = variables->types[index];
 
@@ -179,7 +185,7 @@ int variables_value_read(Variables *variables, Type *type, Value *value, unsigne
 int variables_value_write(Variables *variables, Value *value, unsigned int index)
 {
 	if (!value)
-    {
+	{
 		debug("not Value given.\n");
 		return INTERNAL_ERROR;
 	}
@@ -190,6 +196,11 @@ int variables_value_write(Variables *variables, Value *value, unsigned int index
 		return INTERNAL_ERROR;
 	}
 
+	if(index >= variables->count)
+	{
+		debug("Variables index %u is out of range\n", index);
+		return INTERNAL_ERROR;
+	}
 
 	variables->values[index] = *value;
 
