@@ -262,17 +262,17 @@ static int nt_paramlist(FILE *input, Func_record *func, int count)
     int ret;
     Var_record *var = NULL;
     CHECK_VALUE(nt_var(input, func->locals, true, &var, count), ret);
-    CHECK_VALUE(t_symbol_catch(input, SEMICOLON), ret);
-    if ((ret = nt_paramlist(input, func, count++)) == RETURNING) {
-        func->param_count = count;
+    if ((ret = t_symbol_catch(input, SEMICOLON)) == RETURNING) {
         func->params = (Var_record **)gc_malloc(__FILE__, count * sizeof(Var_record *));
         if (func->params == NULL) {
             return INTERNAL_ERROR;
         }
         func->params[count - 1] = var;
         func->local_count = count;
+        func->param_count = count; /* Function identifier */
         return SUCCESS;
     } else if (ret == SUCCESS) {
+        CHECK_VALUE(nt_paramlist(input, func, count + 1), ret);
         func->params[count - 1] = var;
         return SUCCESS;
     } else {
