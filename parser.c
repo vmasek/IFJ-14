@@ -396,9 +396,11 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
         } else if (token.value.value_keyword == KEYWORD_IF) {
             CHECK_VALUE(parse_expr(input, locals, globals, functions, vars, instr, NULL),
                         ret);
-            CHECK_VALUE(t_symbol(input, KEYWORD_THEN), ret);
+            CHECK_VALUE(t_keyword(input, KEYWORD_THEN), ret);
             CHECK_VALUE(gen_instr(instr, I_JMP, 0, 0, NULL), ret);
             tmp_instr = *instr;
+            //TODO: remove I_NOP
+            CHECK_VALUE(gen_instr(&(tmp_instr->alt_instruction), I_NOP, 0, 0, NULL), ret);
             CHECK_VALUE(nt_comp_cmd(input, locals, globals, functions, instr, vars), ret);
             CATCH_VALUE(nt_else(input, locals, globals, functions,
                                 &(tmp_instr->alt_instruction), vars), ret);
@@ -482,6 +484,7 @@ static int nt_else(FILE *input, Tree *locals, Tree *globals, Tree *functions,
     if (token.type == TOKEN_KEYWORD &&
         token.value.value_keyword == KEYWORD_ELSE) {
         CHECK_VALUE(nt_comp_cmd(input, locals, globals, functions, instr, vars), ret);
+        return SUCCESS;
     }
     unget_token(&token);
     return RETURNING;
