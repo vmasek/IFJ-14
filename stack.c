@@ -1,557 +1,332 @@
 /**
  * @file    stack.c
  * @name    Stack datatype
- * @author  Vojtech Mašek (xmasek15)
+ * @author  Vojtech Mašek (xmasek15), Pavel Tobias (xtobia01)
  * @brief   Implementation of Stack datatype for IFJ projekt
  ****************************************************************************/
 
 #include "stack.h"
 
+struct stack_node {
+    int type;
+    union {
+        Value value;
+        Token token;
+    } value;
+    struct stack_node *next;
+};
 
-/**
- * @brief Inicialize stack structure.
- * @param stack poiner to stack structure.
- */
-int stack_init(Stack *stack)
+/* STATIC FUNCTIONS */
+static void get_value(Stack *stack, struct stack_node *node, void *value)
 {
-	if(!stack)
-	{
-		debug("No stack given\n");
-		return INTERNAL_ERROR;
-	}
+    if (value == NULL)
+        return;
 
-	stack->top = NULL;
-	stack->count = 0;
-	return SUCCESS;
+    if (stack->type == VALUE_STACK)
+        *(Value *)value = node->value.value;
+    else
+        *(Token *)value = node->value.token;
 }
 
-
-int stack_push(Stack *stack, int type, void *value)
+static void set_value(Stack *stack, struct stack_node *node, void *value)
 {
-	if(!stack)
-	{
-		debug("No stack given\n");
-		return INTERNAL_ERROR;
-	}
+    if (value == NULL)
+        return;
 
-	Stack_Node *tmp = malloc(sizeof(Stack_Node)); ///try using calloc and time diff
-
-	if(!tmp)
-	{
-		return INTERNAL_ERROR;
-	}
-
-	tmp->type = type;
-
-	if(!value)
-	{
-		debug("pushing NULL pointer as the value\n");
-	}
-
-	tmp->value = value;
-	tmp->next = stack->top; ///towards
-
-	stack->top = tmp;
-	stack->count++;
-
-	return SUCCESS;
+    if (stack->type == VALUE_STACK)
+        node->value.value = *(Value *)value;
+    else
+        node->value.token = *(Token *)value;
 }
 
-
-int stack_top(Stack *stack, int *type, void **value)
+/* BASIC OPERATIONS */
+int stack_count(Stack *stack)
 {
-	if(!stack)
-	{
-		debug("No stack given\n");
-		return INTERNAL_ERROR;
-	}
-	if(!stack->top)
-	{
-		debug("Stack is empty\n");
-		return INTERNAL_ERROR;
-	}
+    if (stack == NULL) {
+        debug("No stack given\n");
+        return INTERNAL_ERROR;
+    }
 
-	Stack_Node *tmp = stack->top;
-
-	if(type)
-		*type = tmp->type;
-	if(value)
-		*value = tmp->value;
-	return SUCCESS;
+    return stack->count;
 }
 
-
-int stack_index(Stack *stack, unsigned int index, int *type, void **value)
+int stack_free(Stack *stack)
 {
-    if (stack == NULL || stack->top == NULL)
-    {
-		debug("not stack or stack top\n");
-		return INTERNAL_ERROR;
-	}
+    if (stack == NULL) {
+        debug("No stack given\n");
+        return INTERNAL_ERROR;
+    }
 
-	if(index >= stack->count)
-	{
-		debug("Stack index %u is out of range\n", index);
-		return INTERNAL_ERROR;
-	}
+    return stack_popping_spree(stack, stack->count);
+}
 
-    Stack_Node *node = stack->top;
+int stack_init(Stack *stack, Stack_type type)
+{
+    if (stack == NULL) {
+        debug("No stack given\n");
+        return INTERNAL_ERROR;
+    }
 
-	while (index--) {
-		if ((node = node->next) == NULL)
-		{
-			debug("node was not found on that index\n");
-			return INTERNAL_ERROR;
-		}
-	}
+    if (type != VALUE_STACK && type != TOKEN_STACK) {
+        debug("Invalid type of stack\n");
+        return INTERNAL_ERROR;
+    }
 
-    if (type != NULL)
-        *type = node->type;
-
-    if (value != NULL)
-        *value = node->value;
+    stack->top = NULL;
+    stack->type = type;
+    stack->count = 0;
 
     return SUCCESS;
 }
-
-
-int stack_index_value(Stack *stack, unsigned int index, int *type, Value *value)
-{
-    if (stack == NULL || stack->top == NULL)
-    {
-		debug("not stack or stack top\n");
-		return INTERNAL_ERROR;
-	}
-
-	if(index >= stack->count)
-	{
-		debug("Stack index %u is out of range\n", index);
-		return INTERNAL_ERROR;
-	}
-
-	Stack_Node *node = stack->top;
-
-	while (index--) {
-		if ((node = node->next) == NULL)
-		{
-			debug("node was not found on that index\n");
-			return INTERNAL_ERROR;
-		}
-	}
-
-    if (type != NULL)
-        *type = node->type;
-
-    if (value != NULL)
-    {
-		if (node->type == TYPE_INT)
-		{
-			debug("integer\n");
-			value->integer = *((int*)node->value);
-		}
-		else if (node->type == TYPE_REAL)
-		{
-			debug("double\n");
-			value->real = *((double*)node->value);
-		}
-		else if (node->type == TYPE_STRING)
-		{
-			debug("string\n");
-			value->string = ((cstring*)node->value);
-		}
-		else if (node->type == TYPE_BOOL)
-		{
-			debug("bool\n");
-			value->boolean = *((bool*)node->value);
-		}
-		else
-		{
-			debug("not Value value\n");
-			return INTERNAL_ERROR;
-		}
-	}
-
-    return SUCCESS;
-}
-
-
-int stack_index_insert_value(Stack *stack, unsigned int index, int type, Value *value)
-{
-    if (stack == NULL || stack->top == NULL)
-    {
-		debug("not stack or stack top\n");
-		return INTERNAL_ERROR;
-	}
-
-	if(index >= stack->count)
-	{
-		debug("Stack index %u is out of range\n", index);
-		return INTERNAL_ERROR;
-	}
-
-    Stack_Node *node = stack->top;
-
-	while (index--) {
-		if ((node = node->next) == NULL)
-		{
-			debug("node was not found on that index\n");
-			return INTERNAL_ERROR;
-		}
-	}
-
-
-	node->type = type;
-
-	if (!value)
-	{
-		debug("Value not given\n");
-		return INTERNAL_ERROR;
-	}
-
-	if (type == TYPE_INT)
-	{
-		debug("integer\n");
-		*(int *)node->value = value->integer;
-	}
-	else if (type == TYPE_REAL)
-	{
-		debug("double\n");
-		*(double *)node->value = value->real;
-	}
-	else if (type == TYPE_STRING)
-	{
-		debug("string\n");
-		cstr_assign_cstr(((cstring *)(node->value)), value->string);
-	}
-	else if (type == TYPE_BOOL)
-	{
-		debug("bool\n");
-		*(bool *)node->value = value->boolean;
-	}
-	else
-	{
-		debug("not Value value\n");
-		return INTERNAL_ERROR;
-	}
-
-    return SUCCESS;
-}
-
 
 int stack_pop(Stack *stack)
 {
-	if(!stack)
-	{
-		debug("No stack given\n");
-		return INTERNAL_ERROR;
-	}
-	if(!stack->top)
-	{
-		debug("Stack is empty\n");
-		return INTERNAL_ERROR;
-	}
+    struct stack_node *top_node;
 
-	Stack_Node *tmp = stack->top;
+    if (stack == NULL) {
+        debug("No stack given\n");
+        return INTERNAL_ERROR;
+    }
 
-	stack->top = tmp->next; ///backwards
-	stack->count--;
+    if (!stack->count) {
+        debug("Stack is empty\n");
+        return INTERNAL_ERROR;
+    }
 
-	free(tmp);
+    top_node = stack->top;
+    stack->top = top_node->next;
+    free(top_node);
+    stack->count--;
+
+    return SUCCESS;
+}
+
+int stack_push(Stack *stack, int type, void *value)
+{
+    struct stack_node *new_node;
+
+    if (stack == NULL) {
+        debug("No stack given\n");
+        return INTERNAL_ERROR;
+    }
+
+    if ((new_node = malloc(sizeof(struct stack_node))) == NULL) {
+        debug("Malloc failed\n");
+        return INTERNAL_ERROR;
+    }
+
+    new_node->next = stack->top;
+    stack->top = new_node;
+    new_node->type = type;
+    stack->count++;
+    set_value(stack, new_node, value);
+
+    return SUCCESS;
+}
+
+int stack_top(Stack *stack, int *type, void *value)
+{
+    return stack_index(stack, 0, type, value);
+}
+
+/* INDEXING OPERATIONS */
+int stack_index(Stack *stack, unsigned index, int *type, void *value)
+{
+    struct stack_node *node;
+
+    if (stack == NULL) {
+        debug("No stack given\n");
+        return INTERNAL_ERROR;
+    }
+
+    if (index >= stack->count) {
+        debug("Stack index %u is out of range\n", index);
+        return INTERNAL_ERROR;
+    }
+
+    node = stack->top;
+
+    while (index--)
+        node = node->next;
+
+    if (type != NULL)
+        *type = node->type;
+
+    get_value(stack, node, value);
+
+    return SUCCESS;
+}
+
+int stack_update(Stack *stack, unsigned index, int type, void *value)
+{
+    struct stack_node *node;
+
+    if (stack == NULL) {
+        debug("No stack given\n");
+        return INTERNAL_ERROR;
+    }
+
+    if (index >= stack->count) {
+        debug("Stack index %u is out of range\n", index);
+        return INTERNAL_ERROR;
+    }
+
+    node = stack->top;
+
+    while (index--)
+        node = node->next;
+
+    node->type = type;
+    set_value(stack, node, value);
+
+    return SUCCESS;
+}
+
+/* MASS OPERATIONS */
+int stack_popping_spree(Stack *stack, unsigned count)
+{
+    if (stack == NULL) {
+        debug("No stack given\n");
+        return INTERNAL_ERROR;
+    }
+
+    if (stack->count < count) {
+        debug("Popping of %u items, but stack count is only %u\n", count, stack->count);
+        return INTERNAL_ERROR;
+    }
+
+    while (count--)
+        stack_pop(stack);
+
 	return SUCCESS;
 }
 
-
-int stack_popping_spree(Stack *stack, unsigned int count)
-{
-	if(stack->count < count)
-	{
-		debug("Popping of %u items, but stack count is only %u", count, stack->count);
-		return INTERNAL_ERROR;
-	}
-
-	while(count--)
-		stack_pop(stack);
-
-	return SUCCESS;
-}
-
-
-static Stack_Node *stack_find_first_type(Stack *stack, int type)
-{
-	if(!stack||!stack->top)
-	{
-		debug("No stack given or stack empty\n");
-		return NULL;
-	}
-
-	Stack_Node *tmp = stack->top;
-	unsigned int count = stack->count;
-
-	while(count)
-	{
-		if (type == tmp->type)
-			return tmp;
-		count--;
-		tmp=tmp->next;
-	}
-	debug("type not found in the stack\n");
-	return NULL;
-}
-
-
-int stack_read_first_of_type(Stack *stack, int type, void **value)
-{
-	if(!stack)
-	{
-		debug("No stack given\n");
-		return INTERNAL_ERROR;
-	}
-	if(!stack->top)
-	{
-		debug("Stack is empty\n");
-		return INTERNAL_ERROR;
-	}
-
-	Stack_Node *tmp = stack_find_first_type(stack, type);
-	if(tmp)
-	{
-		if(value)
-			*value = (tmp->value);
-		return SUCCESS;
-	}
-	else
-		return INTERNAL_ERROR;
-}
-
-
+/* TOKEN-CENTRIC OPERATIONS */
 int stack_insert(Stack *stack, int searched_type, int type, void *value)
 {
-    Stack_Node **found_ptr = &stack->top;
-    Stack_Node *new_node;
-
-    if (stack == NULL || *found_ptr == NULL)
+    struct stack_node **found_ptr;
+    struct stack_node *new_node;
+    
+    if (stack == NULL) {
+        debug("No stack given\n");
         return INTERNAL_ERROR;
+    }
+
+    if (!stack->count) {
+        debug("Stack is empty\n");
+        return INTERNAL_ERROR;
+    }
+
+    found_ptr = &stack->top;
 
     for (unsigned i = 0; i < stack->count; i++) {
         if ((*found_ptr)->type != searched_type) {
             found_ptr = &(*found_ptr)->next;
             continue;
         }
-        if ((new_node = malloc(sizeof(Stack_Node))) == NULL)
+        if ((new_node = malloc(sizeof(struct stack_node))) == NULL) {
+            debug("Malloc fail");
             return INTERNAL_ERROR;
-        *new_node = (Stack_Node) {type, value, *found_ptr};
+        }
+        new_node->next = *found_ptr;
+        new_node->type = type;
+        set_value(stack, new_node, value);
         *found_ptr = new_node;
         stack->count++;
         return SUCCESS;
     }
 
+    debug("Node of given type not found\n");
+
     return INTERNAL_ERROR;
 }
 
-
-int stack_uninsert(Stack *stack, int searched_type, int *type, void **value)
+int stack_read_first(Stack *stack, int searched_type, void *value)
 {
-	if(!stack)
-	{
-		debug("No stack given\n");
-		return INTERNAL_ERROR;
-	}
-	if(!stack->top)
-	{
-		debug("Stack is empty\n");
-		return INTERNAL_ERROR;
-	}
+    struct stack_node *node;
 
-	Stack_Node *found = NULL ,
-						*before_before_found = stack->top,
-						*before_found = stack->top,
-						*tmp=stack->top;
-	unsigned int count = stack->count;
+    if (stack == NULL) {
+        debug("No stack given\n");
+        return INTERNAL_ERROR;
+    }
 
-	//printf("UNINSERT: ____________WHILE_____________\n");
-		//printf("UNINSERT: count : %u\n", count);
-		//printf("UNINSERT: b_b_f : %p\n", (void*)before_before_found);
-		//printf("UNINSERT:   b_f : %p\n", (void*)before_found);
-		//printf("UNINSERT:     f : %p\n", (void*)found);
-		//printf("UNINSERT:   tmp : %p\n", (void*)tmp);
-		//printf("-----------------------------------------\n");
-	while(count)
-	{
-		if (searched_type == tmp->type)
-		{
-			//printf("UNINSERT: ____________IF(SEARCHED_type==FOUND_type)____\n");
-			debug("searched type was found.\n");
-			found = tmp;
-			//printf("UNINSERT:     f was ok\n");
-			break;
-		}
+    node = stack->top;
 
-		count--;
-		before_before_found=before_found;
-		//printf("UNINSERT: b_b_f was ok\n");
-		before_found=tmp;
-		//printf("UNINSERT:   b_f was ok\n");
-		tmp=tmp->next;
-		//printf("UNINSERT:   tmp was ok\n");
-		//printf("UNINSERT: count : %u\n", count);
-		//printf("UNINSERT: b_b_f : %p\n", (void*)before_before_found);
-		//printf("UNINSERT:   b_f : %p\n", (void*)before_found);
-		//printf("UNINSERT:     f : %p\n", (void*)found);
-		//printf("UNINSERT:   tmp : %p\n", (void*)tmp);
-		//printf("-----------------------------------------\n");
-	}
+    for (unsigned i = 0; i < stack->count; i++) {
+        if (node->type != searched_type) {
+            node = node->next;
+            continue;
+        }
+        get_value(stack, node, value);
+        return SUCCESS;
+    }
 
-	if(found)
-	{
-		//printf("UNINSERT: ____________IF(FOUND)____\n");
-		if(found==before_found)
-		{
-			//printf("UNINSERT: ____________IF(FOUND==B_FOUND)____\n");
-			debug("found is on top of the stack. Nothing to uninsert.\n");
-			return INTERNAL_ERROR;
-		}
+    debug("Node of given type not found\n");
 
-		if(type)
-			*type = before_found->type;
-
-		if(value)
-			*value = before_found->value;
-
-		if(before_before_found==before_found)
-		{
-			debug("found is one node under top of the stack.\n");
-			stack->top = found;
-		}
-		else
-		{
-			before_before_found->next = found;
-		}
-		stack->count--;
-		free(before_found);
-		return SUCCESS;
-
-	}
-	//printf("UNINSERT: ____________NOT_FOUND____\n");
-	debug("int not found\n");
-	return INTERNAL_ERROR;
+    return INTERNAL_ERROR;
 }
 
-
-int stack_free(Stack *stack)
+int stack_uninsert(Stack *stack, int searched_type, int *type, void *value)
 {
-	if(!stack)
-	{
-		debug("No stack given\n");
-		return INTERNAL_ERROR;
-	}
+    struct stack_node **before_ptr;
+    struct stack_node *before;
 
-	Stack_Node *tmp;
+    if (stack == NULL) {
+        debug("No stack given\n");
+        return INTERNAL_ERROR;
+    }
 
-	while((tmp = stack->top))
-	{
-		stack->top = tmp->next;
-		free(tmp);
-	}
+    if (stack->count < 2) {
+        debug("Not enough nodes in stack\n");
+        return INTERNAL_ERROR;
+    }
 
-	stack_init(stack);
+    if (stack->top->type == searched_type) {
+        debug("Nothing before first found\n");
+        return INTERNAL_ERROR;
+    }
 
-	return SUCCESS;
+    before_ptr = &stack->top;
+
+    for (unsigned i = 0; i < stack->count - 1; i++) {
+        if ((*before_ptr)->next->type != searched_type) {
+            before_ptr = &(*before_ptr)->next;
+            continue;
+        }
+        before = *before_ptr;
+        *before_ptr = before->next;
+        if (type != NULL)
+            *type = before->type;
+        get_value(stack, before, value);
+        free(before);
+        stack->count--;
+        return SUCCESS;
+    }
+
+    debug("Node of given type not found\n");
+
+    return INTERNAL_ERROR;
 }
 
-
-
-
-
-
-
-inline void stack_print_node(int type, void *value)
+/* PRINTING FUNCTIONS */
+int stack_print_types(Stack *stack)
 {
-	printf("\n\t_________________________________________________________________\n");
-	//printf("\t|\ttype:  %d\n", type);
-	if (type == TYPE_INT)									// INT
-	{
-		if (!value)
-		{
-			printf("\t|  value:     (int)[ ivalid or NULL pointer to value ]\n");
-		}
-		else
-		{
-			printf("\t|  value:     (int)[ %d ]\n", *(int*)value);
-		}
-	}
-	else if (type == TYPE_STRING)							// CSTRING
-	{
-		if (!value)
-		{
-			printf("\t|  value: (cstring)[ ivalid or NULL pointer to value ]\n");
-		}
-		else
-		{
-			printf("\t|  value: (cstring)[ %s ]\n", ((cstring*)value)->str);
-		}
-	}
-	else if (type == TYPE_REAL)							// DOUBLE
-	{
-		if (!value)
-		{
-			printf("\t|  value:  (double)[ ivalid or NULL pointer to value ]\n");
-		}
-		else
-		{
-			printf("\t|  value:  (double)[ %e ]\n", *(double*)value);
-		}
-	}
-	else if (type == TYPE_OTHER)							// DOUBLE
-	{
-		if (!value)
-		{
-			printf("\t|  value:   (other)[ ivalid or NULL pointer to value ]\n");
-		}
-		else
-		{
-			printf("\t|  value:   (other)[ pointer to other type value { %p } ]\n", value);
-		}
-	}
-	else
-	{
-		if (!value)
-		{
-			printf("\t|  value: (another)[ ivalid or NULL pointer to value ]\n");
-		}
-		else
-		{
-			printf("\t|  value: (another)[ valid pointer to another type ('%d') value { %p } ]\n", type, value);
-		}
-	}
-	printf("\t-----------------------------------------------------------------\n");
-}
+    struct stack_node *node;
 
+    if (stack == NULL) {
+        debug("No stack given\n");
+        return INTERNAL_ERROR;
+    }
 
+    node = stack->top;
+    fprintf(stderr, "<stack>\n");
 
-void stack_print(Stack *stack)
-{
-	if(!stack||!stack->top)
-	{
-		printf("Cannot print stack it is empty\n");
-		return;
-	}
+    for (unsigned i = 0; i < stack->count; i++) {
+        fprintf(stderr, "  <node type=\"%d\" />\n", node->type);
+        node = node->next;
+    }
 
-	Stack_Node *tmp = stack->top;
-	unsigned int count = stack->count;
+    fprintf(stderr, "</stack>\n");
 
-printf("\n===============================Top_of_Stack==============================\n");
-
-	while(count)
-	{
-#ifdef DEBUG
-		printf("Pointer is: [ %p ]\t(long)[ %lu ]", (void*)tmp, (long)tmp);
-#endif
-
-		stack_print_node(tmp->type, tmp->value);
-
-		tmp = tmp->next;
-		count--;
-	}
-
-printf("\n===============================End_of_Stack==============================\n\n");
+    return SUCCESS;
 }
