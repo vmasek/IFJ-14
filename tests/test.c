@@ -44,7 +44,10 @@ int main(int argc, char *argv[])
 		}
 		if(!argc || !strcmp(argv[i], "interpreter") || !strcmp(argv[i], "inter"))
 		{
-			test_interpreter();
+			if(argv[i+1])
+				test_interpreter(argc, argv[i+1]);
+			else
+				test_interpreter(!argc, argv[i]);
 		}
 
 	}
