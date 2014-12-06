@@ -82,7 +82,6 @@ static Instruction_type get_instr_type(Token *token);
 static Type get_type(Token *token);
 static enum terminal get_term(Token *token);
 static Value get_value(Token *token);
-//static int hold_token(Token **token, FILE *input); //TODO PROBABLY DELETE
 static int reduce_rule(Stack *sym_stack, Stack *type_stack, Tree **trees,
                        Variables *global_vars, Instruction **instr_ptr);
 
@@ -139,7 +138,23 @@ const struct rule RULES[RULE_COUNT] = {
          {SYM_TERM, TERM_RP}}, SYM_SNT, handle_call}
 };
 
-/* DEFINITION OF FUNCTIONS */
+/* DEFINITION OF PUBLIC FUNCTIONS */
+int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions,
+                 Variables *global_vars, Instruction **instr_ptr, Type *type)
+{
+    return do_parsing(input, locals, globals, functions, global_vars, instr_ptr,
+                      type, false);
+}
+
+int parse_expr_inarg(FILE *input, Tree *locals, Tree *globals, Tree *functions,
+                     Variables *global_vars, Instruction **instr_ptr,
+                     Type *type)
+{
+    return do_parsing(input, locals, globals, functions, global_vars, instr_ptr,
+                      type, true);
+}
+
+/* DEFINITION OF STATIC FUNCTIONS */
 static int do_parsing(FILE *input, Tree *locals, Tree *globals, Tree *functions,
                       Variables *global_vars, Instruction **instr_ptr,
                       Type *type, bool in_arg)
@@ -148,12 +163,12 @@ static int do_parsing(FILE *input, Tree *locals, Tree *globals, Tree *functions,
     bool finished = false;
     Token input_token;
     Token stack_token;
-    Stack sym_stack;
-    Stack type_stack;
-    Tree *trees[TREE_COUNT];
     enum terminal stack_term;
     enum terminal input_term;
-
+    Stack sym_stack;
+    Stack type_stack;
+    Tree *trees[TREE_COUNT]; 
+    
     if (input == NULL || globals == NULL || functions == NULL ||
         global_vars == NULL || instr_ptr == NULL)
         return INTERNAL_ERROR; 
@@ -177,7 +192,7 @@ static int do_parsing(FILE *input, Tree *locals, Tree *globals, Tree *functions,
         goto fail;
 
     while (!finished) {
-        stack_read_first(&sym_stack, SYM_TERM, &stack_token);
+        stack_read_first(&sym_stack, SYM_TERM, &stack_token);   
         stack_term = get_term(&stack_token);
         input_term = get_term(&input_token);
         switch (PREC_TABLE[stack_term][input_term]) {
@@ -215,8 +230,10 @@ static int do_parsing(FILE *input, Tree *locals, Tree *globals, Tree *functions,
         }
     }
 
-    if (stack_count(&type_stack) != 1) //TODO IS THIS NECESSARY?
+    if (stack_count(&type_stack) != 1) { //TODO IS THIS NECESSARY?
         error = INCOMPATIBLE_TYPE;
+        debug("Incompatible type\n");
+    }
 
     if (type != NULL)
         stack_top(&type_stack, (int *)type, NULL);
@@ -225,8 +242,6 @@ fail:
     stack_free(&sym_stack);
     stack_free(&type_stack);
     gc_free(__FILE__);
-    debug("parse_expr() finished %s\n",
-          finished ? "successfully" : "unsuccessfully");
 
     return error;
 }
@@ -412,21 +427,28 @@ static int handle_add(Token *tokens, Stack *type_stack, Tree **trees,
 
     switch (op1_type) {
     case TYPE_INT:
-        if (op2_type != TYPE_INT && op2_type != TYPE_REAL)
+        if (op2_type != TYPE_INT && op2_type != TYPE_REAL) {
+            debug("Incompatible type\n");
             return INCOMPATIBLE_TYPE;
+        }
         result_type = op2_type;
         break;
     case TYPE_REAL:
-        if (op2_type != TYPE_INT && op2_type != TYPE_REAL)
+        if (op2_type != TYPE_INT && op2_type != TYPE_REAL) {
+            debug("Incompatible type\n");
             return INCOMPATIBLE_TYPE;
+        }
         result_type = TYPE_REAL;
         break;
     case TYPE_STRING:
-        if (op2_type != TYPE_STRING)
+        if (op2_type != TYPE_STRING) {
+            debug("Incompatible type\n");
             return INCOMPATIBLE_TYPE;
+        }
         result_type = TYPE_STRING;
         break;
     default:
+        debug("Incompatible type\n");
         return INCOMPATIBLE_TYPE;
     }
 
@@ -453,14 +475,18 @@ static int handle_call(Token *tokens, Stack *type_stack, Tree **trees,
 
     IGNORE_PARAM(global_vars);
 
+    stack_print_types(type_stack);
+
     if (!strcmp(tokens[0].value.value_name, BIF_COPY)) {
         if (stack_index(type_stack, 2, (int *)&cur_type, NULL) != SUCCESS ||
             cur_type != TYPE_STRING ||
             stack_index(type_stack, 1, (int *)&cur_type, NULL) != SUCCESS ||
             cur_type != TYPE_INT ||
             stack_index(type_stack, 0, (int *)&cur_type, NULL) != SUCCESS ||
-            cur_type != TYPE_INT)
+            cur_type != TYPE_INT) {
+            debug("Incompatible type\n");
             return INCOMPATIBLE_TYPE;
+        }
         instr_type = I_COPY;
         param_count = 3;
         ret_type = TYPE_STRING;
@@ -468,29 +494,37 @@ static int handle_call(Token *tokens, Stack *type_stack, Tree **trees,
         if (stack_index(type_stack, 1, (int *)&cur_type, NULL) != SUCCESS ||
             cur_type != TYPE_STRING ||
             stack_index(type_stack, 0, (int *)&cur_type, NULL) != SUCCESS ||
-            cur_type != TYPE_STRING)
+            cur_type != TYPE_STRING) {
+            debug("Incompatible type\n");
             return INCOMPATIBLE_TYPE;
+        }
         instr_type = I_FIND;
         param_count = 2;
         ret_type = TYPE_INT;
     } else if (!strcmp(tokens[0].value.value_name, BIF_LENGTH)) {
         if (stack_top(type_stack, (int *)&cur_type, NULL) != SUCCESS ||
-            cur_type != TYPE_STRING)
+            cur_type != TYPE_STRING) {
+            debug("Incompatible type\n");
             return INCOMPATIBLE_TYPE;
+        }
         instr_type = I_LEN;
         param_count = 1;
         ret_type = TYPE_INT;
     } else if (!strcmp(tokens[0].value.value_name, BIF_SORT)) {
         if (stack_top(type_stack, (int *)&cur_type, NULL) != SUCCESS ||
-            cur_type != TYPE_STRING)
+            cur_type != TYPE_STRING) {
+            debug("Incompatible type\n");
             return INCOMPATIBLE_TYPE;
+        }
         instr_type = I_SORT;
         param_count = 1;
         ret_type = TYPE_STRING;
     } else { 
         if ((node = tree_find_key_ch(trees[TREE_FUNCS],
-                                     tokens[0].value.value_name)) == NULL)
+                                     tokens[0].value.value_name)) == NULL) {
+            debug("Semantic error\n");
             return SEMANTIC_ERROR;
+        }
         function = node->data;
         instr_type = I_CALL;
         param_count = function->param_count;
@@ -499,14 +533,18 @@ static int handle_call(Token *tokens, Stack *type_stack, Tree **trees,
         first_instr = function->first_instr;
         for (unsigned i = 0; i < param_count; i++) {
             if (stack_index(type_stack, i, (int *)&cur_type, NULL) != SUCCESS ||
-                cur_type != function->params[param_count - i - 1]->type)
+                cur_type != function->params[param_count - i - 1]->type) {
+                debug("Incompatible type\n");
                 return INCOMPATIBLE_TYPE;
+            }
         }
     }
 
     if (stack_index(type_stack, param_count, (int *)&cur_type, NULL)
-        != SUCCESS || cur_type != TYPE_OTHER)
+        != SUCCESS || cur_type != TYPE_OTHER) {
+        debug("Incompatible type\n");
         return INCOMPATIBLE_TYPE;
+    }
 
     stack_popping_spree(type_stack, param_count + 1);
 
@@ -533,8 +571,10 @@ static int handle_comp(Token *tokens, Stack *type_stack, Tree **trees,
         return SYNTAX_ERROR;
     }
 
-    if (op1_type != op2_type)
+    if (op1_type != op2_type) {
+        debug("Incompatible type\n");
         return INCOMPATIBLE_TYPE;
+    }
 
     stack_popping_spree(type_stack, 2);
 
@@ -562,8 +602,10 @@ static int handle_div(Token *tokens, Stack *type_stack, Tree **trees,
     }
 
     if ((op1_type != TYPE_INT && op1_type != TYPE_REAL) ||
-        (op2_type != TYPE_INT && op2_type != TYPE_REAL))
+        (op2_type != TYPE_INT && op2_type != TYPE_REAL)) {
+        debug("Incompatible type\n");
         return INCOMPATIBLE_TYPE;
+    }
 
     stack_popping_spree(type_stack, 2);
 
@@ -635,16 +677,21 @@ static int handle_sub_mul(Token *tokens, Stack *type_stack, Tree **trees,
 
     switch (op1_type) {
     case TYPE_INT:
-        if (op2_type != TYPE_INT && op2_type != TYPE_REAL)
+        if (op2_type != TYPE_INT && op2_type != TYPE_REAL) {
+            debug("Incompatible type\n");
             return INCOMPATIBLE_TYPE;
+        }
         result_type = op2_type;
         break;
     case TYPE_REAL:
-        if (op2_type != TYPE_INT && op2_type != TYPE_REAL)
+        if (op2_type != TYPE_INT && op2_type != TYPE_REAL) {
+            debug("Incompatible type\n");
             return INCOMPATIBLE_TYPE;
+        }
         result_type = TYPE_REAL;
         break;
     default:
+        debug("Incompatible type\n");
         return INCOMPATIBLE_TYPE;
     }
 
@@ -655,32 +702,6 @@ static int handle_sub_mul(Token *tokens, Stack *type_stack, Tree **trees,
         return INTERNAL_ERROR;
 
     return SUCCESS;
-}
-/*
-static int hold_token(Token **token, FILE *input)
-{
-    if ((*token = gc_malloc(__FILE__, sizeof(Token))) == NULL)
-        return INTERNAL_ERROR;
-
-    get_token(*token, input);   //TODO DELETE THIS WHOLE FUCKING BULLSHEEEEEETZ... I'M TIRED :'(
-
-    return SUCCESS;
-}
-*/
-
-int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions,
-                 Variables *global_vars, Instruction **instr_ptr, Type *type)
-{
-    return do_parsing(input, locals, globals, functions, global_vars, instr_ptr,
-                      type, false);
-}
-
-int parse_expr_inarg(FILE *input, Tree *locals, Tree *globals, Tree *functions,
-                     Variables *global_vars, Instruction **instr_ptr,
-                     Type *type)
-{
-    return do_parsing(input, locals, globals, functions, global_vars, instr_ptr,
-                      type, true);
 }
 
 static int reduce_rule(Stack *sym_stack, Stack *type_stack, Tree **trees,
@@ -698,7 +719,6 @@ static int reduce_rule(Stack *sym_stack, Stack *type_stack, Tree **trees,
     stack_pop(sym_stack);
 
     for (unsigned i = 0; i < RULE_COUNT; i++) {
-        debug("%u vs %u\n", RULES[i].length, count);
         if (RULES[i].length != count)
             continue;
         for (index = 0; index < count; index++) {
