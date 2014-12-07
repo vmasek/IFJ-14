@@ -1,6 +1,6 @@
 /**
  * @file    ial.h
- * @name    Implementation of functions from Algorithms.
+ * @brief   Implementation of functions from Algorithms.
  * @author  Albert Uchytil (xuchyt03), Pavel Tobias (xtobia01), Vojtech Mašek (xmasek15)
  *******************************************************************/
 
@@ -18,7 +18,6 @@
 
 /**
  * @brief Creates Partial match table for Knuth–Morris–Pratt algorithm.
- *
  * @param word char* String which is used for table construction.
  * @param _out int*  Table that is filled.
  */
@@ -49,7 +48,6 @@ void kmp_table(const char *word, int *_out)
 
 /**
  * @brief Knuth–Morris–Pratt algorithm that searches for occurances of substring.
- *
  * @param  string String in which we search for substring.
  * @param  sub    Substring which we want to match.
  * @return int    On successful match returns beginning of a match, else -1.
@@ -84,7 +82,6 @@ int kmp_substr(const char *string, const char *sub)
 
 /**
  * @brief Merging function for merge-sort.
- *
  * @param src    Source array of characters.
  * @param dst    Destination array where source array is merged.
  * @param len    Length of src/dst.
@@ -111,7 +108,6 @@ void ms_merge(const char *src, char *dst, unsigned len, unsigned middle)
 
 /**
  * @brief Bottom-up implementation of merge-sort.
- *
  * @param str Null-terminated character array to sort.
  */
 void ms_sort(char *str)
@@ -134,8 +130,7 @@ void ms_sort(char *str)
 }
 
 /**
- * Pointer-swapping helper function for merge-sort.
- *
+ * @brief Pointer-swapping helper function for merge-sort.
  * @param str1 Pointer to first pointer.
  * @param str2 Pointer to second pointer.
  */
@@ -238,17 +233,16 @@ void tree_free(Tree *tree)
 }
 
 
-static inline int string_cmp( const char *str1, const char *str2)
+static inline int tree_string_cmp( const char *str, const cstring *cstr)
 {
-    unsigned int size1 = strlen(str1); /// TODO: optimize sizes (cstring has its size written)
-    unsigned int size2 = strlen(str2);
+    unsigned int size = strlen(str); /// TODO: optimize sizes (cstring has its size written)
 
-    if ( size1 < size2 )
+    if ( size < cstr->size )
         return 1;               ///LEFT
-    else if ( size1 > size2 )
+    else if ( size > cstr->size )
         return -1;              ///RIGHT
 
-    return ((strcmp(str1, str2) == 0) ? 0 : -1 );
+    return ((strcmp(str, cstr->str) == 0) ? 0 : -1 );
 }
 
 Tree_Node *tree_find_node_recursive(Tree_Node *node, cstring *key)
@@ -257,7 +251,7 @@ Tree_Node *tree_find_node_recursive(Tree_Node *node, cstring *key)
         return NULL;
     else if (!strcmp(node->key->str, key->str))
         return node;
-    else if (strlen(node->key->str) > strlen(key->str))
+    else if (node->key->size > key->size)
         return tree_find_node_recursive(node->left, key);
     else
         return tree_find_node_recursive(node->right, key);
@@ -271,7 +265,7 @@ Tree_Node *tree_node_find(Tree_Node *node, char *key)
 #ifdef DEBUG
         fprintf(stderr, "FOUND:\t\t#\tkey: %s\tNode: %s\n\n\n", key, node->key->str);
 #endif
-        if ( (result = string_cmp( key, node->key->str )) < 0 ) { ///here was string_cmp replaced by classic strcmp that is fully functioning, string_cmp did not work
+        if ( (result =  tree_string_cmp( key, node->key )) < 0 ) { ///here was string_cmp replaced by classic strcmp that is fully functioning, string_cmp did not work
             debug("right search\n");
             node = node->right;
         } else if ( result > 0 ) {
@@ -296,96 +290,90 @@ Tree_Node *tree_find_key_ch(Tree *tree, char *key)
     return tree_node_find(tree->root, key);
 }
 
-static inline void tree_create_root(Tree *tree, cstring *key, void *data)
+static inline int tree_create_root(Tree *tree, cstring *key, void *data)
 {
     debug("root insert\n");
     if (!(tree->root = malloc(sizeof(Tree_Node)))) {
         debug("malloc fail\n");
+        return INTERNAL_ERROR;
     }
     tree->root->key = key;
     tree->root->left = tree->root->right = NULL;
     tree->root->data = data;
     tree->last = tree->root;
+    return SUCCESS;
 }
 
-static inline void tree_create_left(Tree *tree, Tree_Node *tmp, cstring *key, void *data)
+static inline int tree_create_left(Tree *tree, Tree_Node *tmp, cstring *key, void *data)
 {
     debug("left insert\n");
     if (!(tmp->left = malloc(sizeof(Tree_Node)))) {
         debug("malloc fail\n");
+        return INTERNAL_ERROR;
     }
     tmp->left->key = key;
     tmp->left->left = tmp->left->right = NULL;
     tmp->left->data = data;
     tree->last = tmp->left;
+    return SUCCESS;
 }
 
-static inline void tree_create_right(Tree *tree, Tree_Node *tmp, cstring *key, void *data)
+static inline int tree_create_right(Tree *tree, Tree_Node *tmp, cstring *key, void *data)
 {
     debug("right insert\n");
     if (!(tmp->right = malloc(sizeof(Tree_Node)))) {
         debug("malloc fail\n");
+        return INTERNAL_ERROR;
     }
     tmp->right->key = key;
     tmp->right->left = tmp->right->right = NULL;
     tmp->right->data = data;
     tree->last = tmp->right;
+    return SUCCESS;
 }
 
 
 /**
- * @brief Inerts node to tree.
- * @param tree where to insert.
- * @param key of node to search/insert.
- * @param data
- * @returns
- *
- *
+ * @brief  Inerts node to tree.
+ * @param  tree where to insert.
+ * @param  key of node to search/insert.
+ * @param  data
+ * @return ERR. codes (SEMANTIC_ERROR when inserting existing)
  */
 int tree_insert(Tree *tree, cstring *key, void *data)
 {
     if (!tree->root) {
-        tree_create_root(tree, key, data);
-        return 0;
+        return tree_create_root(tree, key, data);;
     }
 
-    unsigned int key_size = strlen(key->str);
-
     Tree_Node *tmp = tree->root;
-    unsigned int result;
 
     while (tmp) {
-        result = strlen(tmp->key->str);
 
-        if (key_size < result) {
+        if (key->size < tmp->key->size) {
             debug("left shift\n");
             if (!tmp->left) {
-                tree_create_left(tree, tmp, key, data);
-                return 0;
+                return tree_create_left(tree, tmp, key, data);
             } else
                 tmp = tmp->left;
-        } else if (key_size > result) {
+        } else if (key->size > tmp->key->size) {
             debug("right shift\n");
             if (!tmp->right) {
-                tree_create_right(tree, tmp, key, data);
-                return 0;
+                return tree_create_right(tree, tmp, key, data);
             } else
                 tmp = tmp->right;
         } else {
             if (!cstr_cmp(key, tmp->key)) {
-                tmp->data = data;
-                tree->last = tmp;
-                return 0;
+                return SEMANTIC_ERROR;
             }
             debug("right shift\n");
             if (!tmp->right) {
-                tree_create_right(tree, tmp, key, data);
-                return 0;
+                return tree_create_right(tree, tmp, key, data);
             } else
                 tmp = tmp->right;
         }
     }
-    return 0;
+    return SUCCESS;
 }
 
 
