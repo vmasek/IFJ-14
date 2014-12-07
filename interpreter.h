@@ -38,6 +38,10 @@ typedef enum
     I_GREATER_EQUAL,    // >=
     I_EQUAL,    		// ==
     I_NOT_EQUAL,    	// !=
+    I_AND,              // and
+    I_OR,               // or
+    I_XOR,              // xor
+    I_NOT,              // not
     I_LEN,  			// length
     I_COPY, 			// copy
     I_FIND, 			// find
