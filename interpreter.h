@@ -68,25 +68,46 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
  * @brief Macro for operations over calcs stack.
  * @return INTERNAL_ERROR if anything is wrong.
  *
- * Macro that is used to get values from top and top- of stack and pops once.
+ * Macro that is used to get values from top and top of stack and pops twice,
+ * using popping spree.
  * Will print debug message if something is wrong.
  */
-#define STACK_OPERATIONS()                                                    \
+#define CALCS_STACK_OPERATIONS()                                              \
 if(stack_index(calcs, 0, (int*)&types[0], &values[0])==INTERNAL_ERROR)        \
 {                                                                             \
-	debug("Invalid read from calcs\n");                                       \
+	debug("Invalid read from calcs.\n");                                      \
 	return INTERNAL_ERROR;                                                    \
 }                                                                             \
 if(stack_index(calcs, 1, (int*)&types[1], &values[1])==INTERNAL_ERROR)        \
 {                                                                             \
-	debug("Invalid read from calcs\n");                                       \
+	debug("Invalid read from calcs.\n");                                      \
 	return INTERNAL_ERROR;                                                    \
 }                                                                             \
 if(stack_popping_spree(calcs, 2)==INTERNAL_ERROR)                             \
 {                                                                             \
-	debug("Popping spree calcs error\n");                                     \
+	debug("Popping spree calcs error.\n");                                    \
 	return INTERNAL_ERROR;                                                    \
 }                                                                             \
+
+
+/**
+ * @brief Macro for operation over calcs stack.
+ * @return INTERNAL_ERROR if anything is wrong.
+ *
+ * Macro that is used to get value from top and top of stack and pops once.
+ * Will print debug message if something is wrong.
+ */
+#define CALCS_STACK_OPERATIONS_RESULT()                                       \
+	if (stack_index(calcs, 0, (int *)&types[0], &result) == INTERNAL_ERROR)   \
+	{                                                                         \
+		debug("Invalid read from calcs.\n");                                  \
+		return INTERNAL_ERROR;                                                \
+	}                                                                         \
+	if (stack_pop(calcs) == INTERNAL_ERROR)                                   \
+	{                                                                         \
+		debug("Error poping calcs.\n");                                       \
+		return INTERNAL_ERROR;                                                \
+	}                                                                         \
 
 
 

@@ -9,7 +9,16 @@
 
 int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instructions, Variables *globals)
 {
-	IGNORE_PARAM(instructions);																						// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+	if(!item || !calcs || !locals || !instructions || !globals)
+	{
+		debug("Null pointer in given params\n");
+		if(!item)
+		{
+			debug("Item not given.\n");
+			return INTERNAL_ERROR;
+		}
+	}
 
 	Value values[2];
 	Type  types[2];
@@ -19,20 +28,15 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 	switch (item->instruction)
 	{
 
-	case I_ASSIGN:                                                                                                                                                     ///OK?
+	case I_ASSIGN:
 		debug("I_ASSIGN\n");
-
+		if(!globals)
+		{
+			debug("Globals field not given.\n");
+			return INTERNAL_ERROR;
+		}
 		///                         Stack operations
-		if (stack_index(calcs, 0, (int *)&types[0], &result) == INTERNAL_ERROR)
-		{
-			debug("Invalid read from calcs\n");
-			return INTERNAL_ERROR;
-		}
-		if (stack_pop(calcs) == INTERNAL_ERROR)                                         ///ACHTUNG! If is only one operand then only one pop
-		{
-			debug("Pop of calcs error\n");
-			return INTERNAL_ERROR;
-		}
+		CALCS_STACK_OPERATIONS_RESULT();
 
 		///                         Instruction operations
 		if(item->index < 0)																		/// index indicates locals stack operation
@@ -56,8 +60,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 
 		break;
 
-	case I_PUSH:                                                                                                                                                     ///OK?
-
+	case I_PUSH:
 		///                         Value operations
 		if(item->index < 0)																		/// index indicates local stack operation
 		{
@@ -107,10 +110,10 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		}
 		break;
 
-	case I_ADD:                                                                                                                                                     ///OK?
+	case I_ADD:
 
 		///                         Stack operations
-		STACK_OPERATIONS();
+		CALCS_STACK_OPERATIONS();
 
 		///                         Instruction operations
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
@@ -145,7 +148,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		}
 		else
 		{
-			debug("bad type passed to instruction\n");
+			debug("Invalid type passed to instruction\n");
 			return INTERNAL_ERROR;
 		}
 		break;
@@ -153,7 +156,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 	case I_SUB:
 
 		///                         Stack operations
-		STACK_OPERATIONS();
+		CALCS_STACK_OPERATIONS();
 
 		///                         Instruction operations
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
@@ -182,7 +185,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		}
 		else
 		{
-			debug("bad type passed to instruction\n");
+			debug("Invalid type passed to instruction\n");
 			return INTERNAL_ERROR;
 		}
 		break;
@@ -190,7 +193,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 	case I_MUL:
 
 		///                         Stack operations
-		STACK_OPERATIONS();
+		CALCS_STACK_OPERATIONS();
 
 		///                         Instruction operations
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
@@ -219,15 +222,15 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		}
 		else
 		{
-			debug("bad type passed to instruction\n");
+			debug("Invalid type passed to instruction\n");
 			return INTERNAL_ERROR;
 		}
 		break;
 
-	case I_DIV:                                                                                                                                             ///OK?
+	case I_DIV:
 
 		///                         Stack operations
-		STACK_OPERATIONS();
+		CALCS_STACK_OPERATIONS();
 
 		///                         Instruction operations
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
@@ -276,15 +279,15 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		}
 		else
 		{
-			debug("bad type passed to instruction\n");
+			debug("Invalid type passed to instruction\n");
 			return INTERNAL_ERROR;
 		}
 		break;
 
-	case I_LESS:                                                                                                                                                ///OK?
+	case I_LESS:
 
 		///                         Stack operations
-		STACK_OPERATIONS();
+		CALCS_STACK_OPERATIONS();
 
 		///                         Instruction operations
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
@@ -313,15 +316,15 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		}
 		else
 		{
-			debug("bad type passed to instruction\n");
+			debug("Invalid type passed to instruction\n");
 			return INTERNAL_ERROR;
 		}
 		break;
 
-	case I_GREATER:                                                                                                                                             ///OK?
+	case I_GREATER:
 
 		///                         Stack operations
-		STACK_OPERATIONS();
+		CALCS_STACK_OPERATIONS();
 
 		///                         Instruction operations
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
@@ -351,15 +354,15 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		}
 		else
 		{
-			debug("bad type passed to instruction\n");
+			debug("Invalid type passed to instruction\n");
 			return INTERNAL_ERROR;
 		}
 		break;
 
-	case I_LESS_EQUAL:                                                                                                                                              ///OK?
+	case I_LESS_EQUAL:
 
 		///                         Stack operations
-		STACK_OPERATIONS();
+		CALCS_STACK_OPERATIONS();
 
 		///                         Instruction operations
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
@@ -388,15 +391,15 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		}
 		else
 		{
-			debug("bad type passed to instruction\n");
+			debug("Invalid type passed to instruction\n");
 			return INTERNAL_ERROR;
 		}
 		break;
 
-	case I_GREATER_EQUAL:                                                                                                                                               ///OK?
+	case I_GREATER_EQUAL:
 
 		///                         Stack operations
-		STACK_OPERATIONS();
+		CALCS_STACK_OPERATIONS();
 
 		///                         Instruction operations
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
@@ -425,15 +428,15 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		}
 		else
 		{
-			debug("bad type passed to instruction\n");
+			debug("Invalid type passed to instruction\n");
 			return INTERNAL_ERROR;
 		}
 		break;
 
-	case I_EQUAL:                                                                                                                                               ///OK?
+	case I_EQUAL:
 
 		///                         Stack operations
-		STACK_OPERATIONS();
+		CALCS_STACK_OPERATIONS();
 
 		///                         Instruction operations
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
@@ -462,15 +465,15 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		}
 		else
 		{
-			debug("bad type passed to instruction\n");
+			debug("Invalid type passed to instruction\n");
 			return INTERNAL_ERROR;
 		}
 		break;
 
-	case I_NOT_EQUAL:                                                                                                                                               ///OK?
+	case I_NOT_EQUAL:
 
 		///                         Stack operations
-		STACK_OPERATIONS();
+		CALCS_STACK_OPERATIONS();
 
 		///                         Instruction operations
 		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
@@ -499,7 +502,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		}
 		else
 		{
-			debug("bad type passed to instruction\n");
+			debug("Invalid type passed to instruction\n");
 			return INTERNAL_ERROR;
 		}
 		break;
@@ -507,16 +510,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 	case I_WRITE:
 
 		///                         Stack operations
-		if (stack_index(calcs, 0, (int *)&types[0], &result) == INTERNAL_ERROR)
-		{
-			debug("Invalid read from calcs\n");
-			return INTERNAL_ERROR;
-		}
-		if (stack_pop(calcs) == INTERNAL_ERROR)                                         ///ACHTUNG! If is only one operand then only one pop
-		{
-			debug("Popping spree calcs error\n");
-			return INTERNAL_ERROR;
-		}
+		CALCS_STACK_OPERATIONS_RESULT();
 
 		if (types[0] == TYPE_INT)
 		{
@@ -540,7 +534,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		}
 		else
 		{
-			debug("bad type passed to instruction\n");
+			debug("Invalid type passed to instruction\n");
 			return INTERNAL_ERROR;
 		}
 		break;
@@ -550,43 +544,40 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		if (types[0] == TYPE_INT)
 		{
 			debug("I_READLN - integer\n");
-			//item->result.type = TYPE_INT;
 			//scanf("%d", &(item->result.data.integer));
 		}
 		else if (types[0] == TYPE_REAL)
 		{
 			debug("I_READLN - double\n");
-			//item->result.type = TYPE_REAL;
 			//scanf("%lf", &(item->result.data.real));
 		}
 		else if (types[0] == TYPE_STRING)
 		{
 			debug("I_READLN - cstring\n");
-			//item->result.type = TYPE_STRING;
 			//cstr_read_line(item->result.data.string = cstr_create_str(""));
 		}
 		else
 		{
-			debug("bad type passed to instruction\n");
+			debug("Invalid type passed to instruction\n");
 			return INTERNAL_ERROR;
 		}
 
 		///                         Instruction operations
 		if(item->index < 0)																		/// index indicates locals stack operation
 		{
-			debug("I_ASSIGN - locals stack\n");
+			debug("I_READLN - locals stack\n");
 			if (stack_update(locals, (-(item->index+1)), types[0], &result) == INTERNAL_ERROR)
 			{
-				debug("I_ASSIGN - locals stack error.\n");
+				debug("I_READLN - locals stack error.\n");
 				return INTERNAL_ERROR;
 			}
 		}
 		else
 		{
-			debug("I_ASSIGN - globals field\n");
+			debug("I_READLN - globals field\n");
 			if (variables_value_write(globals, &result, item->index) == INTERNAL_ERROR)	/// index indicates global variables field operation
 			{
-				debug("I_ASSIGN - globals field error.\n");
+				debug("I_READLN - globals field error.\n");
 				return INTERNAL_ERROR;
 			}
 		}
@@ -594,63 +585,69 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		break;
 
 	case I_LEN:
+		///                         Stack operations
+		CALCS_STACK_OPERATIONS_RESULT();
 
 		if (types[0] == TYPE_STRING)
 		{
 			debug("I_LEN - string\n");
-			stack_popping_spree(calcs, 2);
-			result.integer = values[0].integer + values[1].integer;
+
+			result.integer = length(result.string);;
 			stack_push(calcs, TYPE_INT, &result);
-			//item->result.type = TYPE_INT;
-			//item->result.data.integer = length(values[0].string);
 		}
 		else
 		{
-			debug("bad type passed to instruction\n");
+			debug("Invalid type passed to instruction\n");
 			return INTERNAL_ERROR;
 		}
 		break;
 
-	case I_COPY:                                                                                                                                        ///WRONG !
+	case I_COPY:
+	//TODO: dorobit stack operacie
+
 		if (types[0] == TYPE_STRING)
 		{
 			debug("I_COPY - string\n");
-			//item->result.type = TYPE_STRING;
-			//item->result.data.string = copy(values[0].string, values[1].integer, values[1].integer); ///pozor toto bude zmenene na viac operatorov
+			result.string = copy(result.string, values[0].integer, values[1].integer);
+			stack_push(calcs, TYPE_STRING, &result);
 		}
 		else
 		{
-			debug("bad type passed to instruction\n");
+			debug("Invalid type passed to instruction\n");
 			return INTERNAL_ERROR;
 		}
 		break;
 
 	case I_FIND:
-		if (types[0] == TYPE_STRING)
+		///                         Stack operations
+		CALCS_STACK_OPERATIONS();
+
+		if (types[0] == TYPE_STRING && types[1] == TYPE_STRING)
 		{
 			debug("I_FIND - string\n");
-			result.integer = values[0].integer + values[1].integer; // ?
-			stack_push(calcs, TYPE_INT, &result); // ?
-			//item->result.type = TYPE_INT;
-			//item->result.data.integer = find(values[0].string, values[1].string);
+			result.integer = find(values[1].string, values[0].string);
+			stack_push(calcs, TYPE_INT, &result);
 		}
 		else
 		{
-			debug("bad type passed to instruction\n");
+			debug("Invalid type passed to instruction\n");
 			return INTERNAL_ERROR;
 		}
 		break;
 
 	case I_SORT:
+		///                         Stack operations
+		CALCS_STACK_OPERATIONS_RESULT();
+
 		if (types[0] == TYPE_STRING)
 		{
 			debug("I_FIND - string\n");
-			//item->result.type = TYPE_STRING;
-			//item->result.data.string = sort(values[0].string);
+			result.string = sort(result.string);
+			stack_push(calcs, TYPE_STRING, &result);
 		}
 		else
 		{
-			debug("bad type passed to instruction\n");
+			debug("Invalid type passed to instruction\n");
 			return INTERNAL_ERROR;
 		}
 		break;
