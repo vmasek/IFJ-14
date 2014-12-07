@@ -102,9 +102,12 @@ do{                                                                           \
 errors=0;                                                                     \
 }while(0);                                                                    \
                                                                               \
+    stack_free(&calcs);                                                       \
+                                                                              \
 	if(errors)                                                                \
 	{                                                                         \
 		printf("\n\n!!! ERROR has occured during testing !!!\n\n");           \
+		exit(errors);                                                         \
 	}                                                                         \
 	else                                                                      \
 	{                                                                         \
