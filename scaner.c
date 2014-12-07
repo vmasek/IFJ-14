@@ -52,6 +52,12 @@ static enum token_keyword _get_keyword(char *name) {
         name[i] = tolower(name[i]);
     }
     switch (name[0]) {
+    case 'a':
+        if (!strcmp(name, "and"))
+            return KEYWORD_AND;
+
+        break;
+
     case 'b':
         if (!strcmp(name, "begin"))
             return KEYWORD_BEGIN;
@@ -97,6 +103,18 @@ static enum token_keyword _get_keyword(char *name) {
 
         break;
 
+    case 'n':
+        if (!strcmp(name, "not"))
+            return KEYWORD_NOT;
+
+        break;
+
+    case 'o':
+        if (!strcmp(name, "or"))
+            return KEYWORD_OR;
+
+        break;
+
     case 'r':
         if (!strcmp(name, "readln"))
             return KEYWORD_READLN;
@@ -133,6 +151,12 @@ static enum token_keyword _get_keyword(char *name) {
 
         if (!strcmp(name, "write"))
             return KEYWORD_WRITE;
+
+        break;
+
+    case 'x':
+        if (!strcmp(name, "xor"))
+            return KEYWORD_XOR;
 
         break;
     }

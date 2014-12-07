@@ -22,6 +22,7 @@
 /* List of all possible keywords. */
 enum token_keyword {
     NOT_A_KEYWORD = 0,
+    KEYWORD_AND,        // a
     KEYWORD_BEGIN,      // b
     KEYWORD_BOOLEAN,
     KEYWORD_DO,         // d
@@ -32,6 +33,8 @@ enum token_keyword {
     KEYWORD_FUNCTION,
     KEYWORD_IF,         // i
     KEYWORD_INTEGER,
+    KEYWORD_NOT,        // n
+    KEYWORD_OR,         // o
     KEYWORD_READLN,     // r
     KEYWORD_REAL,
     KEYWORD_REPEAT,
@@ -42,6 +45,7 @@ enum token_keyword {
     KEYWORD_VAR,        // v
     KEYWORD_WHILE,      // w
     KEYWORD_WRITE,
+    KEYWORD_XOR,        // x
 };
 
 
