@@ -11,21 +11,26 @@
 #include "parser_private.h"
 #include "stack.h"
 
-#define RULE_COUNT 18
+/* MAXIMUM LENGTH OF A REDUCTION RULE */
 #define RULE_MAXLEN 8
-#define TERM_COUNT 16
-#define TREE_COUNT 3
 
+/* TREE INDICES */
 #define TREE_LOCALS 0
 #define TREE_GLOBALS 1
 #define TREE_FUNCS 2
 
+/* BUILT-IN FUNCTION IDENTIFIERS */
 #define BIF_COPY "copy"
 #define BIF_FIND "find"
 #define BIF_LENGTH "length"
 #define BIF_SORT "sort"
 
+/* MACRO COUNTING ITEMS OF ARRAY */
+#define ARRAY_COUNT(array) (sizeof(array) / sizeof((array)[0]))
+
 /* TYPES */
+typedef int Handler(Token *, Stack *, Tree **, Variables *, Instruction **);
+
 enum symbol {
     SYM_SNT,        // scalar non-terminal symbol
     SYM_VNT,        // vectorial non-terminal symbol
@@ -44,38 +49,28 @@ enum terminal {
     TERM_GT,        // >
     TERM_LEQ,       // <=
     TERM_GEQ,       // >=
+    TERM_AND,       // and
+    TERM_OR,        // or
+    TERM_XOR,       // xor
+    TERM_NOT,       // not
     TERM_COMMA,     // ,
     TERM_LP,        // (
     TERM_RP,        // )
     TERM_LIT,       // literal
     TERM_ID,        // identifier
-    TERM_END        // end of expression
+    TERM_END,       // end of expression
+    TERM_COUNT      // count of terminal types - if defined last (^_~)
 };
 
 enum action {
-    I,  // insert
+    S,  // shift
     P,  // push
     R,  // reduce
     E,  // error
     F   // finish
 };
 
-typedef int Handler(Token *, Stack *, Tree **, Variables *, Instruction **);
-
-struct rule {
-    unsigned length;
-    struct {
-        enum symbol sym_type;
-        enum terminal term_type;
-    } symbols[RULE_MAXLEN];
-    enum symbol reduction;
-    Handler *handler;
-};
-
 /* DECLARATION OF STATIC FUNCTIONS */
-static int do_parsing(FILE *input, Tree *locals, Tree *globals, Tree *functions,
-                      Variables *global_vars, Instruction **instr_ptr,
-                      Type *type, bool in_arg);
 static int gen_instr(Instruction **instr_ptr, Instruction_type type, int index,
                      unsigned locals_count, Instruction *alt_instr);
 static Instruction_type get_instr_type(Token *token);
@@ -87,34 +82,49 @@ static int reduce_rule(Stack *sym_stack, Stack *type_stack, Tree **trees,
 
 /* DECLARATION OF RULE HANDLERS */
 static Handler handle_add;
+static Handler handle_boolop;
 static Handler handle_call;
 static Handler handle_comp;
 static Handler handle_div;
 static Handler handle_id;
 static Handler handle_literal;
+static Handler handle_not;
 static Handler handle_sub_mul;
 
-/* CONSTANTS */
+/* TABLE OF OPERATOR PRECEDENCE */
 const enum action PREC_TABLE[TERM_COUNT][TERM_COUNT] = {
-    {R, R, I, I, R, R, R, R, R, R, R, I, R, I, I, R},
-    {R, R, I, I, R, R, R, R, R, R, R, I, R, I, I, R},
-    {R, R, R, R, R, R, R, R, R, R, R, I, R, I, I, R},
-    {R, R, R, R, R, R, R, R, R, R, R, I, R, I, I, R},
-    {I, I, I, I, R, R, R, R, R, R, R, I, R, I, I, R},
-    {I, I, I, I, R, R, R, R, R, R, R, I, R, I, I, R},
-    {I, I, I, I, R, R, R, R, R, R, R, I, R, I, I, R},
-    {I, I, I, I, R, R, R, R, R, R, R, I, R, I, I, R},
-    {I, I, I, I, R, R, R, R, R, R, R, I, R, I, I, R},
-    {I, I, I, I, R, R, R, R, R, R, R, I, R, I, I, R},
-    {I, I, I, I, I, I, I, I, I, I, R, I, R, I, I, E},
-    {I, I, I, I, I, I, I, I, I, I, I, I, P, I, I, E},
-    {R, R, R, R, R, R, R, R, R, R, R, E, R, E, E, R},
-    {R, R, R, R, R, R, R, R, R, R, R, E, R, E, E, R},
-    {R, R, R, R, R, R, R, R, R, R, R, P, R, E, E, R},
-    {I, I, I, I, I, I, I, I, I, I, E, I, E, I, I, F}
+    {R, R, S, S, R, R, R, R, R, R, S, R, R, S, R, S, R, S, S, R},
+    {R, R, S, S, R, R, R, R, R, R, S, R, R, S, R, S, R, S, S, R},
+    {R, R, R, R, R, R, R, R, R, R, R, R, R, S, R, S, R, S, S, R},
+    {R, R, R, R, R, R, R, R, R, R, R, R, R, S, R, S, R, S, S, R},
+    {S, S, S, S, R, R, R, R, R, R, S, S, S, S, R, S, R, S, S, R},
+    {S, S, S, S, R, R, R, R, R, R, S, S, S, S, R, S, R, S, S, R},
+    {S, S, S, S, R, R, R, R, R, R, S, S, S, S, R, S, R, S, S, R},
+    {S, S, S, S, R, R, R, R, R, R, S, S, S, S, R, S, R, S, S, R},
+    {S, S, S, S, R, R, R, R, R, R, S, S, S, S, R, S, R, S, S, R},
+    {S, S, S, S, R, R, R, R, R, R, S, S, S, S, R, S, R, S, S, R},
+    {R, R, R, R, R, R, R, R, R, R, R, R, R, S, R, S, R, S, S, R},
+    {R, R, S, S, R, R, R, R, R, R, S, R, R, S, R, S, R, S, S, R},
+    {R, R, S, S, R, R, R, R, R, R, S, R, R, S, R, S, R, S, S, R},
+    {R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, S, R, S, S, R},
+    {S, S, S, S, S, S, S, S, S, S, S, S, S, S, R, S, R, S, S, E},
+    {S, S, S, S, S, S, S, S, S, S, S, S, S, S, S, S, P, S, S, E},
+    {R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, E, R, E, E, R},
+    {R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, E, R, E, E, R},
+    {R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, P, R, E, E, R},
+    {S, S, S, S, S, S, S, S, S, S, S, S, S, S, E, S, E, S, S, F}
 };
 
-const struct rule RULES[RULE_COUNT] = {
+/* SET OF REDUCTION RULES */
+const struct {
+    unsigned length;
+    struct {
+        enum symbol sym_type;
+        enum terminal term_type;
+    } symbols[RULE_MAXLEN];
+    enum symbol reduction;
+    Handler *handler;
+} RULES[] = {
     {1, {{SYM_TERM, TERM_ID}}, SYM_SNT, handle_id},
     {1, {{SYM_TERM, TERM_LIT}}, SYM_SNT, handle_literal},
     {3, {{SYM_TERM, TERM_LP}, {SYM_SNT}, {SYM_TERM, TERM_RP}}, SYM_SNT, NULL},
@@ -128,6 +138,10 @@ const struct rule RULES[RULE_COUNT] = {
     {3, {{SYM_SNT}, {SYM_TERM, TERM_GT}, {SYM_SNT}}, SYM_SNT, handle_comp},
     {3, {{SYM_SNT}, {SYM_TERM, TERM_LEQ}, {SYM_SNT}}, SYM_SNT, handle_comp},
     {3, {{SYM_SNT}, {SYM_TERM, TERM_GEQ}, {SYM_SNT}}, SYM_SNT, handle_comp},
+    {3, {{SYM_SNT}, {SYM_TERM, TERM_AND}, {SYM_SNT}}, SYM_SNT, handle_boolop},
+    {3, {{SYM_SNT}, {SYM_TERM, TERM_OR}, {SYM_SNT}}, SYM_SNT, handle_boolop},
+    {3, {{SYM_SNT}, {SYM_TERM, TERM_XOR}, {SYM_SNT}}, SYM_SNT, handle_boolop},
+    {2, {{SYM_TERM, TERM_NOT}, {SYM_SNT}}, SYM_SNT, handle_not},
     {3, {{SYM_SNT}, {SYM_TERM, TERM_COMMA}, {SYM_SNT}}, SYM_VNT, NULL},
     {3, {{SYM_VNT, 0}, {SYM_TERM, TERM_COMMA}, {SYM_SNT}}, SYM_VNT, NULL},
     {3, {{SYM_TERM, TERM_ID}, {SYM_TERM, TERM_LP}, {SYM_TERM, TERM_RP}},
@@ -140,24 +154,8 @@ const struct rule RULES[RULE_COUNT] = {
 
 /* DEFINITION OF PUBLIC FUNCTIONS */
 int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions,
-                 Variables *global_vars, Instruction **instr_ptr, Type *type)
-{
-    return do_parsing(input, locals, globals, functions, global_vars, instr_ptr,
-                      type, false);
-}
-
-int parse_expr_inarg(FILE *input, Tree *locals, Tree *globals, Tree *functions,
-                     Variables *global_vars, Instruction **instr_ptr,
-                     Type *type)
-{
-    return do_parsing(input, locals, globals, functions, global_vars, instr_ptr,
-                      type, true);
-}
-
-/* DEFINITION OF STATIC FUNCTIONS */
-static int do_parsing(FILE *input, Tree *locals, Tree *globals, Tree *functions,
-                      Variables *global_vars, Instruction **instr_ptr,
-                      Type *type, bool in_arg)
+               Variables *global_vars, Instruction **instr_ptr, Type *type,
+               bool in_arg)
 {
     int error;
     bool finished = false;
@@ -167,15 +165,16 @@ static int do_parsing(FILE *input, Tree *locals, Tree *globals, Tree *functions,
     enum terminal input_term;
     Stack sym_stack;
     Stack type_stack;
-    Tree *trees[TREE_COUNT]; 
+    Tree *trees[] = {
+        [TREE_LOCALS] = locals,
+        [TREE_GLOBALS] = globals,
+        [TREE_FUNCS] = functions
+    }; 
     
     if (input == NULL || globals == NULL || functions == NULL ||
         global_vars == NULL || instr_ptr == NULL)
         return INTERNAL_ERROR; 
-    
-    trees[TREE_LOCALS] = locals;
-    trees[TREE_GLOBALS] = globals;
-    trees[TREE_FUNCS] = functions;
+
     stack_init(&sym_stack, TOKEN_STACK);
     stack_init(&type_stack, VALUE_STACK);
 
@@ -196,7 +195,7 @@ static int do_parsing(FILE *input, Tree *locals, Tree *globals, Tree *functions,
         stack_term = get_term(&stack_token);
         input_term = get_term(&input_token);
         switch (PREC_TABLE[stack_term][input_term]) {
-        case I:
+        case S:
             if ((error = stack_insert(&sym_stack, SYM_TERM, SYM_RS, NULL))
                 != SUCCESS)
                 goto fail;
@@ -241,11 +240,11 @@ static int do_parsing(FILE *input, Tree *locals, Tree *globals, Tree *functions,
 fail:
     stack_free(&sym_stack);
     stack_free(&type_stack);
-    gc_free(__FILE__);
 
     return error;
 }
 
+/* DEFINITION OF STATIC FUNCTIONS */
 static int gen_instr(Instruction **instr_ptr, Instruction_type type, int index,
                      unsigned locals_count, Instruction *alt_instr)
 {
@@ -292,6 +291,14 @@ static Instruction_type get_instr_type(Token *token)
         return I_LESS_EQUAL;
     case TERM_GEQ:
         return I_GREATER_EQUAL;
+    case TERM_AND:
+        return I_AND;
+    case TERM_OR:
+        return I_OR;
+    case TERM_XOR:
+        return I_XOR;
+    case TERM_NOT:
+        return I_NOT;
     default:
         break;
     }
@@ -367,6 +374,14 @@ static enum terminal get_term(Token *token)
         break;
     case TOKEN_KEYWORD:
         switch (token->value.value_keyword) {
+        case KEYWORD_AND:
+            return TERM_AND;
+        case KEYWORD_OR:
+            return TERM_OR;
+        case KEYWORD_XOR:
+            return TERM_XOR;
+        case KEYWORD_NOT:
+            return TERM_NOT;
         case KEYWORD_TRUE:
         case KEYWORD_FALSE:
             return TERM_LIT;
@@ -389,25 +404,72 @@ static enum terminal get_term(Token *token)
 
 static Value get_value(Token *token)
 {
+    Value value = {.integer = 0};
+
     if (token == NULL)
-        return (Value) {.integer = 0};
+        return value;
 
     switch (get_type(token)) {
     case TYPE_INT:
-        return (Value) {.integer = token->value.value_int};
+        value.integer = token->value.value_int;
+        break;
     case TYPE_REAL:
-        return (Value) {.real = token->value.value_float};
+        value.real = token->value.value_float;
+        break;
     case TYPE_STRING:
-        return (Value) {.string = token->value.value_string};
+        value.string = token->value.value_string;
+        break;
     case TYPE_BOOL:
-        return (Value) {.boolean = token->value.value_keyword == KEYWORD_TRUE};
+        value.boolean = token->value.value_keyword == KEYWORD_TRUE;
+        break;
     default:
-        return (Value) {.integer = 0};
+        break;
     }
 
-    return (Value) {.integer = 0};
+    return value;
 }
 
+static int reduce_rule(Stack *sym_stack, Stack *type_stack, Tree **trees,
+                       Variables *global_vars, Instruction **instr_ptr)
+{
+    unsigned count = 0;
+    unsigned index;
+    enum symbol sym_array[RULE_MAXLEN];
+    Token token_array[RULE_MAXLEN];
+
+    while (stack_uninsert(sym_stack, SYM_RS, (int *)&sym_array[count],
+           &token_array[count]) == SUCCESS)
+        count++;
+
+    stack_pop(sym_stack);
+
+    for (unsigned i = 0; i < ARRAY_COUNT(RULES); i++) {
+        if (RULES[i].length != count)
+            continue;
+        for (index = 0; index < count; index++) {
+            if (RULES[i].symbols[index].sym_type != sym_array[index])
+                break;
+            if (sym_array[index] == SYM_TERM &&
+                RULES[i].symbols[index].term_type
+                != get_term(&token_array[index]))
+                break;
+        }
+        if (index != count)
+            continue;
+        if (stack_push(sym_stack, RULES[i].reduction, NULL) != SUCCESS)
+            return INTERNAL_ERROR;
+        if (RULES[i].handler == NULL)
+            return SUCCESS;
+        return RULES[i].handler(token_array, type_stack, trees, global_vars,
+                                instr_ptr);
+    }
+
+    debug("Syntax error\n");
+
+    return SYNTAX_ERROR;
+}
+
+/* DEFINITION OF HANDLER FUNCTIONS */
 static int handle_add(Token *tokens, Stack *type_stack, Tree **trees,
                       Variables *global_vars, Instruction **instr_ptr)
 {
@@ -456,6 +518,35 @@ static int handle_add(Token *tokens, Stack *type_stack, Tree **trees,
 
     if (stack_push(type_stack, result_type, NULL) != SUCCESS ||
         gen_instr(instr_ptr, I_ADD, 0, 0, NULL) != SUCCESS)
+        return INTERNAL_ERROR;
+
+    return SUCCESS;
+}
+
+static int handle_boolop(Token *tokens, Stack *type_stack, Tree **trees,
+                         Variables *global_vars, Instruction **instr_ptr)
+{
+    Type op1_type;
+    Type op2_type;
+
+    IGNORE_PARAM(trees);
+    IGNORE_PARAM(global_vars);
+
+    if (stack_index(type_stack, 1, (int *)&op1_type, NULL) != SUCCESS ||
+        stack_index(type_stack, 0, (int *)&op2_type, NULL) != SUCCESS) {
+        debug("Syntax error\n");
+        return SYNTAX_ERROR;
+    }
+
+    if (op1_type != TYPE_BOOL || op2_type != TYPE_BOOL) {
+        debug("Incompatible type\n");
+        return INCOMPATIBLE_TYPE;
+    }
+
+    stack_popping_spree(type_stack, 2);
+
+    if (stack_push(type_stack, TYPE_BOOL, NULL) != SUCCESS ||
+        gen_instr(instr_ptr, get_instr_type(&tokens[1]), 0, 0, NULL) != SUCCESS)
         return INTERNAL_ERROR;
 
     return SUCCESS;
@@ -659,6 +750,34 @@ static int handle_literal(Token *tokens, Stack *type_stack, Tree **trees,
     return SUCCESS;
 }
 
+static int handle_not(Token *tokens, Stack *type_stack, Tree **trees,
+                      Variables *global_vars, Instruction **instr_ptr)
+{
+    Type type;
+
+    IGNORE_PARAM(tokens);
+    IGNORE_PARAM(trees);
+    IGNORE_PARAM(global_vars);
+
+    if (stack_top(type_stack, (int *)&type, NULL) != SUCCESS) {
+        debug("Syntax error\n");
+        return SYNTAX_ERROR;
+    }
+
+    if (type != TYPE_BOOL) {
+        debug("Incompatible type\n");
+        return INCOMPATIBLE_TYPE;
+    }
+
+    stack_pop(type_stack);
+
+    if (stack_push(type_stack, TYPE_BOOL, NULL) != SUCCESS ||
+        gen_instr(instr_ptr, I_NOT, 0, 0, NULL) != SUCCESS)
+        return INTERNAL_ERROR;
+
+    return SUCCESS;
+}
+
 static int handle_sub_mul(Token *tokens, Stack *type_stack, Tree **trees,
                           Variables *global_vars, Instruction **instr_ptr)
 {
@@ -702,44 +821,4 @@ static int handle_sub_mul(Token *tokens, Stack *type_stack, Tree **trees,
         return INTERNAL_ERROR;
 
     return SUCCESS;
-}
-
-static int reduce_rule(Stack *sym_stack, Stack *type_stack, Tree **trees,
-                       Variables *global_vars, Instruction **instr_ptr)
-{
-    unsigned count = 0;
-    unsigned index;
-    enum symbol sym_array[RULE_MAXLEN];
-    Token token_array[RULE_MAXLEN];
-
-    while (stack_uninsert(sym_stack, SYM_RS, (int *)&sym_array[count],
-           &token_array[count]) == SUCCESS)
-        count++;
-
-    stack_pop(sym_stack);
-
-    for (unsigned i = 0; i < RULE_COUNT; i++) {
-        if (RULES[i].length != count)
-            continue;
-        for (index = 0; index < count; index++) {
-            if (RULES[i].symbols[index].sym_type != sym_array[index])
-                break;
-            if (sym_array[index] == SYM_TERM &&
-                RULES[i].symbols[index].term_type
-                != get_term(&token_array[index]))
-                break;
-        }
-        if (index != count)
-            continue;
-        if (stack_push(sym_stack, RULES[i].reduction, NULL) != SUCCESS)
-            return INTERNAL_ERROR;
-        if (RULES[i].handler == NULL)
-            return SUCCESS;
-        return RULES[i].handler(token_array, type_stack, trees, global_vars,
-                                instr_ptr);
-    }
-
-    debug("Syntax error\n");
-
-    return SYNTAX_ERROR;
 }
