@@ -13,7 +13,9 @@ Compile program by calling `make` in project directory.
 
 # Debugging: #
 
-For enable debugging macros compile program with `-DDebug` switch
+For enable debugging macros compile program with `-DDebug` switch.
+
+Or run `build` script that has debugging on.
 
 When using makefile try using this command. It has useful aditional gcc switches and Debug enabled.
 
@@ -72,6 +74,7 @@ Running project test located in directories/subdirectories:
 - `scanner`:	our scanner tests
 - `expr`:		our expr tests
 - `syntax`:		our syntax tests
+- `strins`:		our syntax tests
 
 - `skal`:		tests made by "Skal"
 
@@ -86,9 +89,6 @@ If you want to add new test that you just implemented:
 	2.1. If needed, add keyword to array that will redirect test output to file.
 
 	3.   Use.
-
-
-
 
 
 
