@@ -329,6 +329,169 @@ END_OF_TEST();                                                                \
 
 
 
+#define TEST_OF_BIT_OPERATORS(operation, operator, instruct)                  \
+	Type typ;                                                                 \
+	Value temp;                                                               \
+	int test = 0, errors = 1;                                                 \
+	Instruction instruction;                                                  \
+	instruction.instruction = instruct;                                       \
+	Stack calcs;                                                              \
+	stack_init(&calcs, VALUE_STACK);                                          \
+	Value values[12];                                                         \
+	values[0].integer	= 8;                                                    \
+	values[1].integer	= 100;                                                  \
+	values[2].integer	= 16;                                                 \
+	values[3].integer	= 2;                                                    \
+	values[4].integer	= 8;                                                  \
+	values[5].integer	= 25;                                                    \
+	values[5].boolean	= true;                                                 \
+	values[6].boolean	= false;                                                \
+	values[7].boolean	= true;                                                 \
+	values[8].boolean	= false;                                                \
+	values[9].integer	= 22;                                                   \
+	values[10].integer	= 1500;                                                \
+BEGINE_OF_TEST();                                                             \
+printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);\
+	stack_push(&calcs, TYPE_INT, &(values[0]));                       \
+	stack_push(&calcs, TYPE_INT, &(values[1]));                       \
+	CALL_INTERPRET();                                                         \
+	if(calcs.count==1)                                                        \
+	{                                                                         \
+	stack_index(&calcs, 0, (int*)&typ, &temp);                                                                      \
+		if(typ == TYPE_INT && (temp.integer == ( values[0].integer operator values[1].integer )))\
+			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, operation);\
+		else                                                                  \
+		{                                                                     \
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.integer, values[0].integer operator values[1].integer);\
+			break;                                                            \
+		}                                                                     \
+	}                                                                         \
+	else                                                                      \
+	{                                                                         \
+		printf("\n%s:[test %d.] ERROR: stack counter should be %d and its %u\n", __func__, test, 1, calcs.count);\
+		break;                                                                \
+	}                                                                         \
+	printf("\n");                                                             \
+	POP_OUT_LAST();                                                           \
+test++;                                                                       \
+printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);\
+	stack_push(&calcs, TYPE_INT, &(values[3]));                         \
+	stack_push(&calcs, TYPE_INT, &(values[4]));                         \
+	CALL_INTERPRET();                                                         \
+	if(calcs.count==1)                                                        \
+	{                                                                         \
+	stack_index(&calcs, 0, (int*)&typ, &temp);                                                                      \
+		if(typ == TYPE_INT && (temp.integer == ( values[3].integer operator values[4].integer )))\
+			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, operation);\
+		else                                                                  \
+		{                                                                     \
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.integer, (values[3].integer operator values[4].integer));\
+			break;                                                            \
+		}                                                                     \
+	}                                                                         \
+	else                                                                      \
+	{                                                                         \
+		printf("\n%s:[test %d.] ERROR: stack counter should be %d and its %u\n", __func__, test, 1, calcs.count);\
+		break;                                                                \
+	}                                                                         \
+	printf("\n");                                                             \
+	POP_OUT_LAST();                                                           \
+test++;                                                                       \
+printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);\
+	stack_push(&calcs, TYPE_BOOL, &(values[5]));                      \
+	stack_push(&calcs, TYPE_BOOL, &(values[6]));                      \
+	CALL_INTERPRET();                                                         \
+	if(calcs.count==1)                                                        \
+	{                                                                         \
+		stack_index(&calcs, 0, (int*)&typ, &temp);                            \
+		if(typ == TYPE_BOOL && (temp.boolean == ( values[5].boolean operator values[6].boolean )))\
+			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, operation);\
+		else                                                                  \
+		{                                                                     \
+			printf("\n%s:[test %d.] ERROR: stack value is  %d and should be %d\n", __func__, test, temp.boolean, (values[5].boolean operator values[6].boolean));\
+			break;                                                            \
+		}                                                                     \
+	}                                                                         \
+	else                                                                      \
+	{                                                                         \
+		printf("\n%s:[test %d.] ERROR: stack counter should be %d and its %u\n", __func__, test, 1, calcs.count);\
+		break;                                                                \
+	}                                                                         \
+	printf("\n");                                                             \
+	POP_OUT_LAST();                                                           \
+test++;                                                                       \
+printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);\
+	stack_push(&calcs, TYPE_BOOL, &(values[5]));                      \
+	stack_push(&calcs, TYPE_BOOL, &(values[7]));                      \
+	CALL_INTERPRET();                                                         \
+	if(calcs.count==1)                                                        \
+	{                                                                         \
+	stack_index(&calcs, 0, (int*)&typ, &temp);                                                                      \
+		if(typ == TYPE_BOOL && (temp.boolean == ( values[5].boolean operator values[7].boolean )))\
+			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, operation);\
+		else                                                                  \
+		{                                                                     \
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.boolean, (values[5].boolean operator values[7].boolean));\
+			break;                                                            \
+		}                                                                     \
+	}                                                                         \
+	else                                                                      \
+	{                                                                         \
+		printf("\n%s:[test %d.] ERROR: stack counter should be %d and its %u\n", __func__, test, 1, calcs.count);\
+		break;                                                                \
+	}                                                                         \
+	printf("\n");                                                             \
+	POP_OUT_LAST();                                                           \
+test++;                                                                       \
+printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);\
+	stack_push(&calcs, TYPE_INT, &(values[3]));                         \
+	stack_push(&calcs, TYPE_INT, &(values[5]));                         \
+	CALL_INTERPRET();                                                         \
+	if(calcs.count==1)                                                        \
+	{                                                                         \
+	stack_index(&calcs, 0, (int*)&typ, &temp);                                                                      \
+		if(typ == TYPE_INT && (temp.integer == ( values[3].integer operator values[5].integer )))\
+			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, operation);\
+		else                                                                  \
+		{                                                                     \
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.integer, (values[3].integer operator values[5].boolean));\
+			break;                                                            \
+		}                                                                     \
+	}                                                                         \
+	else                                                                      \
+	{                                                                         \
+		printf("\n%s:[test %d.] ERROR: stack counter should be %d and its %u\n", __func__, test, 1, calcs.count);\
+		break;                                                                \
+	}                                                                         \
+	printf("\n");                                                             \
+	POP_OUT_LAST();                                                           \
+test++;                                                                       \
+printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);\
+	stack_push(&calcs, TYPE_INT, &(values[9]));                               \
+	stack_push(&calcs, TYPE_INT, &(values[10]));                              \
+	CALL_INTERPRET();                                                         \
+	if(calcs.count==1)                                                        \
+	{                                                                         \
+	stack_index(&calcs, 0, (int*)&typ, &temp);                                                                      \
+		if(typ == TYPE_INT && (temp.integer == ( values[9].integer operator values[10].integer )))\
+			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, operation);\
+		else                                                                  \
+		{                                                                     \
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.integer, values[9].integer operator values[10].integer);\
+			break;                                                            \
+		}                                                                     \
+	}                                                                         \
+	else                                                                      \
+	{                                                                         \
+		printf("\n%s:[test %d.] ERROR: stack counter should be %d and its %u\n", __func__, test, 1, calcs.count);\
+		break;                                                                \
+	}                                                                         \
+	printf("\n");                                                             \
+	POP_OUT_LAST();                                                           \
+END_OF_TEST();                                                                \
+
+
+
 
 
 
