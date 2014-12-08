@@ -16,7 +16,8 @@ ALL=true
 OURS=false
 SKAL=false
 SCANNER=false
-
+EXPR=false
+SYNTAX=false
 
 if [ $# -gt 0 ]; then
 
@@ -55,6 +56,16 @@ if [ $# -gt 0 ]; then
 
 		if [[ "scanner" == "$arg" ]]; then			# param "log" to archive all logs
 			SCANNER=true
+			ALL=false
+		fi
+
+		if [[ "expr" == "$arg" ]]; then			# param "log" to archive all logs
+			EXPR=true
+			ALL=false
+		fi
+
+		if [[ "syntax" == "$arg" ]]; then			# param "log" to archive all logs
+			SYNTAX=true
 			ALL=false
 		fi
 
@@ -300,10 +311,11 @@ if [[ $tests == true || $PROJECT == true  ]]; then
     MAKE_RET=$?
 	cd ./tests/             #POZOR make
 
-	read -a FILES_SKAL <<< $( find ./files/skal -name '*.pas') #filling up the field of paths to files
-	read -a FILES_OURS <<< $( find ./files/ours -maxdepth 1 -name '*.pas') #filling up the field of paths to files
-	read -a FILES_OURS_SCANNER <<< $( find ./files/ours/scanner -name '*.pas')
-
+	read -a FILES_SKAL <<< $( find ./files/skal -name '*.pas' | sort) #filling up the field of paths to files
+	read -a FILES_OURS <<< $( find ./files/ours -maxdepth 1 -name '*.pas' | sort) #filling up the field of paths to files
+	read -a FILES_OURS_SCANNER <<< $( find ./files/ours/scanner -name '*.pas' | sort)
+	read -a FILES_OURS_EXPR <<< $( find ./files/ours/expr -name '*.pas' | sort)
+	read -a FILES_OURS_SYNTAX_ERRORS <<< $( find ./files/ours/scanner -name '*.pas' | sort)
 
 
 	if [[ "$MAKE_RET" != "0" ]]; then
@@ -329,6 +341,30 @@ if [[ $tests == true || $PROJECT == true  ]]; then
 	    OK_count=0
 	    echo "---------------------------------------SCANNER--------------------------------------------------------------------------"
 	    for file in "${FILES_OURS_SCANNER[@]}"; do
+		    run_test $file
+		    ((counter++))
+	    done
+	    echo -e "TESTS:\t\t${green}PASSED: $OK_count ${NC} of $counter"
+	fi
+
+	counter=0
+	if [[ $ALL == true || $EXPR == true ]]; then
+	    counter=0
+	    OK_count=0
+	    echo "---------------------------------------EXPR--------------------------------------------------------------------------"
+	    for file in "${FILES_OURS_EXPR[@]}"; do
+		    run_test $file
+		    ((counter++))
+	    done
+	    echo -e "TESTS:\t\t${green}PASSED: $OK_count ${NC} of $counter"
+	fi
+
+	counter=0
+	if [[ $ALL == true || $SYNTAX == true ]]; then
+	    counter=0
+	    OK_count=0
+	    echo "---------------------------------------SYNTAX-ERRORS--------------------------------------------------------------------------"
+	    for file in "${FILES_OURS_SYNTAX_ERRORS[@]}"; do
 		    run_test $file
 		    ((counter++))
 	    done
