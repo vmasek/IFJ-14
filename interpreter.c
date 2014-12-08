@@ -61,6 +61,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		break;
 
 	case I_PUSH:
+		debug("I_PUSH\n");
 		///                         Value operations
 		if(item->index < 0)																		/// index indicates local stack operation
 		{
@@ -112,6 +113,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 
 	case I_ADD:
 
+		debug("I_ADD\n");
 		///                         Stack operations
 		CALCS_STACK_OPERATIONS();
 
@@ -155,6 +157,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 
 	case I_SUB:
 
+		debug("I_SUB\n");
 		///                         Stack operations
 		CALCS_STACK_OPERATIONS();
 
@@ -192,6 +195,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 
 	case I_MUL:
 
+		debug("I_MUL\n");
 		///                         Stack operations
 		CALCS_STACK_OPERATIONS();
 
@@ -229,6 +233,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 
 	case I_DIV:
 
+		debug("I_DIV\n");
 		///                         Stack operations
 		CALCS_STACK_OPERATIONS();
 
@@ -308,8 +313,46 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 
 		COMPARISON_INSTRUCTION("I_NOT_EQUAL", != );
 
+
+	case I_AND:
+
+		LOGICAL_OPERATOR_INSTRUCTION("I_AND", & );
+
+	case I_OR:
+
+		LOGICAL_OPERATOR_INSTRUCTION("II_OR", | );
+
+	case I_XOR:
+
+		LOGICAL_OPERATOR_INSTRUCTION("I_XOR", ^ );
+
+	case I_NOT:
+
+		debug("I_NOT\n");
+		CALCS_STACK_OPERATIONS_RESULT();
+
+		if ((types[0] == TYPE_INT))
+		{
+			debug("I_NOT - INT\n");
+			result.integer = ~ result.integer;
+			stack_push(calcs, TYPE_INT, &(result));
+		}
+		else if ((types[0] == TYPE_BOOL))
+		{
+			debug("I_NOT - BOOL\n");
+			result.boolean = ~ result.boolean;
+			stack_push(calcs, TYPE_BOOL, &(result));
+		}
+		else
+		{
+			debug("Invalid type passed to instruction\n");
+			return INTERNAL_ERROR;
+		}
+		break;
+
 	case I_WRITE:
 
+		debug("I_WRITE\n");
 		///                         Stack operations
 		CALCS_STACK_OPERATIONS_RESULT();
 
@@ -342,6 +385,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 
 	case I_READLN:
 
+		debug("I_READLN\n");
 		if (types[0] == TYPE_INT)
 		{
 			debug("I_READLN - integer\n");
@@ -386,6 +430,8 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		break;
 
 	case I_LEN:
+
+		debug("I_LEN\n");
 		///                         Stack operations
 		CALCS_STACK_OPERATIONS_RESULT();
 
@@ -404,6 +450,8 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		break;
 
 	case I_COPY:
+
+		debug("I_COPY\n");
 	//TODO: dorobit stack operacie
 
 		if (types[0] == TYPE_STRING)
@@ -420,6 +468,8 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		break;
 
 	case I_FIND:
+
+		debug("I_FIND\n");
 		///                         Stack operations
 		CALCS_STACK_OPERATIONS();
 
@@ -437,6 +487,8 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		break;
 
 	case I_SORT:
+
+		debug("I_SORT\n");
 		///                         Stack operations
 		CALCS_STACK_OPERATIONS_RESULT();
 
