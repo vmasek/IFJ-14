@@ -302,47 +302,6 @@ instruction.index		= -1;
 	}
 	printf("\n");
 
-/*
-///PIATY test na assign
-test++;
-printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
-
-///toto bude test na neinicializovanu premennu
-///pushnem do locals stacku TYPE_OTHER ktory znaci neinicializovenie a null pointer
-stack_push(&locals, TYPE_OTHER, NULL);
-instruction.index		= -1;
-stack_print(&locals);
-
-
-	stack_push(&calcs, TYPE_INT, &(values[test]));
-
-	if(interpret(&instruction, &calcs, &locals, NULL, &globals) != SUCCESS)
-	{
-		printf("\n%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
-		break;
-	}
-
-	stack_print(&locals);
-
-	if(calcs.count==0 && locals.count==4)
-	{
-		stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(locals.top->type == TYPE_INT && (*(int*)(locals.top->value) == values[test].integer))
-			printf("\n%s:[test %d.] ASSIGN was OK.\n", __func__, test);
-		else
-		{
-			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, *(int*)(locals.top->value), values[test].integer);
-			break;
-		}
-	}
-	else
-	{
-		printf("\n%s:[test %d.] ERROR: calcs should be %d and its %u\tlocals should be %d and its %u\n", __func__, test, 0, calcs.count, 4, locals.count);
-		break;
-	}
-	printf("\n");
-*/
-
 END_OF_TEST();
 
 stack_free(&locals);
@@ -404,14 +363,9 @@ BEGINE_OF_TEST();
 
 ///PRVY test na push
 
-	instruction.index		= 0;									 ///bude zapis do globals index 0
+	instruction.index		= -1;									 ///bude push z locals index 0 (-(-1+1))
 
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
-	if(stack_push(&calcs, TYPE_INT, &(values[test])) == INTERNAL_ERROR)
-	{
-		debug("stack push sa dorafal !");
-		break;
-	}
 
 
 	if(interpret(&instruction, &calcs, &locals, NULL, &globals) != SUCCESS)
@@ -421,21 +375,20 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	}
 
 
-	if(calcs.count==0 && globals.count==1)
+	if(calcs.count==1 && locals.count==3)
 	{
-		if(globals.types[0] == TYPE_INT && globals.values[0].integer == values[test].integer)
+		stack_index(&calcs, 0, (int*)&typ, &temp);
+		if(typ == TYPE_STRING && !cstr_cmp(temp.string, values[9].string))
 			printf("\n%s:[test %d.] ASSIGN was OK.\n", __func__, test);
 		else
 		{
-			Value temp;
-			variables_value_read(&globals, NULL, &temp, 0);
-			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.integer, values[test].integer);
+			printf("\n%s:[test %d.] ERROR: stack value is (cstring) \"%s\" and should be (cstring) \"%s\"\n", __func__, test, temp.string->str, values[9].string->str);
 			break;
 		}
 	}
 	else
 	{
-		printf("\n%s:[test %d.] ERROR: calcs should be %d and its %u\tglobals should be %d and its %u\n", __func__, test, 0, calcs.count, 1, globals.count);
+		printf("\n%s:[test %d.] ERROR: calcs should be %d and its %u\tlocals should be %d and its %u\n", __func__, test, 1, calcs.count, 3, locals.count);
 		break;
 	}
 	printf("\n");
@@ -446,9 +399,7 @@ test++;
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
 
 
-	instruction.index		= -3;									 ///bude zapis do locals index 2 "( -(index+1) )"
-
-	stack_push(&calcs, TYPE_REAL, &(values[test]));
+	instruction.index		= -2;
 
 	if(interpret(&instruction, &calcs, &locals, NULL, &globals) != SUCCESS)
 	{
@@ -456,22 +407,20 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 		break;
 	}
 
-	stack_print(&locals);
-
-	if(calcs.count==0 && locals.count==3)
+	if(calcs.count==2 && locals.count==3)
 	{
-		stack_index(&locals, 2, (int*)&typ, &temp);
-		if(typ == TYPE_REAL && temp.real == values[test].real)
+		stack_index(&calcs, 0, (int*)&typ, &temp);
+		if(typ == TYPE_BOOL && temp.boolean == values[7].boolean)
 			printf("\n%s:[test %d.] ASSIGN was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, values[test].real);
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be (bool) %d\n", __func__, test, temp.boolean, values[7].boolean);
 			break;
 		}
 	}
 	else
 	{
-		printf("\n%s:[test %d.] ERROR: calcs should be %d and its %u\tlocals should be %d and its %u\n", __func__, test, 0, calcs.count, 3, locals.count);
+		printf("\n%s:[test %d.] ERROR: calcs should be %d and its %u\tlocals should be %d and its %u\n", __func__, test, 1, calcs.count, 3, locals.count);
 		break;
 	}
 	printf("\n");
@@ -481,9 +430,7 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 test++;
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
 
-instruction.index		= -2;
-
-	stack_push(&calcs, TYPE_BOOL, &(values[test]));
+instruction.index		= -3;
 
 	if(interpret(&instruction, &calcs, &locals, NULL, &globals) != SUCCESS)
 	{
@@ -491,22 +438,20 @@ instruction.index		= -2;
 		break;
 	}
 
-	stack_print(&locals);
-
-	if(calcs.count==0 && locals.count==3)
+	if(calcs.count==3 && locals.count==3)
 	{
-		stack_index(&locals, 1, (int*)&typ, &temp);
-		if(typ == TYPE_BOOL && temp.boolean == values[test].boolean)
+		stack_index(&calcs, 0, (int*)&typ, &temp);
+		if(typ == TYPE_REAL && temp.real == values[8].real)
 			printf("\n%s:[test %d.] ASSIGN was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is (bool)%d and should be (bool)%d\n", __func__, test, temp.boolean, values[test].boolean);
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, values[8].real);
 			break;
 		}
 	}
 	else
 	{
-		printf("\n%s:[test %d.] ERROR: calcs should be %d and its %u\tlocals should be %d and its %u\n", __func__, test, 0, calcs.count, 3, locals.count);
+		printf("\n%s:[test %d.] ERROR: calcs should be %d and its %u\tlocals should be %d and its %u\n", __func__, test, 3, calcs.count, 3, locals.count);
 		break;
 	}
 	printf("\n");
@@ -517,9 +462,7 @@ instruction.index		= -2;
 test++;
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
 
-instruction.index		= -1;
-	stack_print(&locals);
-	stack_push(&calcs, TYPE_STRING, &values[test]);
+	instruction.index		= 0; ///zoberie z globals index 0 (prve)
 
 	if(interpret(&instruction, &calcs, &locals, NULL, &globals) != SUCCESS)
 	{
@@ -527,22 +470,52 @@ instruction.index		= -1;
 		break;
 	}
 
-	stack_print(&locals);
-
-	if(calcs.count==0 && locals.count==3)
+	if(calcs.count==4 && locals.count==3 && globals.count==1)
 	{
-		stack_index(&locals, 0, (int*)&typ, &temp);
-		if(typ == TYPE_STRING && !cstr_cmp(temp.string, values[test].string))
+		stack_index(&calcs, 0, (int*)&typ, &temp);
+		if(typ == TYPE_INT && temp.integer == values[0].integer)
 			printf("\n%s:[test %d.] ASSIGN was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is (cstring) \"%s\" and should be (cstring) \"%s\"\n", __func__, test, temp.string->str, values[test].string->str);
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.integer, values[0].integer);
 			break;
 		}
 	}
 	else
 	{
-		printf("\n%s:[test %d.] ERROR: calcs should be %d and its %u\tlocals should be %d and its %u\n", __func__, test, 0, calcs.count, 3, locals.count);
+		printf("\n%s:[test %d.] ERROR: calcs should be %d and its %u\tlocals should be %d and its %u\n", __func__, test, 4, calcs.count, 3, locals.count);
+		break;
+	}
+	printf("\n");
+
+
+///PIATY test na push (zavola instrukciu ADD nad pushnutymi vecami)
+test++;
+printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
+
+instruction.index		= 0; ///toto je momentalne nepotrebne
+instruction.instruction		= I_ADD;
+
+	if(interpret(&instruction, &calcs, &locals, NULL, &globals) != SUCCESS)
+	{
+		printf("\n%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
+		break;
+	}
+
+	if(calcs.count==3 && locals.count==3 && globals.count==1)
+	{
+		stack_index(&calcs, 0, (int*)&typ, &temp);
+		if(typ == TYPE_REAL && temp.real == values[8].real+values[0].integer)
+			printf("\n%s:[test %d.] ASSIGN was OK.\n", __func__, test);
+		else
+		{
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, values[8].real+values[0].integer);
+			break;
+		}
+	}
+	else
+	{
+		printf("\n%s:[test %d.] ERROR: calcs should be %d and its %u\tlocals should be %d and its %u\n", __func__, test, 3, calcs.count, 3, locals.count);
 		break;
 	}
 	printf("\n");

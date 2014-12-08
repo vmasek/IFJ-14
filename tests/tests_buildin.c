@@ -17,14 +17,14 @@ int test_length()
     printf("\n*** Testing buildin length ***\n");
 
     if (length(Vojto) != 10) {
-        print_cstr(Vojto);
+        print_cstr_all(Vojto);
         failures++;
     }
 
     cstr_append_str(Vojto, "1234");
 
     if (length(Vojto) != 14) {
-        print_cstr(Vojto);
+        print_cstr_all(Vojto);
         failures++;
     }
 
@@ -32,14 +32,14 @@ int test_length()
 
 
     if (length(Vojto) != 28) {
-        print_cstr(Vojto);
+        print_cstr_all(Vojto);
         failures++;
     }
 
     cstr_assign_str(Vojto, "");
 
     if (length(Vojto) != 0) {
-        print_cstr(Vojto);
+        print_cstr_all(Vojto);
         failures++;
     }
 
@@ -59,7 +59,7 @@ int test_copy()
     printf("\n*** Testing buildin copy ***\n");
 
     if (strcmp(Albert->str, "hoj Ka") != 0) {
-        print_cstr(Albert);
+        print_cstr_all(Albert);
         failures++;
     }
 
@@ -67,7 +67,7 @@ int test_copy()
     Albert = copy(Vojto, 1, 2);
 
     if (strcmp(Albert->str, "Ah") != 0) {
-        print_cstr(Albert);
+        print_cstr_all(Albert);
         failures++;
     }
 
@@ -75,7 +75,7 @@ int test_copy()
     Albert = copy(Vojto, 6, 2);
 
     if (strcmp(Albert->str, "Ka") != 0) {
-        print_cstr(Albert);
+        print_cstr_all(Albert);
         failures++;
     }
 
@@ -83,7 +83,7 @@ int test_copy()
     cstr_clear(Albert);
     Albert = copy(Vojto, 1, 10);
     if (strcmp(Albert->str, "") != 0) {
-        print_cstr(Albert);
+        print_cstr_all(Albert);
         failures++;
     }
 
@@ -105,16 +105,17 @@ int test_find()
     cstring *Albert = cstr_create_str("le");
 
     if (find(Vojto, Albert) != 9) {
-        print_cstr(Albert);
+		printf("prve\n");
+        print_cstr_all(Albert);
         failures++;
     }
 
     debug("\n*** za prvym ***\n");
     cstr_assign_str(Albert, " ");
 
-    print_cstr(Albert);
     if (find(Vojto, Albert) != 5) {
-        print_cstr(Albert);
+		printf("druhe\n");
+        print_cstr_all(Albert);
         failures++;
     }
 
@@ -123,7 +124,8 @@ int test_find()
     cstr_assign_str(Albert, "1");
 
     if (find(Vojto, Albert) != 17) {
-        print_cstr(Albert);
+		printf("tretie\n");
+        print_cstr_all(Albert);
         failures++;
     }
 
@@ -132,7 +134,8 @@ int test_find()
     cstr_assign_str(Vojto, "");
 
     if (find(Vojto, Albert) != 1) {
-        print_cstr(Albert);
+		printf("stvrte\n");
+        print_cstr_all(Albert);
         failures++;
     }
 
@@ -153,7 +156,7 @@ int test_sort()
     cstring *Albert = sort(Vojto);
 
     if (strcmp(Albert->str, "ABCDEFabcdef") != 0) {
-        print_cstr(Vojto);
+        print_cstr_all(Vojto);
         failures++;
     }
 
@@ -162,7 +165,7 @@ int test_sort()
     cstring *Pavel = sort(Vojto);
 
     if ((strcmp(Pavel->str, "123789") != 0)) {
-        print_cstr(Vojto);
+        print_cstr_all(Vojto);
         failures++;
     }
 
@@ -171,7 +174,7 @@ int test_sort()
     cstring *Adam = sort(Vojto);
 
     if ((strcmp(Adam->str, "1234CDGHabef") != 0)) {
-        print_cstr(Vojto);
+        print_cstr_all(Vojto);
         failures++;
     }
 
