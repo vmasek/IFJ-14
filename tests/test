@@ -114,7 +114,6 @@ if [[ $tests == true || $MODULES == true  ]]; then
 		make -B FLAGS='-g -Wstrict-prototypes -Wstrict-overflow=5 -Wwrite-strings -Wunreachable-code -Winit-self -Werror-implicit-function-declaration' &>"$test".out
 	fi
 
-
 	rm ./*.o ../*.o .depend ../.depend 2>/dev/null
 
 	valgrind_additonal_opt="-v --track-origins=yes --leak-check=full --malloc-fill=0xFF --free-fill=0xFF"
@@ -284,6 +283,7 @@ if [[ $tests == true || $PROJECT == true  ]]; then
 	else
 		make -B FLAGS='-g -Wstrict-prototypes -Wstrict-overflow=5 -Wwrite-strings -Wunreachable-code -Winit-self -Werror-implicit-function-declaration' &>"$test".out
 	fi
+    MAKE_RET=$?
 	cd ./tests/             #POZOR make
 
 	read -a FILES_SKAL <<< $( find ./files/skal -name '*.pas') #filling up the field of paths to files
@@ -293,39 +293,40 @@ if [[ $tests == true || $PROJECT == true  ]]; then
 	#echo "${FILES_OURS[@]}"
 
 
+	if [[ "$MAKE_RET" != "0" ]]; then
+        echo "ERROR: Failed to build project."
+    else
 
-	
+    	if [[ $ALL == true || $OURS == true ]]; then
 
-	if [[ $ALL == true || $OURS == true ]]; then
-
-		counter=0
-		OK_count=0
-		echo "-------------------------------------Our-TESTs--------------------------------------------------------------------------"
-		for file in "${FILES_OURS[@]}"; do
-			run_test $file
-			((counter++))
-		done
+	    	counter=0
+		    OK_count=0
+		    echo "-------------------------------------Our-TESTs--------------------------------------------------------------------------"
+		    for file in "${FILES_OURS[@]}"; do
+			    run_test $file
+			    ((counter++))
+		    done
 		
-		echo -e "TESTS:\t\t${green}PASSED: $OK_count ${NC} of $counter"
-	fi
+		    echo -e "TESTS:\t\t${green}PASSED: $OK_count ${NC} of $counter"
+	    fi
 
 
 
-	counter=0
-	if [[ $ALL == true || $SKAL == true ]]; then
+	    counter=0
+	    if [[ $ALL == true || $SKAL == true ]]; then
 
-		counter=0
-		OK_count=0
-		echo "-------------------------------------TESTy-od-skala---------------------------------------------------------------------"
-		for file in "${FILES_SKAL[@]}"; do
-			run_test $file
-			((counter++))
-		done
+		    counter=0
+		    OK_count=0
+		    echo "-------------------------------------TESTy-od-skala---------------------------------------------------------------------"
+		    for file in "${FILES_SKAL[@]}"; do
+			    run_test $file
+			    ((counter++))
+		    done
 
-		echo -e "TESTS:\t\t${green}PASSED: $OK_count ${NC} of $counter"
+		    echo -e "TESTS:\t\t${green}PASSED: $OK_count ${NC} of $counter"
 
-	fi
-
+	    fi
+    fi
 fi
 
 
