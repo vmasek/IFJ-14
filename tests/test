@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 # Test script
 # Vojtech Mašek (xmasek15)
 
@@ -15,6 +15,7 @@ PROJECT=false
 ALL=true
 OURS=false
 SKAL=false
+SCANNER=false
 
 
 if [ $# -gt 0 ]; then
@@ -49,6 +50,11 @@ if [ $# -gt 0 ]; then
 
 		if [[ "ours" == "$arg" ]]; then			# param "log" to archive all logs
 			OURS=true
+			ALL=false
+		fi
+
+		if [[ "scanner" == "$arg" ]]; then			# param "log" to archive all logs
+			SCANNER=true
 			ALL=false
 		fi
 
@@ -114,6 +120,12 @@ if [[ $tests == true || $MODULES == true  ]]; then
 	else
 		make -B FLAGS='-g -Wstrict-prototypes -Wstrict-overflow=5 -Wwrite-strings -Wunreachable-code -Winit-self -Werror-implicit-function-declaration' &>"$test".out
 	fi
+	MAKE_RET=$?
+
+	if [[ "$MAKE_RET" != "0" ]]; then
+        echo -e "${red}ERROR:${color2} Failed to build project.${NC}"
+        exit 99
+    fi
 
 	rm ./*.o ../*.o .depend ../.depend 2>/dev/null
 
@@ -256,7 +268,7 @@ if [[ $tests == true || $PROJECT == true  ]]; then
 		diff "$file.current.stdout" "$file.stdout.correct" >$file.diff.out
 		diff_code=$?
 		if [[ "$diff_code" == "0"  &&  "$exit_code" == "$exit_code_correct" ]]; then
-			echo -e "[ ${green}OK${NC} ]\tfile: $file_name"
+			echo -e "[  ${green}OK${NC}  ]\tfile: $file_name"
 			OK=true
 			((OK_count++))
 		else
@@ -289,46 +301,52 @@ if [[ $tests == true || $PROJECT == true  ]]; then
 	cd ./tests/             #POZOR make
 
 	read -a FILES_SKAL <<< $( find ./files/skal -name '*.pas') #filling up the field of paths to files
-	read -a FILES_OURS <<< $( find ./files/ours -name '*.pas') #filling up the field of paths to files
+	read -a FILES_OURS <<< $( find ./files/ours -maxdepth 1 -name '*.pas') #filling up the field of paths to files
+	read -a FILES_OURS_SCANNER <<< $( find ./files/ours/scanner -name '*.pas')
 
-	#echo "${FILES_SKAL[@]}"
-	#echo "${FILES_OURS[@]}"
 
 
 	if [[ "$MAKE_RET" != "0" ]]; then
-        echo "ERROR: Failed to build project."
-    else
-
-    	if [[ $ALL == true || $OURS == true ]]; then
-
-	    	counter=0
-		    OK_count=0
-		    echo "-------------------------------------Our-TESTs--------------------------------------------------------------------------"
-		    for file in "${FILES_OURS[@]}"; do
-			    run_test $file
-			    ((counter++))
-		    done
-		
-		    echo -e "TESTS:\t\t${green}PASSED: $OK_count ${NC} of $counter"
-	    fi
-
-
-
-	    counter=0
-	    if [[ $ALL == true || $SKAL == true ]]; then
-
-		    counter=0
-		    OK_count=0
-		    echo "-------------------------------------TESTy-od-skala---------------------------------------------------------------------"
-		    for file in "${FILES_SKAL[@]}"; do
-			    run_test $file
-			    ((counter++))
-		    done
-
-		    echo -e "TESTS:\t\t${green}PASSED: $OK_count ${NC} of $counter"
-
-	    fi
+        echo -e "${red}ERROR:${color2} Failed to build project.${NC}"
+        exit 99
     fi
+
+	if [[ $ALL == true || $OURS == true ]]; then
+		counter=0
+	    OK_count=0
+	    echo "-------------------------------------Our-TESTs--------------------------------------------------------------------------"
+	    for file in "${FILES_OURS[@]}"; do
+		    run_test $file
+		    ((counter++))
+	    done
+	
+	    echo -e "TESTS:\t\t${green}PASSED: $OK_count ${NC} of $counter"
+	fi
+
+	counter=0
+	if [[ $ALL == true || $SCANNER == true ]]; then
+	    counter=0
+	    OK_count=0
+	    echo "---------------------------------------SCANNER--------------------------------------------------------------------------"
+	    for file in "${FILES_OURS_SCANNER[@]}"; do
+		    run_test $file
+		    ((counter++))
+	    done
+	    echo -e "TESTS:\t\t${green}PASSED: $OK_count ${NC} of $counter"
+	fi
+
+	counter=0
+	if [[ $ALL == true || $SKAL == true ]]; then
+	    counter=0
+	    OK_count=0
+	    echo "-------------------------------------TESTy-od-skala---------------------------------------------------------------------"
+	    for file in "${FILES_SKAL[@]}"; do
+		    run_test $file
+		    ((counter++))
+	    done
+	    echo -e "TESTS:\t\t${green}PASSED: $OK_count ${NC} of $counter"
+	fi
+
 fi
 
 
@@ -344,3 +362,34 @@ fi
 # I_GREATER_EQUAL
 # I_EQUAL
 # I_NOT_EQUAL
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
