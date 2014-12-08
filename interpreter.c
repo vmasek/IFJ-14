@@ -331,12 +331,6 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 			result.integer = ~ result.integer;
 			stack_push(calcs, TYPE_INT, &(result));
 		}
-		else if ((types[0] == TYPE_BOOL))
-		{
-			debug("I_NOT - BOOL\n");
-			result.boolean = ~ result.boolean;
-			stack_push(calcs, TYPE_BOOL, &(result));
-		}
 		else
 		{
 			debug("Invalid type passed to instruction\n");
@@ -506,52 +500,9 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		CALCS_STACK_OPERATIONS_RESULT();
 
 		///                         Instruction operations
-		if (types[0] == TYPE_INT)
+		if (types[0] == TYPE_BOOL)
 		{
-			debug("I_JMP for int\n");
-			if (result.integer)
-			{
-				debug("next_instruction\n");
-				stack_push(calcs, 0, item->next_instruction);
-			}
-			else
-			{
-				debug("alt_instruction\n");
-				stack_push(calcs, 0, item->alt_instruction);
-			}
-		}
-		else if (types[0] == TYPE_REAL)
-		{
-			debug("I_JMP for real\n");
-			if (result.real)
-			{
-				debug("next_instruction\n");
-				stack_push(calcs, 0, item->next_instruction);
-			}
-			else
-			{
-				debug("alt_instruction\n");
-				stack_push(calcs, 0, item->alt_instruction);
-			}
-		}
-		else if (types[0] == TYPE_BOOL)
-		{
-			debug("I_JUMP for bool\n");
 			if (result.boolean)
-			{
-				debug("next_instruction\n");
-				stack_push(calcs, 0, item->next_instruction);
-			}
-			else
-			{
-				debug("alt_instruction\n");
-				stack_push(calcs, 0, item->alt_instruction);
-			}
-		}
-		else if (types[0] == TYPE_STRING)				/// WARNING: !!!!!!!!!!!! TAKE BIG CARE WHEN RECASTING CSTRING* TO VOID*
-		{
-			debug("I_JUMP for string\n");
-			if (result.string)
 			{
 				debug("next_instruction\n");
 				stack_push(calcs, 0, item->next_instruction);
