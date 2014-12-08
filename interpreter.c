@@ -1,7 +1,7 @@
 /**
  * @file    interpret.c
  * @brief   Implementation of interpret
- * @author  Tomas Paulus (xpaulu01), Vojtech Mašek (xmasek15)
+ * @author  Vojtech Mašek (xmasek15), Tomas Paulus (xpaulu01)
  *******************************************************************/
 
 #include "interpreter.h"
@@ -286,226 +286,27 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 
 	case I_LESS:
 
-		///                         Stack operations
-		CALCS_STACK_OPERATIONS();
-
-		///                         Instruction operations
-		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
-		{
-			debug("I_LESS - INT\n");
-			result.boolean = values[1].integer < values[0].integer;
-			stack_push(calcs, TYPE_BOOL, &(result));
-		}
-		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
-		{
-			debug("I_LESS - DOUBLE\n");
-			result.boolean = values[1].real < values[0].real;
-			stack_push(calcs, TYPE_BOOL, &(result));
-		}
-		else if ((types[0] == TYPE_BOOL) && (types[1] == TYPE_BOOL))
-		{
-			debug("I_LESS - BOOL\n");
-			result.boolean = values[1].boolean < values[0].boolean;
-			stack_push(calcs, TYPE_BOOL, &(result));
-		}
-		else if ((types[0] == TYPE_STRING) && (types[1] == TYPE_STRING))
-		{
-			debug("I_LESS - STRING\n");
-			result.boolean = (cstr_cmp(values[1].string, values[0].string) < 0) ;
-			stack_push(calcs, TYPE_BOOL, &(result));
-		}
-		else
-		{
-			debug("Invalid type passed to instruction\n");
-			return INTERNAL_ERROR;
-		}
-		break;
+		COMPARISON_INSTRUCTION("I_LESS",  < );
 
 	case I_GREATER:
 
-		///                         Stack operations
-		CALCS_STACK_OPERATIONS();
-
-		///                         Instruction operations
-		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
-		{
-			debug("I_GREATER - INT\n");
-			result.boolean = values[1].integer > values[0].integer;
-			stack_push(calcs, TYPE_BOOL, &result);
-		}
-		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
-		{
-			debug("I_GREATER - DOUBLE\n");
-			result.boolean = values[1].real > values[0].real;
-			stack_push(calcs, TYPE_BOOL, &(result));
-		}
-		else if ((types[0] == TYPE_BOOL) && (types[1] == TYPE_BOOL))
-		{
-			debug("I_GREATER - BOOL\n");
-			result.boolean = values[1].boolean > values[0].boolean;
-			stack_push(calcs, TYPE_BOOL, &(result));
-		}
-		else if ((types[0] == TYPE_STRING) && (types[1] == TYPE_STRING))
-		{
-			debug("I_GREATER - STRING\n");
-			result.boolean = (cstr_cmp(values[1].string, values[0].string) > 0) ;
-			debug("bool je %d", cstr_cmp(values[1].string, values[0].string));
-			stack_push(calcs, TYPE_BOOL, &(result));
-		}
-		else
-		{
-			debug("Invalid type passed to instruction\n");
-			return INTERNAL_ERROR;
-		}
-		break;
+		COMPARISON_INSTRUCTION("I_GREATER",  > );
 
 	case I_LESS_EQUAL:
 
-		///                         Stack operations
-		CALCS_STACK_OPERATIONS();
-
-		///                         Instruction operations
-		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
-		{
-			debug("I_LESS_EQUAL - INT\n");
-			result.boolean = values[1].integer <= values[0].integer;
-			stack_push(calcs, TYPE_BOOL, &result);
-		}
-		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
-		{
-			debug("I_LESS_EQUAL - DOUBLE\n");
-			result.boolean = values[1].real <= values[0].real;
-			stack_push(calcs, TYPE_BOOL, &(result));
-		}
-		else if ((types[0] == TYPE_BOOL) && (types[1] == TYPE_BOOL))
-		{
-			debug("I_LESS_EQUAL - BOOL\n");
-			result.boolean = values[1].boolean <= values[0].boolean;
-			stack_push(calcs, TYPE_BOOL, &(result));
-		}
-		else if ((types[0] == TYPE_STRING) && (types[1] == TYPE_STRING))
-		{
-			debug("I_LESS_EQUAL - STRING\n");
-			result.boolean = (cstr_cmp(values[1].string, values[0].string) <= 0) ;
-			stack_push(calcs, TYPE_BOOL, &(result));
-		}
-		else
-		{
-			debug("Invalid type passed to instruction\n");
-			return INTERNAL_ERROR;
-		}
-		break;
+		COMPARISON_INSTRUCTION("I_LESS_EQUAL", <= );
 
 	case I_GREATER_EQUAL:
 
-		///                         Stack operations
-		CALCS_STACK_OPERATIONS();
-
-		///                         Instruction operations
-		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
-		{
-			debug("I_GREATER_EQUAL - INT\n");
-			result.boolean = values[1].integer >= values[0].integer;
-			stack_push(calcs, TYPE_BOOL, &result);
-		}
-		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
-		{
-			debug("I_GREATER_EQUAL - DOUBLE\n");
-			result.boolean = values[1].real >= values[0].real;
-			stack_push(calcs, TYPE_BOOL, &(result));
-		}
-		else if ((types[0] == TYPE_BOOL) && (types[1] == TYPE_BOOL))
-		{
-			debug("I_GREATER_EQUAL - BOOL\n");
-			result.boolean = values[1].boolean >= values[0].boolean;
-			stack_push(calcs, TYPE_BOOL, &(result));
-		}
-		else if ((types[0] == TYPE_STRING) && (types[1] == TYPE_STRING))
-		{
-			debug("I_GREATER_EQUAL - STRING\n");
-			result.boolean = (cstr_cmp(values[1].string, values[0].string) >= 0) ;
-			stack_push(calcs, TYPE_BOOL, &(result));
-		}
-		else
-		{
-			debug("Invalid type passed to instruction\n");
-			return INTERNAL_ERROR;
-		}
-		break;
+		COMPARISON_INSTRUCTION("I_GREATER_EQUAL", >= );
 
 	case I_EQUAL:
 
-		///                         Stack operations
-		CALCS_STACK_OPERATIONS();
-
-		///                         Instruction operations
-		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
-		{
-			debug("I_EQUAL - INT\n");
-			result.boolean = values[1].integer == values[0].integer;
-			stack_push(calcs, TYPE_BOOL, &result);
-		}
-		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
-		{
-			debug("I_EQUAL - DOUBLE\n");
-			result.boolean = values[1].real == values[0].real;
-			stack_push(calcs, TYPE_BOOL, &(result));
-		}
-		else if ((types[0] == TYPE_BOOL) && (types[1] == TYPE_BOOL))
-		{
-			debug("I_EQUAL - BOOL\n");
-			result.boolean = values[1].boolean == values[0].boolean;
-			stack_push(calcs, TYPE_BOOL, &(result));
-		}
-		else if ((types[0] == TYPE_STRING) && (types[1] == TYPE_STRING))
-		{
-			debug("I_EQUAL - STRING\n");
-			result.boolean = (cstr_cmp(values[1].string, values[0].string) == 0) ;
-			stack_push(calcs, TYPE_BOOL, &(result));
-		}
-		else
-		{
-			debug("Invalid type passed to instruction\n");
-			return INTERNAL_ERROR;
-		}
-		break;
+		COMPARISON_INSTRUCTION("I_EQUAL", == );
 
 	case I_NOT_EQUAL:
 
-		///                         Stack operations
-		CALCS_STACK_OPERATIONS();
-
-		///                         Instruction operations
-		if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
-		{
-			debug("I_NOT_EQUAL - INT\n");
-			result.boolean = values[1].integer != values[0].integer;
-			stack_push(calcs, TYPE_BOOL, &result);
-		}
-		else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
-		{
-			debug("I_NOT_EQUAL - DOUBLE\n");
-			result.boolean = values[1].real != values[0].real;
-			stack_push(calcs, TYPE_BOOL, &(result));
-		}
-		else if ((types[0] == TYPE_BOOL) && (types[1] == TYPE_BOOL))
-		{
-			debug("I_NOT_EQUAL - BOOL\n");
-			result.boolean = values[1].boolean != values[0].boolean;
-			stack_push(calcs, TYPE_BOOL, &(result));
-		}
-		else if ((types[0] == TYPE_STRING) && (types[1] == TYPE_STRING))
-		{
-			debug("I_NOT_EQUAL - STRING\n");
-			result.boolean = (cstr_cmp(values[1].string, values[0].string) != 0) ;
-			stack_push(calcs, TYPE_BOOL, &(result));
-		}
-		else
-		{
-			debug("Invalid type passed to instruction\n");
-			return INTERNAL_ERROR;
-		}
-		break;
+		COMPARISON_INSTRUCTION("I_NOT_EQUAL", != );
 
 	case I_WRITE:
 
