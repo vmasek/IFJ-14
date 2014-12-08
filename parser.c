@@ -380,6 +380,7 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
     int ret;
     int unique_id;
     Token token;
+    Type type;
     cstring *id;
     Instruction *tmp_instr = NULL;
     Instruction *tmp_instr2 = NULL;
