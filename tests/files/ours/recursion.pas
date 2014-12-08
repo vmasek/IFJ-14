@@ -1,6 +1,6 @@
 function factorial(n : Integer) : Integer;
 begin
-    if n == 0 then
+    if n = 0 then
     begin
         factorial := 1
     end
