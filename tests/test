@@ -18,6 +18,7 @@ SKAL=false
 SCANNER=false
 EXPR=false
 SYNTAX=false
+STRINGS=false
 
 if [ $# -gt 0 ]; then
 
@@ -69,6 +70,11 @@ if [ $# -gt 0 ]; then
 			ALL=false
 		fi
 
+		if [[ "strings" == "$arg" ]]; then			# param "log" to archive all logs
+			STRINGS=true
+			ALL=false
+		fi
+
 		if [[ "skal" == "$arg" ]]; then			# param "log" to archive all logs
 			SKAL=true
 			ALL=false
@@ -86,16 +92,23 @@ BIN_TEST="./test_ifj"
 I_TESTS=(	#this is array of keys to coded tests of instructions(will be used as argument for project)
 			"I_ASSIGN"
 			"I_PUSH"
+
 			"I_ADD"
 			"I_SUB"
 			"I_MUL"
 			"I_DIV"
+
 			"I_LESS"
 			"I_GREATER"
 			"I_LESS_EQUAL"
 			"I_GREATER_EQUAL"
 			"I_EQUAL"
 			"I_NOT_EQUAL"
+
+			"I_AND"
+			"I_OR"
+			"I_XOR"
+			"I_NOT"
 		)
 
 TESTS=(	#this is array of keys to coded tests (will be used as argument for project)
@@ -313,9 +326,10 @@ if [[ $tests == true || $PROJECT == true  ]]; then
 
 	read -a FILES_SKAL <<< $( find ./files/skal -name '*.pas' | sort) #filling up the field of paths to files
 	read -a FILES_OURS <<< $( find ./files/ours -maxdepth 1 -name '*.pas' | sort) #filling up the field of paths to files
-	read -a FILES_OURS_SCANNER <<< $( find ./files/ours/scanner -name '*.pas' | sort)
-	read -a FILES_OURS_EXPR <<< $( find ./files/ours/expr -name '*.pas' | sort)
+	read -a FILES_OURS_SCANNER <<< $( find ./files/ours/scanner -maxdepth 1 -name  '*.pas' | sort)
+	read -a FILES_OURS_EXPR <<< $( find ./files/ours/scanner/expr -name '*.pas' | sort)
 	read -a FILES_OURS_SYNTAX_ERRORS <<< $( find ./files/ours/scanner -name '*.pas' | sort)
+	read -a FILES_OURS_STRINGS <<< $( find ./files/ours/scanner/expr -name '*.pas' | sort)
 
 
 	if [[ "$MAKE_RET" != "0" ]]; then
@@ -345,6 +359,11 @@ if [[ $tests == true || $PROJECT == true  ]]; then
 		    ((counter++))
 	    done
 	    echo -e "TESTS:\t\t${green}PASSED: $OK_count ${NC} of $counter"
+
+		# EXPR=true
+		# SYNTAX=true
+		# STRINGS=true
+
 	fi
 
 	counter=0
@@ -365,6 +384,18 @@ if [[ $tests == true || $PROJECT == true  ]]; then
 	    OK_count=0
 	    echo "---------------------------------------SYNTAX-ERRORS--------------------------------------------------------------------------"
 	    for file in "${FILES_OURS_SYNTAX_ERRORS[@]}"; do
+		    run_test $file
+		    ((counter++))
+	    done
+	    echo -e "TESTS:\t\t${green}PASSED: $OK_count ${NC} of $counter"
+	fi
+
+	counter=0
+	if [[ $ALL == true || $STRINGS == true ]]; then
+	    counter=0
+	    OK_count=0
+	    echo "---------------------------------------STRINGS-------------------------------------------------------------------------------"
+	    for file in "${FILES_OURS_STRINGS[@]}"; do
 		    run_test $file
 		    ((counter++))
 	    done
