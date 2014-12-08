@@ -400,8 +400,11 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
             CHECK_VALUE(t_symbol(input, PARENTHESIS_R), ret);
             return SUCCESS;
         } else if (token.value.value_keyword == KEYWORD_IF) {
-            CHECK_VALUE(parse_expr(input, locals, globals, functions, vars, instr, NULL, false),
+            CHECK_VALUE(parse_expr(input, locals, globals, functions, vars, instr, &type, false),
                         ret);
+            if (type != TYPE_BOOL) {
+                return INCOMPATIBLE_TYPE;
+            }
             CHECK_VALUE(t_keyword(input, KEYWORD_THEN), ret);
             CHECK_VALUE(gen_instr(instr, I_JMP, 0, 0, NULL), ret);
             tmp_instr = *instr;
@@ -420,8 +423,11 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
         } else if (token.value.value_keyword == KEYWORD_WHILE) {
             CHECK_VALUE(gen_instr(instr, I_NOP, 0, 0, NULL), ret);
             tmp_instr = *instr;
-            CHECK_VALUE(parse_expr(input,locals, globals, functions, vars, instr, NULL, false),
+            CHECK_VALUE(parse_expr(input,locals, globals, functions, vars, instr, &type, false),
                         ret);
+            if (type != TYPE_BOOL) {
+                return INCOMPATIBLE_TYPE;
+            }
             CHECK_VALUE(t_keyword(input, KEYWORD_DO), ret);
             CHECK_VALUE(gen_instr(instr, I_JMP, 0, 0, NULL), ret);
             tmp_instr2 = *instr;
@@ -435,16 +441,21 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
             tmp_instr = *instr;
             CHECK_VALUE(nt_cmd_list(input, locals, globals, functions, instr, vars), ret);
             CHECK_VALUE(t_keyword(input, KEYWORD_UNTIL), ret);
-            CHECK_VALUE(parse_expr(input, locals, globals, functions, vars, instr, NULL, false),
+            CHECK_VALUE(parse_expr(input, locals, globals, functions, vars, instr, &type, false),
                         ret);
+            if (type != TYPE_BOOL) {
+                return INCOMPATIBLE_TYPE;
+            }
             CHECK_VALUE(gen_instr(instr, I_JMP, 0, 0, NULL), ret);
             (*instr)->alt_instruction = tmp_instr;
             return SUCCESS;
         }
     } else if (token.type == TOKEN_ID) {
         //TODO: array
+        //TODO: search type
         CHECK_VALUE(t_symbol(input, ASSIGNMENT), ret);
-        CHECK_VALUE(parse_expr(input, locals, globals, functions, vars, instr, NULL, false), ret);
+        CHECK_VALUE(parse_expr(input, locals, globals, functions, vars, instr, &type, false),
+                    ret);
         CHECK_VALUE(search_trees(cstr_create_str(token.value.value_name),
                                 locals, globals, &unique_id), ret);
         CHECK_VALUE(gen_instr(instr, I_ASSIGN, unique_id, 0, NULL), ret);
