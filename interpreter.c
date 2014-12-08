@@ -66,14 +66,12 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		if(item->index < 0)																		/// index indicates local stack operation
 		{
 			debug("I_PUSH - locals stack\n");
-			//if (stack_index(locals, (-(item->index+1)), (int *)&types[0], &values[0]) == INTERNAL_ERROR) ///
 			if (stack_index(locals, (-(item->index+1)), (int *)&types[0], &result) == INTERNAL_ERROR) ///
 				return INTERNAL_ERROR;
 		}
 		else
 		{
 			debug("I_PUSH - globals field\n");
-			//if (variables_value(globals, &types[0], &values[0], item->index) == INTERNAL_ERROR)	/// index indicates global variables operation
 			if (variables_value_read(globals, &types[0], &result, item->index) == INTERNAL_ERROR)		/// index indicates global variables field operation
 				return INTERNAL_ERROR;
 		}
@@ -83,25 +81,21 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		if (types[0] == TYPE_INT)
 		{
 			debug("I_PUSH - integer\n");
-			//result.integer = values[0].integer;
 			stack_push(calcs, TYPE_INT, &result);
 		}
 		else if (types[0] == TYPE_REAL)
 		{
 			debug("I_PUSH - double\n");
-			//result.real = values[0].real;
 			stack_push(calcs, TYPE_REAL, &(result));
 		}
 		else if (types[0] == TYPE_BOOL)
 		{
 			debug("I_PUSH - bool\n");
-			//result.boolean = values[0].boolean;
 			stack_push(calcs, TYPE_BOOL, &(result));
 		}
 		else if (types[0] == TYPE_STRING)
 		{
 			debug("I_PUSH - cstring\n");
-			//cstr_assign_cstr(result.string, values[0].string);
 			stack_push(calcs, TYPE_STRING, &(result));
 		}
 		else
@@ -497,6 +491,76 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 			debug("I_FIND - string\n");
 			result.string = sort(result.string);
 			stack_push(calcs, TYPE_STRING, &result);
+		}
+		else
+		{
+			debug("Invalid type passed to instruction\n");
+			return INTERNAL_ERROR;
+		}
+		break;
+
+	case I_JMP:
+
+		debug("I_JMP\n");
+		///                         Stack operations
+		CALCS_STACK_OPERATIONS_RESULT();
+
+		///                         Instruction operations
+		if (types[0] == TYPE_INT)
+		{
+			debug("I_JMP for int\n");
+			if (result.integer)
+			{
+				debug("next_instruction\n");
+				stack_push(calcs, 0, item->next_instruction);
+			}
+			else
+			{
+				debug("alt_instruction\n");
+				stack_push(calcs, 0, item->alt_instruction);
+			}
+		}
+		else if (types[0] == TYPE_REAL)
+		{
+			debug("I_JMP for real\n");
+			if (result.real)
+			{
+				debug("next_instruction\n");
+				stack_push(calcs, 0, item->next_instruction);
+			}
+			else
+			{
+				debug("alt_instruction\n");
+				stack_push(calcs, 0, item->alt_instruction);
+			}
+		}
+		else if (types[0] == TYPE_BOOL)
+		{
+			debug("I_JUMP for bool\n");
+			if (result.boolean)
+			{
+				debug("next_instruction\n");
+				stack_push(calcs, 0, item->next_instruction);
+			}
+			else
+			{
+				debug("alt_instruction\n");
+				stack_push(calcs, 0, item->alt_instruction);
+			}
+		}
+		else if (types[0] == TYPE_STRING)				/// WARNING: !!!!!!!!!!!! TAKE BIG CARE WHEN RECASTING CSTRING* TO VOID*
+		{
+			debug("I_JUMP for string\n");
+			if (result.string)
+			{
+				debug("next_instruction\n");
+				stack_push(calcs, 0, item->next_instruction);
+			}
+			else
+			{
+				debug("alt_instruction\n");
+				stack_push(calcs, 0, item->alt_instruction);
+			}
 		}
 		else
 		{
