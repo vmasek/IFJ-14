@@ -73,7 +73,7 @@ enum action {
 
 /* DECLARATION OF STATIC FUNCTIONS */
 static int gen_instr(Instruction **instr_ptr, Instruction_type type, int index,
-                     unsigned locals_count, Instruction *alt_instr);
+                     Instruction *alt_instr);
 static Instruction_type get_instr_type(Token *token);
 static Type get_type(Token *token);
 static enum terminal get_term(Token *token);
@@ -250,7 +250,7 @@ fail:
 
 /* DEFINITION OF STATIC FUNCTIONS */
 static int gen_instr(Instruction **instr_ptr, Instruction_type type, int index,
-                     unsigned locals_count, Instruction *alt_instr)
+                     Instruction *alt_instr)
 {
     if (((*instr_ptr)->next_instruction = gc_malloc(GC_INSTR,
                                                     sizeof(Instruction)))
@@ -261,7 +261,6 @@ static int gen_instr(Instruction **instr_ptr, Instruction_type type, int index,
     **instr_ptr = (Instruction) {
         .instruction = type,
         .index = index,
-        .locals_count = locals_count,
         .next_instruction = NULL,
         .alt_instruction = alt_instr
     };
@@ -523,7 +522,7 @@ static int handle_add(Token *tokens, Stack *type_stack, Tree **trees,
     stack_popping_spree(type_stack, 2);
 
     if (stack_push(type_stack, result_type, NULL) != SUCCESS ||
-        gen_instr(instr_ptr, I_ADD, 0, 0, NULL) != SUCCESS)
+        gen_instr(instr_ptr, I_ADD, 0, NULL) != SUCCESS)
         return INTERNAL_ERROR;
 
     return SUCCESS;
@@ -552,7 +551,7 @@ static int handle_boolop(Token *tokens, Stack *type_stack, Tree **trees,
     stack_popping_spree(type_stack, 2);
 
     if (stack_push(type_stack, TYPE_BOOL, NULL) != SUCCESS ||
-        gen_instr(instr_ptr, get_instr_type(&tokens[1]), 0, 0, NULL) != SUCCESS)
+        gen_instr(instr_ptr, get_instr_type(&tokens[1]), 0, NULL) != SUCCESS)
         return INTERNAL_ERROR;
 
     return SUCCESS;
@@ -567,6 +566,7 @@ static int handle_call(Token *tokens, Stack *type_stack, Tree **trees,
     struct func_record *function;
     unsigned param_count = 0;
     unsigned local_count = 0;
+    struct var_record **locals;
     Instruction *first_instr = NULL;
     Type ret_type;
 
@@ -628,6 +628,7 @@ static int handle_call(Token *tokens, Stack *type_stack, Tree **trees,
         local_count = function->local_count;
         ret_type = function->ret_value.type;
         first_instr = function->first_instr;
+        locals = function->params;
         for (unsigned i = 0; i < param_count; i++) {
             if (stack_index(type_stack, i, (int *)&cur_type, NULL) != SUCCESS ||
                 cur_type != function->params[param_count - i - 1]->type) {
@@ -645,9 +646,19 @@ static int handle_call(Token *tokens, Stack *type_stack, Tree **trees,
 
     stack_popping_spree(type_stack, param_count + 1);
 
-    if (stack_push(type_stack, ret_type, NULL) != SUCCESS ||
-        gen_instr(instr_ptr, instr_type, param_count, local_count, first_instr)
-        != SUCCESS)
+    if (stack_push(type_stack, ret_type, NULL) != SUCCESS)
+        return INTERNAL_ERROR;
+
+    if (instr_type == I_CALL) {
+        while (local_count--) {
+            if (gen_instr(instr_ptr, 
+                          local_count >= param_count ? I_PREP : I_PASS,
+                          locals[local_count]->type, NULL) != SUCCESS)
+                return INTERNAL_ERROR;
+        }
+    }
+
+    if (gen_instr(instr_ptr, instr_type, 0, first_instr) != SUCCESS)
         return INTERNAL_ERROR;
 
     return SUCCESS;
@@ -676,7 +687,7 @@ static int handle_comp(Token *tokens, Stack *type_stack, Tree **trees,
     stack_popping_spree(type_stack, 2);
 
     if (stack_push(type_stack, TYPE_BOOL, NULL) != SUCCESS ||
-        gen_instr(instr_ptr, get_instr_type(&tokens[1]), 0, 0, NULL) != SUCCESS)
+        gen_instr(instr_ptr, get_instr_type(&tokens[1]), 0, NULL) != SUCCESS)
         return INTERNAL_ERROR;
 
     return SUCCESS;
@@ -707,7 +718,7 @@ static int handle_div(Token *tokens, Stack *type_stack, Tree **trees,
     stack_popping_spree(type_stack, 2);
 
     if (stack_push(type_stack, TYPE_REAL, NULL) != SUCCESS ||
-        gen_instr(instr_ptr, I_DIV, 0, 0, NULL) != SUCCESS)
+        gen_instr(instr_ptr, I_DIV, 0, NULL) != SUCCESS)
         return INTERNAL_ERROR;
 
     return SUCCESS;
@@ -733,7 +744,7 @@ static int handle_id(Token *tokens, Stack *type_stack, Tree **trees,
 
     if (stack_push(type_stack, ((struct var_record *)(node->data))->type, NULL)
         != SUCCESS ||
-        gen_instr(instr_ptr, I_PUSH, index, 0, NULL) != SUCCESS)
+        gen_instr(instr_ptr, I_PUSH, index, NULL) != SUCCESS)
         return INTERNAL_ERROR;
 
     return SUCCESS;
@@ -750,7 +761,7 @@ static int handle_literal(Token *tokens, Stack *type_stack, Tree **trees,
     if (stack_push(type_stack, type, NULL) != SUCCESS ||
         variables_add(global_vars, type, get_value(&tokens[0]), &var_index)
         != SUCCESS ||
-        gen_instr(instr_ptr, I_PUSH, var_index, 0, NULL) != SUCCESS)
+        gen_instr(instr_ptr, I_PUSH, var_index, NULL) != SUCCESS)
         return INTERNAL_ERROR;
 
     return SUCCESS;
@@ -778,7 +789,7 @@ static int handle_neg(Token *tokens, Stack *type_stack, Tree **trees,
     stack_pop(type_stack);
 
     if (stack_push(type_stack, type, NULL) != SUCCESS ||
-        gen_instr(instr_ptr, I_NEG, 0, 0, NULL) != SUCCESS)
+        gen_instr(instr_ptr, I_NEG, 0, NULL) != SUCCESS)
         return INTERNAL_ERROR;
 
     return SUCCESS;
@@ -806,7 +817,7 @@ static int handle_not(Token *tokens, Stack *type_stack, Tree **trees,
     stack_pop(type_stack);
 
     if (stack_push(type_stack, TYPE_BOOL, NULL) != SUCCESS ||
-        gen_instr(instr_ptr, I_NOT, 0, 0, NULL) != SUCCESS)
+        gen_instr(instr_ptr, I_NOT, 0, NULL) != SUCCESS)
         return INTERNAL_ERROR;
 
     return SUCCESS;
@@ -851,7 +862,7 @@ static int handle_sub_mul(Token *tokens, Stack *type_stack, Tree **trees,
     stack_popping_spree(type_stack, 2);
 
     if (stack_push(type_stack, result_type, NULL) != SUCCESS ||
-        gen_instr(instr_ptr, get_instr_type(&tokens[1]), 0, 0, NULL) != SUCCESS)
+        gen_instr(instr_ptr, get_instr_type(&tokens[1]), 0, NULL) != SUCCESS)
         return INTERNAL_ERROR;
 
     return SUCCESS;
