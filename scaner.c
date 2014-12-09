@@ -300,10 +300,13 @@ int get_token(Token *token, FILE *input) {
             case '{':
                 state = LEXER_COMMENT;
                 break;
-
+                
+            default: 
+                return LEXICAL_ERROR;
+                break;
 
             }
-            break;
+                break;
 
 
         case LEXER_COMMENT:
