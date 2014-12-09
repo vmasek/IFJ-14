@@ -35,6 +35,7 @@ inline void debug_printf(const char* file, const int line, const char* func, con
 
 const char *keywords[] = {
     "none",
+    "and",
     "begin",
     "boolean",
     "do",
@@ -45,6 +46,8 @@ const char *keywords[] = {
     "function",
     "if",
     "integer",
+    "not",
+    "or",
     "readln",
     "real",
     "repeat",
@@ -54,7 +57,8 @@ const char *keywords[] = {
     "until",
     "var",
     "while",
-    "write"
+    "write",
+    "xor",
 };
 
 const char *symbols[] = {
@@ -87,12 +91,15 @@ void debug_print_token(Token *token)
 		break;
 	case TOKEN_INT:
 		debug("INT\n");
+        debug("%d\n", token->value.value_int);
 		break;
 	case TOKEN_FLOAT:
 		debug("FLOAT\n");
+        debug("%f\n", token->value.value_float);
 		break;
 	case TOKEN_STRING:
 		debug("STRING\n");
+        debug("%s\n", token->value.value_string->str);
 		break;
 	case TOKEN_KEYWORD:
 		debug("KEYWORD\n");
