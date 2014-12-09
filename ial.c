@@ -59,7 +59,12 @@ int kmp_substr(const char *string, const char *sub)
     int curr_match = 0;     /* Index of current match that is getting checked. */
     int curr_position = 0;  /* Index of position within sub string. */
     int table[sub_len];
+
+    debug("sub_len: %d\tstring_len: %d\n", sub_len, string_len);
+
     kmp_table(sub, table);
+
+    debug("curr_match: %d\tcurr_position: %d\n", curr_match, curr_position);
 
     while (curr_match + curr_position < string_len) {
         if (sub[curr_position] == string[curr_match + curr_position]) {
@@ -266,7 +271,7 @@ Tree_Node *tree_node_find(Tree_Node *node, char *key)
 #ifdef DEBUG
         fprintf(stderr, "FOUND:\t\t#\tkey: %s\tNode: %s\n\n\n", key, node->key->str);
 #endif
-        if ( (result =  tree_string_cmp( key, node->key )) < 0 ) { ///here was string_cmp replaced by classic strcmp that is fully functioning, string_cmp did not work
+        if ( (result = tree_string_cmp( key, node->key )) < 0 ) { ///here was string_cmp replaced by classic strcmp that is fully functioning, string_cmp did not work
             debug("right search\n");
             node = node->right;
         } else if ( result > 0 ) {
@@ -344,7 +349,7 @@ static inline int tree_create_right(Tree *tree, Tree_Node *tmp, cstring *key, vo
 int tree_insert(Tree *tree, cstring *key, void *data)
 {
     if (!tree->root) {
-        return tree_create_root(tree, key, data);;
+        return tree_create_root(tree, key, data);
     }
 
     Tree_Node *tmp = tree->root;
@@ -377,6 +382,32 @@ int tree_insert(Tree *tree, cstring *key, void *data)
     }
     return SUCCESS;
 }
+
+static inline bool tree_recursive(Tree_Node *node, tree_function_ptr func)
+{
+	if(func(node)==false)
+		return false;
+
+    if (node->left)
+        return tree_recursive(node->left, func);
+
+    if (node->right)
+        return tree_recursive(node->right, func);
+
+    return true;
+}
+
+bool tree_check_all(Tree *tree, tree_function_ptr func)
+{
+	if (!tree)
+	{
+		debug("tree not given\n");
+		return INTERNAL_ERROR;
+	}
+
+	return tree_recursive(tree->root, func);
+}
+
 
 
 static void tree_print_nodes(Tree_Node *node, const char *sufix, const char fromdir)

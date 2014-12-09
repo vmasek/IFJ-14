@@ -27,7 +27,7 @@ typedef struct {
     Tree_Node   *last;
 }   Tree;
 
-
+typedef bool (*tree_function_ptr)(Tree_Node *node);
 
 /**
  * @brief Creates Partial match table for Knuth–Morris–Pratt algorithm.
@@ -81,6 +81,9 @@ int         tree_create(Tree **tree);
 int         tree_init(Tree *);
 void        tree_free(Tree *);
 void        tree_print(Tree *);
+
+
+bool tree_check_all(Tree *tree, tree_function_ptr func);
 
 
 #endif // __IAL_H__
