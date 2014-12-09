@@ -98,7 +98,7 @@ int test_copy()
 int test_find()
 {
     int failures = 0;
-    const int test_count = 4;
+    const int test_count = 5;
     printf("\n*** Testing buildin find ***\n");
 
     cstring *Vojto = cstr_create_str("Ahoj Karle      1");
@@ -133,13 +133,24 @@ int test_find()
 
     cstr_assign_str(Vojto, "");
 
-    if (find(Vojto, Albert) != 1) {
-		printf("stvrte\n");
+    if (find(Vojto, Albert) != 0) {
+	printf("stvrte\n");
         print_cstr_all(Albert);
         failures++;
     }
 
     debug("\n*** za stvrtym ***\n");
+
+    cstr_assign_str(Vojto,"Ahoj Kikus, nasi isli na vikend, prec!");
+    cstr_assign_str(Albert, "");
+
+    if (find(Vojto, Albert) != 1) {
+        printf("piate\n");
+        print_cstr_all(Albert);
+        failures++;
+    }
+
+    debug("\n*** za piatym ***\n");
 
     print_result(test_count, failures);
 
