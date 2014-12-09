@@ -129,19 +129,19 @@ errors=0;                                                                     \
 	Stack calcs;                                                              \
 	stack_init(&calcs, VALUE_STACK);                                          \
 	Value values[12];                                                         \
-	values[0].integer	= 8;                                                    \
-	values[1].integer	= 100;                                                  \
-	values[2].real		= 16.125;                                                 \
-	values[3].real		= 2.5;                                                    \
-	values[4].real 		= 8.75;                                                  \
-	values[5].real		= 2.5;                                                    \
-	values[5].boolean	= true;                                                 \
-	values[6].boolean	= false;                                                \
-	values[7].boolean	= true;                                                 \
-	values[8].boolean	= false;                                                \
-	values[9].string	= cstr_create_str("text1");                              \
-	values[10].string	= cstr_create_str("text1");                             \
-	values[11].string	= cstr_create_str("text2");                             \
+	values[0].data.integer	= 8;                                                    \
+	values[1].data.integer	= 100;                                                  \
+	values[2].data.real		= 16.125;                                                 \
+	values[3].data.real		= 2.5;                                                    \
+	values[4].data.real 		= 8.75;                                                  \
+	values[5].data.real		= 2.5;                                                    \
+	values[5].data.boolean	= true;                                                 \
+	values[6].data.boolean	= false;                                                \
+	values[7].data.boolean	= true;                                                 \
+	values[8].data.boolean	= false;                                                \
+	values[9].data.string	= cstr_create_str("text1");                              \
+	values[10].data.string	= cstr_create_str("text1");                        \
+	values[11].data.string	= cstr_create_str("text2");                        \
 BEGINE_OF_TEST();                                                             \
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);\
 	stack_push(&calcs, TYPE_INT, &(values[0]));                       \
@@ -150,11 +150,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)                                                        \
 	{                                                                         \
 	stack_index(&calcs, 0, (int*)&typ, &temp);                                                                      \
-		if(typ == TYPE_BOOL && (temp.boolean == ( values[0].integer operator values[1].integer )))\
+		if(typ == TYPE_BOOL && (temp.data.boolean == ( values[0].data.integer operator values[1].data.integer )))\
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, operation);\
 		else                                                                  \
 		{                                                                     \
-			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, temp.boolean, values[0].integer operator values[1].integer);\
+			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, temp.data.boolean, values[0].data.integer operator values[1].data.integer);\
 			break;                                                            \
 		}                                                                     \
 	}                                                                         \
@@ -173,11 +173,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)                                                        \
 	{                                                                         \
 	stack_index(&calcs, 0, (int*)&typ, &temp);                                                                      \
-		if(typ == TYPE_BOOL && (temp.boolean == ( values[3].real operator values[4].real )))\
+		if(typ == TYPE_BOOL && (temp.data.boolean == ( values[3].data.real operator values[4].data.real )))\
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, operation);\
 		else                                                                  \
 		{                                                                     \
-			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, temp.boolean, (values[3].real operator values[4].real));\
+			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, temp.data.boolean, (values[3].data.real operator values[4].data.real));\
 			break;                                                            \
 		}                                                                     \
 	}                                                                         \
@@ -196,11 +196,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)                                                        \
 	{                                                                         \
 		stack_index(&calcs, 0, (int*)&typ, &temp);                            \
-		if(typ == TYPE_BOOL && (temp.boolean == ( values[5].boolean operator values[6].boolean )))\
+		if(typ == TYPE_BOOL && (temp.data.boolean == ( values[5].data.boolean operator values[6].data.boolean )))\
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, operation);\
 		else                                                                  \
 		{                                                                     \
-			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, temp.boolean, (values[5].boolean operator values[6].boolean));\
+			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, temp.data.boolean, (values[5].data.boolean operator values[6].data.boolean));\
 			break;                                                            \
 		}                                                                     \
 	}                                                                         \
@@ -219,11 +219,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)                                                        \
 	{                                                                         \
 	stack_index(&calcs, 0, (int*)&typ, &temp);                                                                      \
-		if(typ == TYPE_BOOL && (temp.boolean == ( values[5].boolean operator values[7].boolean )))\
+		if(typ == TYPE_BOOL && (temp.data.boolean == ( values[5].data.boolean operator values[7].data.boolean )))\
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, operation);\
 		else                                                                  \
 		{                                                                     \
-			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, temp.boolean, (values[5].boolean operator values[7].boolean));\
+			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, temp.data.boolean, (values[5].data.boolean operator values[7].data.boolean));\
 			break;                                                            \
 		}                                                                     \
 	}                                                                         \
@@ -242,11 +242,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)                                                        \
 	{                                                                         \
 	stack_index(&calcs, 0, (int*)&typ, &temp);                                                                      \
-		if(typ == TYPE_BOOL && (temp.boolean == ( values[3].boolean operator values[5].boolean )))\
+		if(typ == TYPE_BOOL && (temp.data.boolean == ( values[3].data.boolean operator values[5].data.boolean )))\
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, operation);\
 		else                                                                  \
 		{                                                                     \
-			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, temp.boolean, (values[3].boolean operator values[5].boolean));\
+			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, temp.data.boolean, (values[3].data.boolean operator values[5].data.boolean));\
 			break;                                                            \
 		}                                                                     \
 	}                                                                         \
@@ -265,11 +265,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)                                                        \
 	{                                                                         \
 	stack_index(&calcs, 0, (int*)&typ, &temp);                                                                      \
-		if(typ == TYPE_BOOL && (temp.boolean == ( values[3].boolean operator values[5].boolean )))\
+		if(typ == TYPE_BOOL && (temp.data.boolean == ( values[3].data.boolean operator values[5].data.boolean )))\
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, operation);\
 		else                                                                  \
 		{                                                                     \
-			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, temp.boolean, (values[3].boolean operator values[5].boolean));\
+			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, temp.data.boolean, (values[3].data.boolean operator values[5].data.boolean));\
 			break;                                                            \
 		}                                                                     \
 	}                                                                         \
@@ -288,11 +288,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)                                                        \
 	{                                                                         \
 	stack_index(&calcs, 0, (int*)&typ, &temp);                                                                      \
-		if(typ == TYPE_BOOL && (temp.boolean == (cstr_cmp(values[9].string, values[10].string) operator 0) ))\
+		if(typ == TYPE_BOOL && (temp.data.boolean == (cstr_cmp(values[9].data.string, values[10].data.string) operator 0) ))\
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, operation);\
 		else                                                                  \
 		{                                                                     \
-			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, temp.boolean, (cstr_cmp(values[9].string, values[10].string) operator 0));\
+			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, temp.data.boolean, (cstr_cmp(values[9].data.string, values[10].data.string) operator 0));\
 			break;                                                            \
 		}                                                                     \
 	}                                                                         \
@@ -311,11 +311,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)                                                        \
 	{                                                                         \
 	stack_index(&calcs, 0, (int*)&typ, &temp);                                                                      \
-		if(typ == TYPE_BOOL && (temp.boolean == (cstr_cmp(values[10].string, values[11].string) operator 0) ))\
+		if(typ == TYPE_BOOL && (temp.data.boolean == (cstr_cmp(values[10].data.string, values[11].data.string) operator 0) ))\
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, operation);\
 		else                                                                  \
 		{                                                                     \
-			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, temp.boolean, (cstr_cmp(values[10].string, values[11].string) operator 0));\
+			printf("\n%s:[test %d.] ERROR: stack value is (bool) %d and should be (bool) %d\n", __func__, test, temp.data.boolean, (cstr_cmp(values[10].data.string, values[11].data.string) operator 0));\
 			break;                                                            \
 		}                                                                     \
 	}                                                                         \
@@ -342,18 +342,18 @@ END_OF_TEST();                                                                \
 	Stack calcs;                                                              \
 	stack_init(&calcs, VALUE_STACK);                                          \
 	Value values[12];                                                         \
-	values[0].integer	= 8;                                                    \
-	values[1].integer	= 100;                                                  \
-	values[2].integer	= 16;                                                 \
-	values[3].integer	= 2;                                                    \
-	values[4].integer	= 8;                                                  \
-	values[5].integer	= 25;                                                    \
-	values[5].boolean	= true;                                                 \
-	values[6].boolean	= false;                                                \
-	values[7].boolean	= true;                                                 \
-	values[8].boolean	= false;                                                \
-	values[9].integer	= 22;                                                   \
-	values[10].integer	= 1500;                                                \
+	values[0].data.integer	= 8;                                                    \
+	values[1].data.integer	= 100;                                                  \
+	values[2].data.integer	= 16;                                                 \
+	values[3].data.integer	= 2;                                                    \
+	values[4].data.integer	= 8;                                                  \
+	values[5].data.integer	= 25;                                                    \
+	values[5].data.boolean	= true;                                                 \
+	values[6].data.boolean	= false;                                                \
+	values[7].data.boolean	= true;                                                 \
+	values[8].data.boolean	= false;                                                \
+	values[9].data.integer	= 22;                                                   \
+	values[10].data.integer	= 1500;                                                \
 BEGINE_OF_TEST();                                                             \
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);\
 	stack_push(&calcs, TYPE_INT, &(values[0]));                       \
@@ -362,11 +362,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)                                                        \
 	{                                                                         \
 	stack_index(&calcs, 0, (int*)&typ, &temp);                                                                      \
-		if(typ == TYPE_INT && (temp.integer == ( values[0].integer operator values[1].integer )))\
+		if(typ == TYPE_INT && (temp.data.integer == ( values[0].data.integer operator values[1].data.integer )))\
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, operation);\
 		else                                                                  \
 		{                                                                     \
-			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.integer, values[0].integer operator values[1].integer);\
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.integer, values[0].data.integer operator values[1].data.integer);\
 			break;                                                            \
 		}                                                                     \
 	}                                                                         \
@@ -385,11 +385,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)                                                        \
 	{                                                                         \
 	stack_index(&calcs, 0, (int*)&typ, &temp);                                                                      \
-		if(typ == TYPE_INT && (temp.integer == ( values[3].integer operator values[4].integer )))\
+		if(typ == TYPE_INT && (temp.data.integer == ( values[3].data.integer operator values[4].data.integer )))\
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, operation);\
 		else                                                                  \
 		{                                                                     \
-			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.integer, (values[3].integer operator values[4].integer));\
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.integer, (values[3].data.integer operator values[4].data.integer));\
 			break;                                                            \
 		}                                                                     \
 	}                                                                         \
@@ -408,11 +408,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)                                                        \
 	{                                                                         \
 		stack_index(&calcs, 0, (int*)&typ, &temp);                            \
-		if(typ == TYPE_BOOL && (temp.boolean == ( values[5].boolean operator values[6].boolean )))\
+		if(typ == TYPE_BOOL && (temp.data.boolean == ( values[5].data.boolean operator values[6].data.boolean )))\
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, operation);\
 		else                                                                  \
 		{                                                                     \
-			printf("\n%s:[test %d.] ERROR: stack value is  %d and should be %d\n", __func__, test, temp.boolean, (values[5].boolean operator values[6].boolean));\
+			printf("\n%s:[test %d.] ERROR: stack value is  %d and should be %d\n", __func__, test, temp.data.boolean, (values[5].data.boolean operator values[6].data.boolean));\
 			break;                                                            \
 		}                                                                     \
 	}                                                                         \
@@ -431,11 +431,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)                                                        \
 	{                                                                         \
 	stack_index(&calcs, 0, (int*)&typ, &temp);                                                                      \
-		if(typ == TYPE_BOOL && (temp.boolean == ( values[5].boolean operator values[7].boolean )))\
+		if(typ == TYPE_BOOL && (temp.data.boolean == ( values[5].data.boolean operator values[7].data.boolean )))\
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, operation);\
 		else                                                                  \
 		{                                                                     \
-			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.boolean, (values[5].boolean operator values[7].boolean));\
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.boolean, (values[5].data.boolean operator values[7].data.boolean));\
 			break;                                                            \
 		}                                                                     \
 	}                                                                         \
@@ -454,11 +454,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)                                                        \
 	{                                                                         \
 	stack_index(&calcs, 0, (int*)&typ, &temp);                                                                      \
-		if(typ == TYPE_INT && (temp.integer == ( values[3].integer operator values[5].integer )))\
+		if(typ == TYPE_INT && (temp.data.integer == ( values[3].data.integer operator values[5].data.integer )))\
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, operation);\
 		else                                                                  \
 		{                                                                     \
-			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.integer, (values[3].integer operator values[5].boolean));\
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.integer, (values[3].data.integer operator values[5].data.boolean));\
 			break;                                                            \
 		}                                                                     \
 	}                                                                         \
@@ -477,11 +477,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)                                                        \
 	{                                                                         \
 	stack_index(&calcs, 0, (int*)&typ, &temp);                                                                      \
-		if(typ == TYPE_INT && (temp.integer == ( values[9].integer operator values[10].integer )))\
+		if(typ == TYPE_INT && (temp.data.integer == ( values[9].data.integer operator values[10].data.integer )))\
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, operation);\
 		else                                                                  \
 		{                                                                     \
-			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.integer, values[9].integer operator values[10].integer);\
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.integer, values[9].data.integer operator values[10].data.integer);\
 			break;                                                            \
 		}                                                                     \
 	}                                                                         \

@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
 			printf("***ALL TESTs will be runned***\n");
 			argc=0;
 		}
-		if(!argc || !strcmp(argv[i], "debug"))									///nemusi byt pridane de test scriptu ale moze
+		else if(!argc || !strcmp(argv[i], "debug"))									///nemusi byt pridane de test scriptu ale moze
 		{
 #ifndef DEBUG
 			fprintf(stderr, "ERROR: Debug must be enabled to test Debug\n");
@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 		{
 			test_buildin(); ///test for buildin copy gives SIGSEGV
 		}
-		
+
 		if(!argc || !strcmp(argv[i], "unary"))
 		{
 			test_scanner_unary(); ///test for buildin copy gives SIGSEGV

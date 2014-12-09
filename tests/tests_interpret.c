@@ -156,18 +156,17 @@ void test_I_ASSIGN(void)
 	///tu je potrebne si popridavat values pre testy
 
 
-	values[0].integer	= 42;
-	values[1].real		= 16.125;
-	values[2].boolean	= 1;
-	values[3].string	= cstr_create_str("text");
-	values[4].integer	= 1234;
+	values[0].data.integer	= 42;
+	values[1].data.real		= 16.125;
+	values[2].data.boolean	= 1;
+	values[3].data.string	= cstr_create_str("text");
+	values[4].data.integer	= 1234;
 
-	values[7].boolean   = true;
-	values[8].real      = 1.5;
-	values[9].string    = cstr_create_str("globals text");
+	values[7].data.boolean   = true;
+	values[8].data.real      = 1.5;
+	values[9].data.string    = cstr_create_str("globals text");
 
 	variables_add(&globals, TYPE_INT, values[0], NULL);
-
 	stack_push(&locals, TYPE_REAL, &(values[8]));
 	stack_push(&locals, TYPE_BOOL, &(values[7]));
 	stack_push(&locals, TYPE_STRING, &values[9]);
@@ -207,13 +206,13 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 
 	if(calcs.count==0 && globals.count==1)
 	{
-		if(globals.types[0] == TYPE_INT && globals.values[0].integer == values[test].integer)
+		if(globals.types[0] == TYPE_INT && globals.values[0].data.integer == values[test].data.integer)
 			printf("\n%s:[test %d.] ASSIGN was OK.\n", __func__, test);
 		else
 		{
 			Value temp;
 			variables_value_read(&globals, NULL, &temp, 0);
-			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.integer, values[test].integer);
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.integer, values[test].data.integer);
 			break;
 		}
 	}
@@ -245,11 +244,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==0 && locals.count==3)
 	{
 		stack_index(&locals, 2, (int*)&typ, &temp);
-		if(typ == TYPE_REAL && temp.real == values[test].real)
+		if(typ == TYPE_REAL && temp.data.real == values[test].data.real)
 			printf("\n%s:[test %d.] ASSIGN was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, values[test].real);
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.data.real, values[test].data.real);
 			break;
 		}
 	}
@@ -280,11 +279,11 @@ instruction.index		= -2;
 	if(calcs.count==0 && locals.count==3)
 	{
 		stack_index(&locals, 1, (int*)&typ, &temp);
-		if(typ == TYPE_BOOL && temp.boolean == values[test].boolean)
+		if(typ == TYPE_BOOL && temp.data.boolean == values[test].data.boolean)
 			printf("\n%s:[test %d.] ASSIGN was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is (bool)%d and should be (bool)%d\n", __func__, test, temp.boolean, values[test].boolean);
+			printf("\n%s:[test %d.] ERROR: stack value is (bool)%d and should be (bool)%d\n", __func__, test, temp.data.boolean, values[test].data.boolean);
 			break;
 		}
 	}
@@ -316,11 +315,11 @@ instruction.index		= -1;
 	if(calcs.count==0 && locals.count==3)
 	{
 		stack_index(&locals, 0, (int*)&typ, &temp);
-		if(typ == TYPE_STRING && !cstr_cmp(temp.string, values[test].string))
+		if(typ == TYPE_STRING && !cstr_cmp(temp.data.string, values[test].data.string))
 			printf("\n%s:[test %d.] ASSIGN was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is (cstring) \"%s\" and should be (cstring) \"%s\"\n", __func__, test, temp.string->str, values[test].string->str);
+			printf("\n%s:[test %d.] ERROR: stack value is (cstring) \"%s\" and should be (cstring) \"%s\"\n", __func__, test, temp.data.string->str, values[test].data.string->str);
 			break;
 		}
 	}
@@ -369,15 +368,20 @@ void test_I_PUSH(void)
 	///tu je potrebne si popridavat values pre testy
 
 
-	values[0].integer	= 42;
-	values[1].real		= 16.125;
-	values[2].boolean	= 1;
-	values[3].string	= cstr_create_str("text");
-	values[4].integer	= 1234;
+	values[0].data.integer	= 42;
+	values[0].inited = true;
 
-	values[7].boolean   = true;
-	values[8].real      = 1.5;
-	values[9].string    = cstr_create_str("globals text");
+	values[1].data.real		= 16.125;
+	values[2].data.boolean	= 1;
+	values[3].data.string	= cstr_create_str("text");
+	values[4].data.integer	= 1234;
+
+	values[7].data.boolean   = true;
+	values[7].inited = true;
+	values[8].data.real      = 1.5;
+	values[8].inited = true;
+	values[9].data.string    = cstr_create_str("globals text");
+	values[9].inited = true;
 
 	variables_add(&globals, TYPE_INT, values[0], NULL);
 
@@ -407,11 +411,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1 && locals.count==3)
 	{
 		stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_STRING && !cstr_cmp(temp.string, values[9].string))
+		if(typ == TYPE_STRING && !cstr_cmp(temp.data.string, values[9].data.string))
 			printf("\n%s:[test %d.] ASSIGN was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is (cstring) \"%s\" and should be (cstring) \"%s\"\n", __func__, test, temp.string->str, values[9].string->str);
+			printf("\n%s:[test %d.] ERROR: stack value is (cstring) \"%s\" and should be (cstring) \"%s\"\n", __func__, test, temp.data.string->str, values[9].data.string->str);
 			break;
 		}
 	}
@@ -439,11 +443,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==2 && locals.count==3)
 	{
 		stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_BOOL && temp.boolean == values[7].boolean)
+		if(typ == TYPE_BOOL && temp.data.boolean == values[7].data.boolean)
 			printf("\n%s:[test %d.] ASSIGN was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %d and should be (bool) %d\n", __func__, test, temp.boolean, values[7].boolean);
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be (bool) %d\n", __func__, test, temp.data.boolean, values[7].data.boolean);
 			break;
 		}
 	}
@@ -470,11 +474,11 @@ instruction.index		= -3;
 	if(calcs.count==3 && locals.count==3)
 	{
 		stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_REAL && temp.real == values[8].real)
+		if(typ == TYPE_REAL && temp.data.real == values[8].data.real)
 			printf("\n%s:[test %d.] ASSIGN was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, values[8].real);
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.data.real, values[8].data.real);
 			break;
 		}
 	}
@@ -502,11 +506,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==4 && locals.count==3 && globals.count==1)
 	{
 		stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_INT && temp.integer == values[0].integer)
+		if(typ == TYPE_INT && temp.data.integer == values[0].data.integer)
 			printf("\n%s:[test %d.] ASSIGN was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.integer, values[0].integer);
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.integer, values[0].data.integer);
 			break;
 		}
 	}
@@ -534,11 +538,11 @@ instruction.instruction		= I_ADD;
 	if(calcs.count==3 && locals.count==3 && globals.count==1)
 	{
 		stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_REAL && temp.real == values[8].real+values[0].integer)
+		if(typ == TYPE_REAL && temp.data.real == values[8].data.real+values[0].data.integer)
 			printf("\n%s:[test %d.] ASSIGN was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, values[8].real+values[0].integer);
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.data.real, values[8].data.real+values[0].data.integer);
 			break;
 		}
 	}
@@ -574,14 +578,14 @@ void test_I_ADD(void)
 	Value values[10];
 
 	///tu je potrebne si popridavat values pre testy
-	values[0].integer	= 8;
-	values[1].integer	= 100;
+	values[0].data.integer	= 8;
+	values[1].data.integer	= 100;
 
-	values[2].real		= 16.125;
-	values[3].real		= 2.5;
-	values[4].real 		= 8.75;
-	values[5].string	= cstr_create_str("text1");
-	values[6].string	= cstr_create_str("text2");
+	values[2].data.real		= 16.125;
+	values[3].data.real		= 2.5;
+	values[4].data.real 		= 8.75;
+	values[5].data.string	= cstr_create_str("text1");
+	values[6].data.string	= cstr_create_str("text2");
 
 ///---------------------------------------------------------------------------
 
@@ -603,11 +607,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)
 	{
 		stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_INT && (temp.integer == ( values[0].integer + values[1].integer )))
+		if(typ == TYPE_INT && (temp.data.integer == ( values[0].data.integer + values[1].data.integer )))
 			printf("\n%s:[test %d.] ADD was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.integer, values[0].integer + values[1].integer);
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.integer, values[0].data.integer + values[1].data.integer);
 			break;
 		}
 	}
@@ -637,11 +641,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)
 	{
 		stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_REAL && (temp.real == ( values[3].real + values[4].real )))
+		if(typ == TYPE_REAL && (temp.data.real == ( values[3].data.real + values[4].data.real )))
 			printf("\n%s:[test %d.] ADD was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, (values[3].real - values[4].real));
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.data.real, (values[3].data.real - values[4].data.real));
 			break;
 		}
 	}
@@ -672,11 +676,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)
 	{
 		stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_REAL && (temp.real == ( values[1].integer + values[4].real )))
+		if(typ == TYPE_REAL && (temp.data.real == ( values[1].data.integer + values[4].data.real )))
 			printf("\n%s:[test %d.] ADD was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, (values[1].integer + values[4].real));
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.data.real, (values[1].data.integer + values[4].data.real));
 			break;
 		}
 	}
@@ -706,11 +710,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)
 	{
 		stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_REAL && (temp.real == ( values[3].real + values[1].integer )))
+		if(typ == TYPE_REAL && (temp.data.real == ( values[3].data.real + values[1].data.integer )))
 			printf("\n%s:[test %d.] ADD was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, (values[3].real + values[1].integer));
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.data.real, (values[3].data.real + values[1].data.integer));
 			break;
 		}
 	}
@@ -742,11 +746,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)
 	{
 		stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_STRING && ( !cstr_cmp_str(temp.string, "text1text2") ) )
+		if(typ == TYPE_STRING && ( !cstr_cmp_str(temp.data.string, "text1text2") ) )
 			printf("\n%s:[test %d.] ADD was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %s and should be %s\n", __func__, test, (temp.string)->str, "text1text2");
+			printf("\n%s:[test %d.] ERROR: stack value is %s and should be %s\n", __func__, test, (temp.data.string)->str, "text1text2");
 			break;
 		}
 	}
@@ -784,12 +788,12 @@ void test_I_SUB(void)
 	Value values[10];
 
 	///tu je potrebne si popridavat values pre testy
-	values[0].integer	= 8;
-	values[1].integer	= 100;
+	values[0].data.integer	= 8;
+	values[1].data.integer	= 100;
 
-	values[2].real		= 16.125;
-	values[3].real		= 2.5;
-	values[4].real 		= 8.75;
+	values[2].data.real		= 16.125;
+	values[3].data.real		= 2.5;
+	values[4].data.real 		= 8.75;
 
 ///---------------------------------------------------------------------------
 
@@ -809,11 +813,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)
 	{
 		stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_INT && (temp.integer == ( values[0].integer - values[1].integer )))
+		if(typ == TYPE_INT && (temp.data.integer == ( values[0].data.integer - values[1].data.integer )))
 			printf("\n%s:[test %d.] SUB was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.integer, values[0].integer - values[1].integer);
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.integer, values[0].data.integer - values[1].data.integer);
 			break;
 		}
 	}
@@ -843,11 +847,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)
 	{
 		stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_REAL && (temp.real == ( values[3].real - values[4].real )))
+		if(typ == TYPE_REAL && (temp.data.real == ( values[3].data.real - values[4].data.real )))
 			printf("\n%s:[test %d.] SUB was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, (values[3].real - values[4].real));
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.data.real, (values[3].data.real - values[4].data.real));
 			break;
 		}
 	}
@@ -878,11 +882,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)
 	{
 		stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_REAL && (temp.real == ( values[1].integer - values[4].real )))
+		if(typ == TYPE_REAL && (temp.data.real == ( values[1].data.integer - values[4].data.real )))
 			printf("\n%s:[test %d.] SUB was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, (values[1].integer - values[4].real));
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.data.real, (values[1].data.integer - values[4].data.real));
 			break;
 		}
 	}
@@ -912,11 +916,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)
 	{
 		stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_REAL && (temp.real == ( values[3].real - values[1].integer )))
+		if(typ == TYPE_REAL && (temp.data.real == ( values[3].data.real - values[1].data.integer )))
 			printf("\n%s:[test %d.] SUB was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, (values[3].real - values[1].integer));
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.data.real, (values[3].data.real - values[1].data.integer));
 			break;
 		}
 	}
@@ -952,12 +956,12 @@ void test_I_MUL(void)
 	Value values[10];
 
 	///tu je potrebne si popridavat values pre testy
-	values[0].integer	= 8;
-	values[1].integer	= 100;
+	values[0].data.integer	= 8;
+	values[1].data.integer	= 100;
 
-	values[2].real		= 16.125;
-	values[3].real		= 2.5;
-	values[4].real 		= 8.75;
+	values[2].data.real		= 16.125;
+	values[3].data.real		= 2.5;
+	values[4].data.real 		= 8.75;
 
 ///---------------------------------------------------------------------------
 
@@ -977,11 +981,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)
 	{
 		stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_INT && (temp.integer == ( values[0].integer * values[1].integer )))
+		if(typ == TYPE_INT && (temp.data.integer == ( values[0].data.integer * values[1].data.integer )))
 			printf("\n%s:[test %d.] MUL was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.integer, values[0].integer * values[1].integer);
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.integer, values[0].data.integer * values[1].data.integer);
 			break;
 		}
 	}
@@ -1011,11 +1015,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)
 	{
 		stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_REAL && (temp.real == ( values[3].real * values[4].real )))
+		if(typ == TYPE_REAL && (temp.data.real == ( values[3].data.real * values[4].data.real )))
 			printf("\n%s:[test %d.] MUL was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, (values[3].real * values[4].real));
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.data.real, (values[3].data.real * values[4].data.real));
 			break;
 		}
 	}
@@ -1046,11 +1050,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)
 	{
 		stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_REAL && (temp.real == ( values[1].integer * values[4].real )))
+		if(typ == TYPE_REAL && (temp.data.real == ( values[1].data.integer * values[4].data.real )))
 			printf("\n%s:[test %d.] MUL was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, (values[1].integer * values[4].real));
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.data.real, (values[1].data.integer * values[4].data.real));
 			break;
 		}
 	}
@@ -1080,11 +1084,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)
 	{
 		stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_REAL && (temp.real == ( values[3].real * values[1].integer )))
+		if(typ == TYPE_REAL && (temp.data.real == ( values[3].data.real * values[1].data.integer )))
 			printf("\n%s:[test %d.] MUL was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, (values[3].real * values[1].integer));
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.data.real, (values[3].data.real * values[1].data.integer));
 			break;
 		}
 	}
@@ -1120,12 +1124,12 @@ void test_I_DIV(void)
 	Value values[10];
 
 	///tu je potrebne si popridavat values pre testy
-	values[0].integer	= 2;
-	values[1].integer	= 100;
+	values[0].data.integer	= 2;
+	values[1].data.integer	= 100;
 
-	values[2].real		= 16.125;
-	values[3].real		= 2.5;
-	values[4].real 		= 8.75;
+	values[2].data.real		= 16.125;
+	values[3].data.real		= 2.5;
+	values[4].data.real 		= 8.75;
 
 ///---------------------------------------------------------------------------
 
@@ -1145,11 +1149,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)
 	{
 		stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_INT && (temp.integer == ( values[0].integer / values[1].integer )))
+		if(typ == TYPE_INT && (temp.data.integer == ( values[0].data.integer / values[1].data.integer )))
 			printf("\n%s:[test %d.] DIV was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.integer, values[0].integer / values[1].integer);
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.integer, values[0].data.integer / values[1].data.integer);
 			break;
 		}
 	}
@@ -1179,11 +1183,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)
 	{
 		stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_REAL && (temp.real == ( values[3].real / values[4].real )))
+		if(typ == TYPE_REAL && (temp.data.real == ( values[3].data.real / values[4].data.real )))
 			printf("\n%s:[test %d.] DIV was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, (values[3].real / values[4].real));
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.data.real, (values[3].data.real / values[4].data.real));
 			break;
 		}
 	}
@@ -1213,11 +1217,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)
 	{
 		stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_REAL && (temp.real == ( values[1].integer / values[4].real )))
+		if(typ == TYPE_REAL && (temp.data.real == ( values[1].data.integer / values[4].data.real )))
 			printf("\n%s:[test %d.] DIV int / real was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, (values[1].integer / values[4].real));
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.data.real, (values[1].data.integer / values[4].data.real));
 			break;
 		}
 	}
@@ -1247,11 +1251,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)
 	{
 		stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_REAL && (temp.real == ( values[3].real / values[1].integer )))
+		if(typ == TYPE_REAL && (temp.data.real == ( values[3].data.real / values[1].data.integer )))
 			printf("\n%s:[test %d.] DIV real / int was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.real, (values[3].real / values[1].integer));
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.data.real, (values[3].data.real / values[1].data.integer));
 			break;
 		}
 	}
@@ -1269,10 +1273,10 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 test++;
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
 
-Value nula = { .real=0.0 };
+Value nula = { .data.real=0.0 };
 
 	stack_push(&calcs, TYPE_REAL, &(values[3]));
-	stack_push(&calcs, TYPE_REAL, &(nula.real));
+	stack_push(&calcs, TYPE_REAL, &(nula));
 
 	///zavolanie interpretera na delenie nulou
 	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != RUNTIME_DIV_BY_ZERO)
@@ -1371,12 +1375,12 @@ void test_I_NOT(void)
 	Stack calcs;
 	stack_init(&calcs, VALUE_STACK);
 	Value values[6];
-	values[0].integer	= 8;
-	values[1].integer	= 100;
-	values[2].integer	= 0;
-	values[3].integer	= -1;
-	values[4].integer	= -54646406;
-	values[5].integer	= 2154668;
+	values[0].data.integer	= 8;
+	values[1].data.integer	= 100;
+	values[2].data.integer	= 0;
+	values[3].data.integer	= -1;
+	values[4].data.integer	= -54646406;
+	values[5].data.integer	= 2154668;
 
 BEGINE_OF_TEST();
 
@@ -1388,11 +1392,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)
 	{
 	stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_INT && (temp.integer == ( ~values[0].integer )))
+		if(typ == TYPE_INT && (temp.data.integer == ( ~values[0].data.integer )))
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, "NOT");
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.integer, ~values[0].integer );
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.integer, ~values[0].data.integer );
 			break;
 		}
 	}
@@ -1413,11 +1417,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)
 	{
 	stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_INT && (temp.integer == ( ~values[1].integer )))
+		if(typ == TYPE_INT && (temp.data.integer == ( ~values[1].data.integer )))
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, "NOT");
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.integer, ( ~values[1].integer ));
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.integer, ( ~values[1].data.integer ));
 			break;
 		}
 	}
@@ -1438,11 +1442,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)
 	{
 		stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_INT && (temp.integer == ( ~values[5].integer  )))
+		if(typ == TYPE_INT && (temp.data.integer == ( ~values[5].data.integer  )))
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, "NOT");
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is  %d and should be %d\n", __func__, test, temp.integer, ( ~values[5].integer ));
+			printf("\n%s:[test %d.] ERROR: stack value is  %d and should be %d\n", __func__, test, temp.data.integer, ( ~values[5].data.integer ));
 			break;
 		}
 	}
@@ -1463,11 +1467,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)
 	{
 	stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_INT && (temp.integer == ( ~values[4].integer  )))
+		if(typ == TYPE_INT && (temp.data.integer == ( ~values[4].data.integer  )))
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, "NOT");
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.integer, ( ~values[4].integer ));
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.integer, ( ~values[4].data.integer ));
 			break;
 		}
 	}
@@ -1488,11 +1492,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)
 	{
 	stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_INT && (temp.integer == ( ~values[3].integer  )))
+		if(typ == TYPE_INT && (temp.data.integer == ( ~values[3].data.integer  )))
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, "NOT");
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.integer, ( ~values[3].integer ));
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.integer, ( ~values[3].data.integer ));
 			break;
 		}
 	}
@@ -1513,11 +1517,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)
 	{
 	stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_INT && (temp.integer == ( ~values[2].integer )))
+		if(typ == TYPE_INT && (temp.data.integer == ( ~values[2].data.integer )))
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, "NOT");
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.integer, ~values[2].integer );
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.integer, ~values[2].data.integer );
 			break;
 		}
 	}
