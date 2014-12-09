@@ -52,7 +52,8 @@ enum token_keyword {
 /* List of operations and other symbols */
 enum token_symbol {
     ADDITION,       // +
-    SUBTRACTION,   // -
+    SUBTRACTION,    // -
+    NEGATION,       // unary -
     MULTIPLICATION, // *
     DIVISION,       // /
     COMPARISON,     // =
@@ -74,14 +75,13 @@ enum token_symbol {
 
 /* List of all Token types */
 enum token_type {
-    TOKEN_ERROR = 0,  //  --
+    TOKEN_EOF,        //  --
     TOKEN_ID,         //  value_name
     TOKEN_INT,        //  value_int
     TOKEN_FLOAT,      //  value_float
     TOKEN_STRING,     // *value_string
     TOKEN_KEYWORD,    //  value_keyword
     TOKEN_SYMBOL,     //  value_symbol
-    TOKEN_EOF,        //  --
 };
 
 

@@ -185,7 +185,7 @@ static void strcatc(char * destination, char c) {
  * Load (another) lexeme from the source file
  * and return it's Token representation
  */
-int get_token(Token *token, FILE *input) {
+int get_token(Token *token_ret, FILE *input) {
     int symbol = 0;
     enum lexer_state state = LEXER_START;
 
@@ -194,8 +194,12 @@ int get_token(Token *token, FILE *input) {
 
     char buffer[100] = {0};
 
-    if (token_register(token, false))
+    static Token token;
+
+    if (token_register(&token, false)) {
+        *token_ret = token;
         return SUCCESS;
+    }
 
     while (1) {
         symbol = getc(input);
@@ -205,14 +209,15 @@ int get_token(Token *token, FILE *input) {
                 break;
 
             if (symbol == EOF) {
-                token->type = TOKEN_EOF;
+                token.type = TOKEN_EOF;
+                *token_ret = token;
                 return SUCCESS;
             }
 
             if ((symbol >= 'a' && symbol <= 'z') ||
                 (symbol >= 'A' && symbol <= 'Z') ||
                 (symbol == '_')) {
-                token->value.value_name[token_name_pos] = symbol;
+                token.value.value_name[token_name_pos] = symbol;
                 token_name_pos ++;
                 state = LEXER_ID_KEYWORD;
                 break;
@@ -220,80 +225,106 @@ int get_token(Token *token, FILE *input) {
 
             if (symbol >= '0' && symbol <= '9') {
                 strcatc(buffer, symbol);
-                token->type = TOKEN_INT;
+                token.type = TOKEN_INT;
                 state = LEXER_INT_LOADING;
                 break;
             }
 
             switch (symbol) {
             case '+':
-                token->type = TOKEN_SYMBOL;
-                token->value.value_symbol = ADDITION;
+                token.type = TOKEN_SYMBOL;
+                token.value.value_symbol = ADDITION;
+                *token_ret = token;
                 return SUCCESS;
 
             case '-':
-                token->type = TOKEN_SYMBOL;
-                token->value.value_symbol = SUBTRACTION;
+                switch (token.type) {
+                case TOKEN_KEYWORD:
+                    token.value.value_keyword = (token.value.value_keyword
+                                                == KEYWORD_TRUE ||
+                                                token.value.value_keyword
+                                                == KEYWORD_FALSE) ?
+                                                SUBTRACTION : NEGATION;
+                    break;
+                case TOKEN_ID:
+                case TOKEN_INT:
+                case TOKEN_FLOAT:
+                case TOKEN_STRING:
+                    token.value.value_keyword = SUBTRACTION; 
+                    break;
+                default:
+                    token.value.value_keyword = NEGATION;
+                    break;
+                }
+                token.type = TOKEN_SYMBOL;
+                *token_ret = token;
                 return SUCCESS;
 
             case '*':
-                token->type = TOKEN_SYMBOL;
-                token->value.value_symbol = MULTIPLICATION;
+                token.type = TOKEN_SYMBOL;
+                token.value.value_symbol = MULTIPLICATION;
+                *token_ret = token;
                 return SUCCESS;
 
             case '/':
-                token->type = TOKEN_SYMBOL;
-                token->value.value_symbol = DIVISION;
+                token.type = TOKEN_SYMBOL;
+                token.value.value_symbol = DIVISION;
+                *token_ret = token;
                 return SUCCESS;
 
             case '=':
-                token->type = TOKEN_SYMBOL;
-                token->value.value_symbol = COMPARISON;
+                token.type = TOKEN_SYMBOL;
+                token.value.value_symbol = COMPARISON;
+                *token_ret = token;
                 return SUCCESS;
 
             case ':':
-                token->type = TOKEN_SYMBOL;
+                token.type = TOKEN_SYMBOL;
                 state = LEXER_MAYBE_ASSIGNMENT;
                 break; // can be ':=' or ':'
 
             case ';':
-                token->type = TOKEN_SYMBOL;
-                token->value.value_symbol = SEMICOLON;
+                token.type = TOKEN_SYMBOL;
+                token.value.value_symbol = SEMICOLON;
+                *token_ret = token;
                 return SUCCESS;
 
             case '.':
-                token->type = TOKEN_SYMBOL;
+                token.type = TOKEN_SYMBOL;
                 state = LEXER_MAYBE_DOUBLE_DOT;
                 break; // can be '..' or '.'
 
             case ',':
-                token->type = TOKEN_SYMBOL;
-                token->value.value_symbol = COMMA;
+                token.type = TOKEN_SYMBOL;
+                token.value.value_symbol = COMMA;
+                *token_ret = token;
                 return SUCCESS;
 
             case '(':
-                token->type = TOKEN_SYMBOL;
-                token->value.value_symbol = PARENTHESIS_L;
+                token.type = TOKEN_SYMBOL;
+                token.value.value_symbol = PARENTHESIS_L;
+                *token_ret = token;
                 return SUCCESS;
 
             case ')':
-                token->type = TOKEN_SYMBOL;
-                token->value.value_symbol = PARENTHESIS_R;
+                token.type = TOKEN_SYMBOL;
+                token.value.value_symbol = PARENTHESIS_R;
+                *token_ret = token;
                 return SUCCESS;
 
             case '>':
-                token->type = TOKEN_SYMBOL;
+                token.type = TOKEN_SYMBOL;
                 state = LEXER_MAYBE_GREATER_EQUAL;
                 break; // can be '>=' or '>'
 
             case '<':
-                token->type = TOKEN_SYMBOL;
+                token.type = TOKEN_SYMBOL;
                 state = LEXER_MAYBE_LESS_EQUAL;
                 break; // can be '<=' or '<>' or '<'
 
 
             case '\'':
-                token->type = TOKEN_STRING;
+                token.type = TOKEN_STRING;
                 state = LEXER_STR_START;
                 break;
 
@@ -319,12 +350,12 @@ int get_token(Token *token, FILE *input) {
 
         case LEXER_STR_START:
             if (symbol == '\'') {
-                token->value.value_string = cstr_create_str(NULL);
+                token.value.value_string = cstr_create_str(NULL);
                 state = LEXER_STR_AP;
                 break;
             }
 
-            token->value.value_string = cstr_create_chr(symbol);
+            token.value.value_string = cstr_create_chr(symbol);
             state = LEXER_STR_LOAD;
             break;
 
@@ -335,13 +366,13 @@ int get_token(Token *token, FILE *input) {
                 break;
             }
 
-            cstr_append_chr(token->value.value_string, symbol);
+            cstr_append_chr(token.value.value_string, symbol);
             break;
 
 
         case LEXER_STR_AP:
             if (symbol == '\'') {
-                cstr_append_chr(token->value.value_string, symbol);
+                cstr_append_chr(token.value.value_string, symbol);
                 state = LEXER_STR_LOAD;
                 break;
             }
@@ -352,6 +383,7 @@ int get_token(Token *token, FILE *input) {
             }
 
             ungetc(symbol, input);
+            *token_ret = token;
             return SUCCESS;
 
 
@@ -359,7 +391,7 @@ int get_token(Token *token, FILE *input) {
             if (symbol == '\'') {
                 // FIXME what if the int is too big?!
                 symbol = (int)atof(buffer);
-                cstr_append_chr(token->value.value_string, symbol);
+                cstr_append_chr(token.value.value_string, symbol);
                 state = LEXER_STR_LOAD;
                 break;
             }
@@ -369,11 +401,13 @@ int get_token(Token *token, FILE *input) {
 
         case LEXER_MAYBE_GREATER_EQUAL:
             if (symbol == '=') {
-                token->value.value_symbol = GREATER_EQUAL;
+                token.value.value_symbol = GREATER_EQUAL;
+                *token_ret = token;
                 return SUCCESS;
             } else {
                 ungetc(symbol, input);
-                token->value.value_symbol = GREATER_THAN;
+                token.value.value_symbol = GREATER_THAN;
+                *token_ret = token;
                 return SUCCESS;
             }
 
@@ -382,14 +416,17 @@ int get_token(Token *token, FILE *input) {
 
         case LEXER_MAYBE_LESS_EQUAL:
             if (symbol == '=') {
-                token->value.value_symbol = LESS_EQUAL;
+                token.value.value_symbol = LESS_EQUAL;
+                *token_ret = token;
                 return SUCCESS;
             } else if (symbol == '>') {
-                token->value.value_symbol = NOT_EQUAL;
+                token.value.value_symbol = NOT_EQUAL;
+                *token_ret = token;
                 return SUCCESS;
             } else {
                 ungetc(symbol, input);
-                token->value.value_symbol = LESS_THAN;
+                token.value.value_symbol = LESS_THAN;
+                *token_ret = token;
                 return SUCCESS;
             }
 
@@ -398,11 +435,13 @@ int get_token(Token *token, FILE *input) {
 
         case LEXER_MAYBE_ASSIGNMENT:
             if (symbol == '=') {
-                token->value.value_symbol = ASSIGNMENT;
+                token.value.value_symbol = ASSIGNMENT;
+                *token_ret = token;
                 return SUCCESS;
             } else {
                 ungetc(symbol, input);
-                token->value.value_symbol = COLON;
+                token.value.value_symbol = COLON;
+                *token_ret = token;
                 return SUCCESS;
             }
 
@@ -411,11 +450,13 @@ int get_token(Token *token, FILE *input) {
 
         case LEXER_MAYBE_DOUBLE_DOT:
             if (symbol == '.') {
-                token->value.value_symbol = DOUBLE_DOT;
+                token.value.value_symbol = DOUBLE_DOT;
+                *token_ret = token;
                 return SUCCESS;
             } else {
                 ungetc(symbol, input);
-                token->value.value_symbol = DOT;
+                token.value.value_symbol = DOT;
+                *token_ret = token;
                 return SUCCESS;
             }
 
@@ -430,15 +471,15 @@ int get_token(Token *token, FILE *input) {
             } else if (symbol == '.') {
                 strcatc(buffer, symbol);
                 state = LEXER_FLOAT_LOADING_FIRST;
-                token->type = TOKEN_FLOAT;
-                token->value.value_float = (double)token->value.value_int;
+                token.type = TOKEN_FLOAT;
+                token.value.value_float = (double)token.value.value_int;
                 break;
 
             } else if ((symbol == 'e') || (symbol == 'E')) {
                 strcatc(buffer, symbol);
                 state = LEXER_FLOAT_EXP_LOADING_FIRST;
-                token->type = TOKEN_FLOAT;
-                token->value.value_float = (double)token->value.value_int;
+                token.type = TOKEN_FLOAT;
+                token.value.value_float = (double)token.value.value_int;
                 break;
 
             } else if((symbol >= 'a' && symbol <= 'z') || (symbol >= 'A' && symbol <= 'Z')){
@@ -446,8 +487,9 @@ int get_token(Token *token, FILE *input) {
                 break; 
 
             } else {
-                token->value.value_int = (int)atof(buffer);
+                token.value.value_int = (int)atof(buffer);
                 ungetc(symbol, input);
+                *token_ret = token;
                 return SUCCESS;
             }
 
@@ -466,13 +508,14 @@ int get_token(Token *token, FILE *input) {
             if ((symbol == 'e') || (symbol == 'E')) {
                 strcatc(buffer, symbol);
                 state = LEXER_FLOAT_EXP_LOADING_FIRST;
-                token->type = TOKEN_FLOAT;
-                token->value.value_float = (double)token->value.value_int;
+                token.type = TOKEN_FLOAT;
+                token.value.value_float = (double)token.value.value_int;
                 break;
 
             } else if (! ((symbol >= '0' && symbol <= '9'))) {
-                token->value.value_float = atof(buffer);
+                token.value.value_float = atof(buffer);
                 ungetc(symbol, input);
+                *token_ret = token;
                 return SUCCESS;
             }
 
@@ -490,8 +533,9 @@ int get_token(Token *token, FILE *input) {
 
         case LEXER_FLOAT_EXP_LOADING:
             if (! (symbol >= '0' && symbol <= '9')) {
-                token->value.value_float = atof(buffer);
+                token.value.value_float = atof(buffer);
                 ungetc(symbol, input);
+                *token_ret = token;
                 return SUCCESS;
             }
 
@@ -503,25 +547,27 @@ int get_token(Token *token, FILE *input) {
                   (symbol >= 'A' && symbol <= 'Z') ||
                   (symbol >= '0' && symbol <= '9') ||
                   (symbol == '_'))) {
-                token->value.value_name[token_name_pos] = 0;
+                token.value.value_name[token_name_pos] = 0;
                 token_name_pos = 0;
-                keyword = _get_keyword(token->value.value_name);
+                keyword = _get_keyword(token.value.value_name);
                 if (!keyword) {
-                    token->type = TOKEN_ID;
+                    token.type = TOKEN_ID;
                 } else {
-                    token->type = TOKEN_KEYWORD;
-                    token->value.value_keyword = keyword;
+                    token.type = TOKEN_KEYWORD;
+                    token.value.value_keyword = keyword;
                 }
                 ungetc(symbol, input);
+                *token_ret = token;
                 return SUCCESS;
             } else {
-                token->value.value_name[token_name_pos] = tolower(symbol);
+                token.value.value_name[token_name_pos] = tolower(symbol);
                 token_name_pos ++;
                 break;
             }
 
             if (symbol == EOF) {
-                token->type = TOKEN_EOF;
+                token.type = TOKEN_EOF;
+                *token_ret = token;
                 return SUCCESS;
             }
             break;
