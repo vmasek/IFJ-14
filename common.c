@@ -33,7 +33,7 @@ inline void debug_printf(const char* file, const int line, const char* func, con
 
 #ifdef DEBUG
 
-const char *keywords[] = {
+static const char *keywords[] = {
     "none",
     "and",
     "begin",
@@ -61,7 +61,7 @@ const char *keywords[] = {
     "xor",
 };
 
-const char *symbols[] = {
+static const char *symbols[] = {
     "+",
     "-",
     "*",

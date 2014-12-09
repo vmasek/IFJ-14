@@ -3,9 +3,12 @@
 
 static int nt_program(FILE *input, Tree *globals, Tree *functions, 
                       Instruction **first_instr, Variables *vars);
-static int nt_var_section(FILE *input, Tree *vars, Tree *functions, int *count);
-static int nt_var_list(FILE *input, Tree *vars, Tree *functions, int *count);
-static int nt_var_sublist(FILE *input, Tree *vars, Tree *functions, int *count);
+static int nt_var_section(FILE *input, Tree *vars, Tree *functions, Var_record ***var_ar,
+                          int *count);
+static int nt_var_list(FILE *input, Tree *vars, Tree *functions, Var_record ***var_ar,
+                       int *count);
+static int nt_var_sublist(FILE *input, Tree *vars, Tree *functions, Var_record ***var_ar,
+                          int *count);
 static int nt_var(FILE *input, Tree *vars, Tree *functions, bool eps,
                   Var_record **_var, int count);
 static int t_symbol(FILE *input, enum token_symbol symbol);
@@ -15,9 +18,10 @@ static int nt_func_section(FILE *input, Tree *globals, Tree *functions,
                            Variables *vars);
 static int nt_func(FILE *input, Tree *globals, Tree *functions, Variables *vars);
 static int t_id(FILE *input, cstring **_id);
-static int nt_paramlist(FILE *input, Func_record *func, Tree *functions, int count);
+static int nt_paramlist(FILE *input, Func_record *func, Tree *functions, int *count);
 static int nt_func_body(FILE *input, Tree *locals, Tree *globals, Tree *functions,
-                        Instruction *instr, unsigned *_var_count, Variables *vars);
+                        Instruction *instr, unsigned *_var_count, Variables *vars,
+                        Var_record ***var_ar);
 static int nt_comp_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
                        Instruction **intr, Variables *vars);
 static int t_keyword(FILE *input, enum token_keyword keyword);
@@ -61,7 +65,8 @@ static int nt_program(FILE *input, Tree *globals, Tree *functions,
 {
     int ret;
     int global_count;
-    CATCH_VALUE(nt_var_section(input, globals, functions, &global_count), ret);
+    Var_record **var_ar = NULL;
+    CATCH_VALUE(nt_var_section(input, globals, functions, &var_ar, &global_count), ret);
     variables_occupy(vars, global_count);
     CATCH_VALUE(nt_func_section(input, globals, functions, vars), ret);
     CHECK_VALUE(nt_main(input, globals, functions, first_instr, vars), ret);
@@ -69,7 +74,8 @@ static int nt_program(FILE *input, Tree *globals, Tree *functions,
     return SUCCESS;
 }
 
-static int nt_var_section(FILE *input, Tree *vars, Tree *functions, int *count)
+static int nt_var_section(FILE *input, Tree *vars, Tree *functions, Var_record ***var_ar,
+                          int *count)
 {
     int ret;
     *count = 0;
@@ -79,7 +85,7 @@ static int nt_var_section(FILE *input, Tree *vars, Tree *functions, int *count)
     debug_token(&token);
     if (token.type == TOKEN_KEYWORD &&
         token.value.value_keyword == KEYWORD_VAR) {
-        CHECK_VALUE(nt_var_list(input, vars, functions, count), ret);
+        CHECK_VALUE(nt_var_list(input, vars, functions, var_ar, count), ret);
         return SUCCESS;
     }
 
@@ -88,26 +94,61 @@ static int nt_var_section(FILE *input, Tree *vars, Tree *functions, int *count)
     return RETURNING;
 }
 
-static int nt_var_list(FILE *input, Tree *vars, Tree *functions, int *count)
+static int nt_var_list(FILE *input, Tree *vars, Tree *functions, Var_record ***var_ar,
+                       int *count)
 {
     int ret;
-    CHECK_VALUE(nt_var(input, vars, functions, false, NULL, *count), ret);
+    int id = *count;
+    Var_record *var;
+    CHECK_VALUE(nt_var(input, vars, functions, false, &var, *count), ret);
     CHECK_VALUE(t_symbol(input, SEMICOLON), ret);
     (*count)++;
-    CHECK_VALUE(nt_var_sublist(input, vars, functions, count), ret);
+    CHECK_VALUE(nt_var_sublist(input, vars, functions, var_ar, count), ret);
 
+    if ((ret = nt_var_sublist(input, vars, functions, var_ar, count)) == RETURNING) {
+       if ((*var_ar =
+           (Var_record **)gc_realloc(__FILE__, *var_ar,
+                                     ((*count) + 1) * sizeof(Var_record *)))
+                   == NULL) {
+           debug("tu");
+           return INTERNAL_ERROR;
+       }
+       (*var_ar)[id] = var;
+       return SUCCESS;
+    } else if (ret == SUCCESS) {
+        (*var_ar)[id] = var;
+        return SUCCESS;
+    } else {
+        return ret;
+    }
     return SUCCESS;
 }
 
-static int nt_var_sublist(FILE *input, Tree *vars, Tree *functions, int *count)
+static int nt_var_sublist(FILE *input, Tree *vars, Tree *functions, Var_record ***var_ar,
+                          int *count)
 {
     int ret;
-    CHECK_VALUE(nt_var(input, vars, functions, true, NULL, *count), ret);
+    int id = *count;
+    Var_record *var;
+    CHECK_VALUE(nt_var(input, vars, functions, true, &var, *count), ret);
     CHECK_VALUE(t_symbol(input, SEMICOLON), ret);
     (*count)++;
-    CHECK_VALUE(nt_var_sublist(input, vars, functions, count), ret);
-
-    return SUCCESS;
+    if ((ret = nt_var_sublist(input, vars, functions, var_ar, count)) == RETURNING) {
+        if ((*var_ar =
+            (Var_record **)gc_realloc(__FILE__, *var_ar,
+                                      ((*count) + 1) * sizeof(Var_record *)))
+                    == NULL) {
+            debug("%d\n", *count);
+            return INTERNAL_ERROR;
+        }
+        (*var_ar)[id] = var;
+        return SUCCESS;
+    } else if (ret == SUCCESS) {
+        (*var_ar)[id] = var;
+        return SUCCESS;
+    } else {
+        return ret;
+    }
 }
 
 static int nt_var(FILE *input, Tree *vars, Tree *functions, bool eps,
@@ -224,14 +265,17 @@ static int nt_func(FILE *input, Tree *globals, Tree *functions, Variables *vars)
         token.value.value_keyword == KEYWORD_FUNCTION) {
         MALLOC_FUNC(func, __FILE__);
         tree_create(&(func->locals));
-        
+
         CHECK_VALUE(t_id(input, &id), ret);
         CHECK_VALUE(update_tree(functions, id, func, globals), ret);
         CHECK_VALUE(tree_insert(func->locals, id, &(func->ret_value)), ret);
         func->ret_value.index = 0;
         func->local_count = 1;
         CHECK_VALUE(t_symbol(input, PARENTHESIS_L), ret);
-        CATCH_VALUE(nt_paramlist(input, func, functions, func->local_count), ret);
+        //TODO: Pavluv vymysl urezat
+        CATCH_VALUE(nt_paramlist(input, func, functions, (int *)&(func->local_count)),
+                    ret);
+        func->params[0] = &(func->ret_value);
         CHECK_VALUE(t_symbol(input, PARENTHESIS_R), ret);
         CHECK_VALUE(t_symbol(input, COLON), ret);
         CHECK_VALUE(nt_type(input, &(func->ret_value.type)), ret);
@@ -239,7 +283,8 @@ static int nt_func(FILE *input, Tree *globals, Tree *functions, Variables *vars)
         CHECK_VALUE(t_symbol(input, SEMICOLON), ret);
 
         CHECK_VALUE(nt_func_body(input, func->locals, globals, functions,
-                                 func->first_instr, &(func->local_count), vars), ret);
+                                 func->first_instr, &(func->local_count), vars,
+                                 &(func->params)), ret);
         return SUCCESS;
     }
 
@@ -262,23 +307,25 @@ static int t_id(FILE *input, cstring **functions)
     return (ret) ? SUCCESS : SYNTAX_ERROR;
 }
 
-static int nt_paramlist(FILE *input, Func_record *func, Tree *functions,  int count)
+static int nt_paramlist(FILE *input, Func_record *func, Tree *functions,  int *count)
 {
     int ret;
+    int id = *count;
     Var_record *var = NULL;
-    CHECK_VALUE(nt_var(input, func->locals, functions, true, &var, count), ret);
+    (*count)++;
+    CHECK_VALUE(nt_var(input, func->locals, functions, true, &var, *count), ret);
     if ((ret = t_symbol_catch(input, SEMICOLON)) == RETURNING) {
-        func->params = (Var_record **)gc_malloc(__FILE__, count * sizeof(Var_record *));
+        func->params = (Var_record **)gc_malloc(__FILE__, *count * sizeof(Var_record *));
         if (func->params == NULL) {
             return INTERNAL_ERROR;
         }
-        func->params[count - 1] = var;
-        func->local_count = count;
-        func->param_count = count; /* Function identifier */
+        func->params[id] = var;
+        func->param_count = *count - 1; /* Function identifier */
+        debug("func->param_count: %d\n", func->param_count);
         return SUCCESS;
     } else if (ret == SUCCESS) {
-        CHECK_VALUE(nt_paramlist(input, func, functions, count + 1), ret);
-        func->params[count - 1] = var;
+        CHECK_VALUE(nt_paramlist(input, func, functions, count), ret);
+        func->params[id] = var;
         return SUCCESS;
     } else {
         return ret;
@@ -288,7 +335,8 @@ static int nt_paramlist(FILE *input, Func_record *func, Tree *functions,  int co
 }
 
 static int nt_func_body(FILE *input, Tree *locals, Tree *globals, Tree *functions,
-                        Instruction *instr, unsigned *_var_count, Variables *vars)
+                        Instruction *instr, unsigned *_var_count, Variables *vars,
+                        Var_record ***var_ar)
 {
     int ret;
     int count = 0;
@@ -302,7 +350,8 @@ static int nt_func_body(FILE *input, Tree *locals, Tree *globals, Tree *function
         return SUCCESS;
     } else {
         unget_token(&token);
-        CATCH_VALUE(nt_var_section(input, locals, functions,  &count), ret);
+        CATCH_VALUE(nt_var_section(input, locals, functions, var_ar,  &count),
+                    ret);
         if (_var_count != NULL)
             *_var_count = count;
         //TODO: consider removing I_NOP
@@ -407,8 +456,8 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
             CHECK_VALUE(t_symbol(input, PARENTHESIS_R), ret);
             return SUCCESS;
         } else if (token.value.value_keyword == KEYWORD_IF) {
-            CHECK_VALUE(parse_expr(input, locals, globals, functions, vars, instr, &type, false),
-                        ret);
+            CHECK_VALUE(parse_expr(input, locals, globals, functions,
+                        vars, instr, &type, false), ret);
             if (type != TYPE_BOOL) {
                 return INCOMPATIBLE_TYPE;
             }
@@ -448,21 +497,24 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
             tmp_instr = *instr;
             CHECK_VALUE(nt_cmd_list(input, locals, globals, functions, instr, vars), ret);
             CHECK_VALUE(t_keyword(input, KEYWORD_UNTIL), ret);
-            CHECK_VALUE(parse_expr(input, locals, globals, functions, vars, instr, &type, false),
-                        ret);
+            CHECK_VALUE(parse_expr(input, locals, globals, functions, vars,
+                                   instr, &type, false), ret);
             if (type != TYPE_BOOL) {
                 return INCOMPATIBLE_TYPE;
             }
             CHECK_VALUE(gen_instr(instr, I_JMP, 0, 0, NULL), ret);
             (*instr)->alt_instruction = tmp_instr;
             return SUCCESS;
+        } else if (token.value.value_keyword == KEYWORD_BEGIN) {
+            unget_token(&token);
+            CHECK_VALUE(nt_comp_cmd(input, locals, globals, functions, instr, vars), ret);
+            return SUCCESS;
         }
     } else if (token.type == TOKEN_ID) {
         //TODO: array
-        //TODO: search type
         CHECK_VALUE(t_symbol(input, ASSIGNMENT), ret);
-        CHECK_VALUE(parse_expr(input, locals, globals, functions, vars, instr, &type, false),
-                    ret);
+        CHECK_VALUE(parse_expr(input, locals, globals, functions,
+                               vars, instr, &type, false), ret);
         CHECK_VALUE(search_trees(cstr_create_str(token.value.value_name),
                                 locals, globals, &unique_id, &type2), ret);
         if (type != type2) {
