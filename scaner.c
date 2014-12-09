@@ -508,8 +508,11 @@ int get_token(Token *token, FILE *input) {
                 token->type = TOKEN_EOF;
                 return SUCCESS;
             }
-
             break;
+
+            default:
+                return LEXICAL_ERROR;
+                break;
         }
     }
 }
