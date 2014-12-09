@@ -354,10 +354,11 @@ int get_token(Token *token_ret, FILE *input) {
                 state = LEXER_STR_AP;
                 break;
             }
-
+            // FIXME: else if (a-z...):
             token.value.value_string = cstr_create_chr(symbol);
             state = LEXER_STR_LOAD;
             break;
+            // FIXME: else ERROR
 
 
         case LEXER_STR_LOAD:
@@ -366,8 +367,10 @@ int get_token(Token *token_ret, FILE *input) {
                 break;
             }
 
+            // FIXME: if printable:
             cstr_append_chr(token.value.value_string, symbol);
             break;
+            // FIXME: else ERROR
 
 
         case LEXER_STR_AP:
@@ -396,8 +399,10 @@ int get_token(Token *token_ret, FILE *input) {
                 break;
             }
 
+            // FIXME: if number:
             strcatc(buffer, symbol);
             break;
+            // FIXME: else ERROR;
 
         case LEXER_MAYBE_GREATER_EQUAL:
             if (symbol == '=') {
@@ -564,7 +569,7 @@ int get_token(Token *token_ret, FILE *input) {
                 token_name_pos ++;
                 break;
             }
-
+            // FIXME: this will never happen
             if (symbol == EOF) {
                 token.type = TOKEN_EOF;
                 *token_ret = token;
