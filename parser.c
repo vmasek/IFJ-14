@@ -3,10 +3,11 @@
 
 static int nt_program(FILE *input, Tree *globals, Tree *functions, 
                       Instruction **first_instr, Variables *vars);
-static int nt_var_section(FILE *input, Tree *vars, int *count);
-static int nt_var_list(FILE *input, Tree *vars, int *count);
-static int nt_var_sublist(FILE *input, Tree *vars, int *count);
-static int nt_var(FILE *input, Tree *vars, bool eps, Var_record **_var, int count);
+static int nt_var_section(FILE *input, Tree *vars, Tree *functions, int *count);
+static int nt_var_list(FILE *input, Tree *vars, Tree *functions, int *count);
+static int nt_var_sublist(FILE *input, Tree *vars, Tree *functions, int *count);
+static int nt_var(FILE *input, Tree *vars, Tree *functions, bool eps,
+                  Var_record **_var, int count);
 static int t_symbol(FILE *input, enum token_symbol symbol);
 static int t_symbol_catch(FILE *input, enum token_symbol symbol);
 static int nt_type(FILE *input, Type *vars);
@@ -14,7 +15,7 @@ static int nt_func_section(FILE *input, Tree *globals, Tree *functions,
                            Variables *vars);
 static int nt_func(FILE *input, Tree *globals, Tree *functions, Variables *vars);
 static int t_id(FILE *input, cstring **_id);
-static int nt_paramlist(FILE *input, Func_record *func, int count);
+static int nt_paramlist(FILE *input, Func_record *func, Tree *functions, int count);
 static int nt_func_body(FILE *input, Tree *locals, Tree *globals, Tree *functions,
                         Instruction *instr, unsigned *_var_count, Variables *vars);
 static int nt_comp_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
@@ -36,6 +37,8 @@ static int nt_else(FILE *input, Tree *locals, Tree *globals, Tree *functions,
 static int gen_instr(Instruction **instr_ptr, Instruction_type type, int index,
                      unsigned locals_count, Instruction *alt_instr);
 static int search_trees(cstring *id, Tree *locals, Tree *globals, int *_ret, Type *_type);
+static int insert_tree(Tree *insert, cstring *id, void *data, Tree *other);
+static int update_tree(Tree *update, cstring *id, void *data, Tree *other);
 
 int parse(FILE *input, Instruction *first_instr, Variables *vars)
 {
@@ -58,7 +61,7 @@ static int nt_program(FILE *input, Tree *globals, Tree *functions,
 {
     int ret;
     int global_count;
-    CATCH_VALUE(nt_var_section(input, globals, &global_count), ret);
+    CATCH_VALUE(nt_var_section(input, globals, functions, &global_count), ret);
     variables_occupy(vars, global_count);
     CATCH_VALUE(nt_func_section(input, globals, functions, vars), ret);
     CHECK_VALUE(nt_main(input, globals, functions, first_instr, vars), ret);
@@ -66,7 +69,7 @@ static int nt_program(FILE *input, Tree *globals, Tree *functions,
     return SUCCESS;
 }
 
-static int nt_var_section(FILE *input, Tree *vars, int *count)
+static int nt_var_section(FILE *input, Tree *vars, Tree *functions, int *count)
 {
     int ret;
     *count = 0;
@@ -76,7 +79,7 @@ static int nt_var_section(FILE *input, Tree *vars, int *count)
     debug_token(&token);
     if (token.type == TOKEN_KEYWORD &&
         token.value.value_keyword == KEYWORD_VAR) {
-        CHECK_VALUE(nt_var_list(input, vars, count), ret);
+        CHECK_VALUE(nt_var_list(input, vars, functions, count), ret);
         return SUCCESS;
     }
 
@@ -85,29 +88,30 @@ static int nt_var_section(FILE *input, Tree *vars, int *count)
     return RETURNING;
 }
 
-static int nt_var_list(FILE *input, Tree *vars, int *count)
+static int nt_var_list(FILE *input, Tree *vars, Tree *functions, int *count)
 {
     int ret;
-    CHECK_VALUE(nt_var(input, vars, false, NULL, *count), ret);
+    CHECK_VALUE(nt_var(input, vars, functions, false, NULL, *count), ret);
     CHECK_VALUE(t_symbol(input, SEMICOLON), ret);
     (*count)++;
-    CHECK_VALUE(nt_var_sublist(input, vars, count), ret);
+    CHECK_VALUE(nt_var_sublist(input, vars, functions, count), ret);
 
     return SUCCESS;
 }
 
-static int nt_var_sublist(FILE *input, Tree *vars, int *count)
+static int nt_var_sublist(FILE *input, Tree *vars, Tree *functions, int *count)
 {
     int ret;
-    CHECK_VALUE(nt_var(input, vars, true, NULL, *count), ret);
+    CHECK_VALUE(nt_var(input, vars, functions, true, NULL, *count), ret);
     CHECK_VALUE(t_symbol(input, SEMICOLON), ret);
     (*count)++;
-    CHECK_VALUE(nt_var_sublist(input, vars, count), ret);
+    CHECK_VALUE(nt_var_sublist(input, vars, functions, count), ret);
 
     return SUCCESS;
 }
 
-static int nt_var(FILE *input, Tree *vars, bool eps, Var_record **_var, int id)
+static int nt_var(FILE *input, Tree *vars, Tree *functions, bool eps,
+                  Var_record **_var, int id)
 {
     int ret;
     Token token;
@@ -118,7 +122,8 @@ static int nt_var(FILE *input, Tree *vars, bool eps, Var_record **_var, int id)
     if (token.type == TOKEN_ID) {
         MALLOC_VAR(var, __FILE__);
 
-        CHECK_VALUE(tree_insert(vars, cstr_create_str(token.value.value_name), var), ret);
+        CHECK_VALUE(insert_tree(vars, cstr_create_str(token.value.value_name),
+                                var, functions), ret);
         CHECK_VALUE(t_symbol(input, COLON), ret);
         CHECK_VALUE(nt_type(input, &(var->type)), ret);
         var->index = id;
@@ -221,12 +226,12 @@ static int nt_func(FILE *input, Tree *globals, Tree *functions, Variables *vars)
         tree_create(&(func->locals));
         
         CHECK_VALUE(t_id(input, &id), ret);
-        tree_insert(functions, id, func);
-        tree_insert(func->locals, id, &(func->ret_value));
+        CHECK_VALUE(update_tree(functions, id, func, globals), ret);
+        CHECK_VALUE(tree_insert(func->locals, id, &(func->ret_value)), ret);
         func->ret_value.index = 0;
         func->local_count = 1;
         CHECK_VALUE(t_symbol(input, PARENTHESIS_L), ret);
-        CATCH_VALUE(nt_paramlist(input, func, func->local_count), ret);
+        CATCH_VALUE(nt_paramlist(input, func, functions, func->local_count), ret);
         CHECK_VALUE(t_symbol(input, PARENTHESIS_R), ret);
         CHECK_VALUE(t_symbol(input, COLON), ret);
         CHECK_VALUE(nt_type(input, &(func->ret_value.type)), ret);
@@ -257,11 +262,11 @@ static int t_id(FILE *input, cstring **functions)
     return (ret) ? SUCCESS : SYNTAX_ERROR;
 }
 
-static int nt_paramlist(FILE *input, Func_record *func, int count)
+static int nt_paramlist(FILE *input, Func_record *func, Tree *functions,  int count)
 {
     int ret;
     Var_record *var = NULL;
-    CHECK_VALUE(nt_var(input, func->locals, true, &var, count), ret);
+    CHECK_VALUE(nt_var(input, func->locals, functions, true, &var, count), ret);
     if ((ret = t_symbol_catch(input, SEMICOLON)) == RETURNING) {
         func->params = (Var_record **)gc_malloc(__FILE__, count * sizeof(Var_record *));
         if (func->params == NULL) {
@@ -272,7 +277,7 @@ static int nt_paramlist(FILE *input, Func_record *func, int count)
         func->param_count = count; /* Function identifier */
         return SUCCESS;
     } else if (ret == SUCCESS) {
-        CHECK_VALUE(nt_paramlist(input, func, count + 1), ret);
+        CHECK_VALUE(nt_paramlist(input, func, functions, count + 1), ret);
         func->params[count - 1] = var;
         return SUCCESS;
     } else {
@@ -297,7 +302,7 @@ static int nt_func_body(FILE *input, Tree *locals, Tree *globals, Tree *function
         return SUCCESS;
     } else {
         unget_token(&token);
-        CATCH_VALUE(nt_var_section(input, locals, &count), ret);
+        CATCH_VALUE(nt_var_section(input, locals, functions,  &count), ret);
         if (_var_count != NULL)
             *_var_count = count;
         //TODO: consider removing I_NOP
@@ -559,4 +564,31 @@ static int search_trees(cstring *id, Tree *locals, Tree *globals, int *_ret, Typ
     }
 
     return (node != NULL) ? SUCCESS : UNDEFINED_IDENTIFIER;
+}
+
+static int insert_tree(Tree *insert, cstring *id, void *data, Tree *other)
+{
+    int ret;
+    Tree_Node *node;
+    if ((node = tree_find_key(other, id)) != NULL) {
+        return UNDEFINED_IDENTIFIER;
+    } else {
+        CHECK_VALUE(tree_insert(insert, id, data), ret);
+        return SUCCESS;
+    }
+}
+
+static int update_tree(Tree *update, cstring *id, void *data, Tree *other)
+{
+    int ret;
+    Tree_Node *node;
+    if ((node = tree_find_key(other, id)) != NULL) {
+        return UNDEFINED_IDENTIFIER;
+    } else  if ((node = tree_find_key(update, id)) != NULL) {
+        node->data = data;
+        return SUCCESS;
+    } else {
+        CHECK_VALUE(tree_insert(update, id, data), ret);
+        return SUCCESS;
+    }
 }
