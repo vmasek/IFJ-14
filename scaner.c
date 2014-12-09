@@ -122,6 +122,9 @@ static enum token_keyword _get_keyword(char *name) {
         if (!strcmp(name, "real"))
             return KEYWORD_REAL;
 
+        if (!strcmp(name, "repeat"))
+            return KEYWORD_REPEAT;
+
         break;
 
     case 's':
@@ -136,6 +139,12 @@ static enum token_keyword _get_keyword(char *name) {
 
         if (!strcmp(name, "true"))
             return KEYWORD_TRUE;
+
+        break;
+
+    case 'u':
+        if (!strcmp(name, "until"))
+            return KEYWORD_UNTIL;
 
         break;
 
