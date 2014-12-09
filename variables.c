@@ -92,6 +92,9 @@ int variables_occupy(Variables *vars, unsigned count)
 
 int variables_print(Variables *vars)
 {
+    const char *type_strs[] = {"TYPE_OTHER", "TYPE_INT", "TYPE_REAL",
+                               "TYPE_STRING", "TYPE_BOOL"};
+
     if (vars == NULL) {
         fprintf(stderr, "NULL-pointer passed to 'vars'!\n");
         return INTERNAL_ERROR;
@@ -103,22 +106,28 @@ int variables_print(Variables *vars)
     }
 
     for (unsigned i = 0; i < vars->count; i++) {
+        if (!vars->values[i].inited) {
+            fprintf(stderr, "variable %u: <uninitialized> (%s)\n", i,
+                    type_strs[vars->types[i]]);
+            continue;
+        }
+
         switch (vars->types[i]) {
         case TYPE_INT:
             fprintf(stderr, "variable %u: %d (TYPE_INT)\n", i,
-                    vars->values[i].integer);
+                    vars->values[i].data.integer);
             break;
         case TYPE_REAL:
             fprintf(stderr, "variable %u: %f (TYPE_REAL)\n", i,
-                    vars->values[i].real);
+                    vars->values[i].data.real);
             break;
         case TYPE_STRING:
             fprintf(stderr, "variable %u: %s (TYPE_STRING)\n", i,
-                    vars->values[i].string->str);
+                    vars->values[i].data.string->str);
             break;
         case TYPE_BOOL:
             fprintf(stderr, "variable %u: %s (TYPE_BOOL)\n", i,
-                    vars->values[i].boolean ? "true" : "false");
+                    vars->values[i].data.boolean ? "true" : "false");
             break;
         default:
             fprintf(stderr, "variable %u: ? (UNKNOWN_TYPE)", i);
@@ -152,32 +161,7 @@ int variables_value_read(Variables *variables, Type *type, Value *value, unsigne
 	if(type)
 		*type = variables->types[index];
 
-
-	if (variables->types[index] == TYPE_INT)
-	{
-		debug("integer\n");
-		value->integer = variables->values[index].integer;
-	}
-	else if (variables->types[index] == TYPE_REAL)
-	{
-		debug("double\n");
-		value->real = variables->values[index].real;
-	}
-	else if (variables->types[index] == TYPE_STRING)
-	{
-		debug("string\n");
-		value->string = variables->values[index].string;
-	}
-	else if (variables->types[index] == TYPE_BOOL)
-	{
-		debug("bool\n");
-		value->boolean = variables->values[index].boolean;
-	}
-	else
-	{
-		debug("bad type\n");
-		return INTERNAL_ERROR;
-	}
+	*value = variables->values[index];
 
 	return SUCCESS;
 }

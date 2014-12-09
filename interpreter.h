@@ -134,25 +134,25 @@ if(stack_popping_spree(calcs, 2)==INTERNAL_ERROR)                             \
 	if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))                     \
 	{                                                                         \
 		debug(instruct " - INT\n");                                           \
-		result.boolean = values[1].integer operator values[0].integer;        \
+		result.data.boolean = values[1].data.integer operator values[0].data.integer;        \
 		stack_push(calcs, TYPE_BOOL, &(result));                              \
 	}                                                                         \
 	else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))              \
 	{                                                                         \
 		debug(instruct " - DOUBLE\n");                                        \
-		result.boolean = values[1].real operator values[0].real;              \
+		result.data.boolean = values[1].data.real operator values[0].data.real;              \
 		stack_push(calcs, TYPE_BOOL, &(result));                              \
 	}                                                                         \
 	else if ((types[0] == TYPE_BOOL) && (types[1] == TYPE_BOOL))              \
 	{                                                                         \
 		debug(instruct " - BOOL\n");                                          \
-		result.boolean = values[1].boolean operator values[0].boolean;        \
+		result.data.boolean = values[1].data.boolean operator values[0].data.boolean;        \
 		stack_push(calcs, TYPE_BOOL, &(result));                              \
 	}                                                                         \
 	else if ((types[0] == TYPE_STRING) && (types[1] == TYPE_STRING))          \
 	{                                                                         \
 		debug(instruct " - STRING\n");                                        \
-		result.boolean = (cstr_cmp(values[1].string, values[0].string) operator 0) ;\
+		result.data.boolean = (cstr_cmp(values[1].data.string, values[0].data.string) operator 0) ;\
 		stack_push(calcs, TYPE_BOOL, &(result));                              \
 	}                                                                         \
 	else                                                                      \
@@ -180,13 +180,13 @@ if(stack_popping_spree(calcs, 2)==INTERNAL_ERROR)                             \
 	if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))                     \
 	{                                                                         \
 		debug(instruct " - INT\n");                                           \
-		result.integer = values[1].integer operator values[0].integer;        \
+		result.data.integer = values[1].data.integer operator values[0].data.integer;        \
 		stack_push(calcs, TYPE_INT, &(result));                               \
 	}                                                                         \
 	else if ((types[0] == TYPE_BOOL) && (types[1] == TYPE_BOOL))              \
 	{                                                                         \
 		debug(instruct " - BOOL\n");                                          \
-		result.boolean = values[1].boolean operator values[0].boolean;        \
+		result.data.boolean = values[1].data.boolean operator values[0].data.boolean;        \
 		stack_push(calcs, TYPE_BOOL, &(result));                              \
 	}                                                                         \
 	else                                                                      \

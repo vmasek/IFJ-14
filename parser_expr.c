@@ -409,23 +409,23 @@ static enum terminal get_term(Token *token)
 
 static Value get_value(Token *token)
 {
-    Value value = {.integer = 0};
+    Value value = {.inited = true};
 
     if (token == NULL)
         return value;
 
     switch (get_type(token)) {
     case TYPE_INT:
-        value.integer = token->value.value_int;
+        value.data.integer = token->value.value_int;
         break;
     case TYPE_REAL:
-        value.real = token->value.value_float;
+        value.data.real = token->value.value_float;
         break;
     case TYPE_STRING:
-        value.string = token->value.value_string;
+        value.data.string = token->value.value_string;
         break;
     case TYPE_BOOL:
-        value.boolean = token->value.value_keyword == KEYWORD_TRUE;
+        value.data.boolean = token->value.value_keyword == KEYWORD_TRUE;
         break;
     default:
         break;
