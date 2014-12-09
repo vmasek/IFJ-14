@@ -1,0 +1,76 @@
+# dot -Tpng lexer.gv -o lexer.png
+# obsah fsm.gv:
+digraph finite_state_machine {
+        rankdir=LR;
+        size="8,15";
+       
+        node [shape = doublecircle]; START;
+        node [shape = point]; qi;
+ 
+        node [shape=circle];
+        qi -> START;
+    
+        START -> SUCCESS                [label = "EOF"];
+        START -> LEXER_ID_KEYWORD   [label = "a-z, A-Z, _"];
+        START -> LEXER_INT_LOADING  [label = "0-9"];
+
+        START -> SUCCESS [label = "+"];
+        START -> SUCCESS [label = "-"];
+        START -> SUCCESS [label = "*"];
+        START -> SUCCESS [label = "/"];
+        START -> SUCCESS [label = "="];
+        START -> LEXER_MAYBE_ASSIGNMENT [label = ":"];
+        START -> SUCCESS [label = ";"];
+        START -> LEXER_MAYBE_DOUBLE_DOT [label = "."];
+        START -> SUCCESS [label = ","];
+        START -> SUCCESS [label = "("];
+        START -> SUCCESS [label = ")"];
+        START -> LEXER_MAYBE_GREATER_EQUAL [label = ">"];
+        START -> LEXER_MAYBE_LESS_EQUAL [label = "<"];
+        START -> LEXER_STR_START [label = "'"];
+        START -> LEXER_COMMENT [label = "{"];
+
+        LEXER_COMMENT -> LEXER_START [label = "}"];
+
+        LEXER_STR_START -> LEXER_STR_AP [label = "'"];
+        LEXER_STR_START -> LEXER_STR_LOAD [label = "printable"];
+
+        LEXER_STR_LOAD -> LEXER_STR_AP [label = "'"];
+        LEXER_STR_LOAD -> LEXER_STR_LOAD [label = "printable"];
+
+        LEXER_STR_AP -> LEXER_STR_LOAD [label = "'"];
+        LEXER_STR_AP -> LEXER_STR_SPEC [label = "#"];
+        LEXER_STR_AP -> SUCCESS [label = "not ' or #"];
+
+        LEXER_STR_SPEC -> LEXER_STR_LOAD [label = "'"];
+        LEXER_STR_SPEC -> LEXER_STR_SPEC [label = "0-9"];
+
+        LEXER_MAYBE_GREATER_EQUAL -> SUCCESS [label = "="];
+        LEXER_MAYBE_GREATER_EQUAL -> SUCCESS [label = ""];
+
+        LEXER_MAYBE_LESS_EQUAL -> SUCCESS [label = "="];
+        LEXER_MAYBE_LESS_EQUAL -> SUCCESS [label = ">"];
+        LEXER_MAYBE_LESS_EQUAL -> SUCCESS [label = ""];
+
+        LEXER_MAYBE_ASSIGNMENT -> SUCCESS [label = "="];
+        LEXER_MAYBE_ASSIGNMENT -> SUCCESS [label = ""];
+
+        LEXER_INT_LOADING -> LEXER_INT_LOADING [label = "0-9"];
+        LEXER_INT_LOADING -> LEXER_FLOAT_LOADING_FIRST [label = "."];
+        LEXER_INT_LOADING -> LEXER_FLOAT_EXP_LOADING_FIRST [label = "e, E"];
+        LEXER_INT_LOADING -> SUCCESS [label = ""];
+
+        LEXER_FLOAT_LOADING_FIRST -> LEXER_FLOAT_LOADING [label = "0-9"];
+
+        LEXER_FLOAT_LOADING -> LEXER_FLOAT_LOADING [label = "0-9"];
+        LEXER_FLOAT_LOADING -> LEXER_FLOAT_EXP_LOADING_FIRST [label = "e, E"];
+        LEXER_FLOAT_LOADING -> SUCCESS [label = "not 0-9"];
+
+        LEXER_FLOAT_EXP_LOADING_FIRST -> LEXER_FLOAT_EXP_LOADING [label = "0-9"];
+
+        LEXER_FLOAT_EXP_LOADING -> SUCCESS [label = "not 0-9"];
+        LEXER_FLOAT_EXP_LOADING -> LEXER_FLOAT_EXP_LOADING [label = "0-9"];
+
+        LEXER_ID_KEYWORD -> SUCCESS [label = "not a-z, A-Z, 0-9, _"];
+        LEXER_ID_KEYWORD -> LEXER_ID_KEYWORD [label = "a-z, A-Z, 0-9, _"];
+}
