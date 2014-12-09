@@ -64,11 +64,14 @@
 /**
  * Union representing value of any type
  */
-typedef union {
-    int integer;
-    double real;
-    cstring *string;
-    bool boolean;
+typedef struct {
+    union {
+        int integer;
+        double real;
+        cstring *string;
+        bool boolean;
+    } data;
+    bool inited;
 } Value;
 
 
