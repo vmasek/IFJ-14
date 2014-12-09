@@ -652,8 +652,8 @@ static int handle_call(Token *tokens, Stack *type_stack, Tree **trees,
     if (instr_type == I_CALL) {
         while (local_count--) {
             if (gen_instr(instr_ptr, 
-                          local_count >= param_count ? I_PREP : I_PASS,
-                          locals[local_count]->type, NULL) != SUCCESS)
+                !local_count || local_count > param_count ? I_PREP : I_PASS,
+                locals[local_count]->type, NULL) != SUCCESS)
                 return INTERNAL_ERROR;
         }
     }
