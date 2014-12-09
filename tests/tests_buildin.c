@@ -52,7 +52,7 @@ int test_length()
 int test_copy()
 {
     int failures = 0;
-    const int test_count = 4;
+    //const int test_count = 4;
 
     cstring *Vojto = cstr_create_str("Ahoj Karle");
     cstring *Albert = copy(Vojto, 2, 6);
@@ -99,7 +99,7 @@ int test_copy()
 int test_find()
 {
     int failures = 0;
-    const int test_count = 5;
+    //const int test_count = 5;
     //printf("\n*** Testing buildin find ***\n");
 
     cstring *Vojto = cstr_create_str("Ahoj Karle      1");
@@ -161,7 +161,7 @@ int test_find()
 int test_sort()
 {
     int failures = 0;
-    const int test_count = 4;
+    //const int test_count = 4;
     //printf("\n*** Testing buildin sort ***\n");
     cstring *Vojto = cstr_create_str("abcABCdefDEF");
 
