@@ -29,6 +29,7 @@ typedef enum
     I_PUSH,   			// push
     I_ASSIGN,   		// :=
     I_ADD,      		// +
+    I_NEG,              // unary -
     I_SUB,      		// -
     I_MUL,				// *
     I_DIV,      		// /
