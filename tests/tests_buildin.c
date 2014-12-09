@@ -2,11 +2,23 @@
 
 void test_buildin()
 {
+	int failures=0;
+
     printf("*** Testing of builtin ***\n");
-    test_length();
-    test_copy();
-    test_find();
-    test_sort();
+    failures += test_length();
+    failures += test_copy();
+    failures += test_find();
+    failures += test_sort();
+
+
+    if(failures)
+	{
+		printf("\n\n!!! ERROR has occured during testing !!!\n\n");
+	}
+	else
+	{
+		printf("\n\nOK. Everything is fine.\n\n");
+	}
 }
 
 int test_length()

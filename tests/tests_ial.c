@@ -34,5 +34,15 @@ int test_kmp_substr()
     }
     print_result(test_count, failures);
 
+
+	if(failures)
+	{
+		printf("\n\n!!! ERROR has occured during testing !!!\n\n");
+	}
+	else
+	{
+		printf("\n\nOK. Everything is fine.\n\n");
+	}
+
     return failures;
 }
