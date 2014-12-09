@@ -83,6 +83,7 @@ int interpret(Instruction *item, Stack *calcs, Stack *locals, Stack *instruction
 		}
 		///                         Instruction operations
 		stack_push(calcs, types[0], &result);
+		break;
 
 	case I_ADD:
 
