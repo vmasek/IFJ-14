@@ -121,12 +121,6 @@ TESTS=(	#this is array of keys to coded tests (will be used as argument for proj
 			
 		)
 
-FILE_OUT_TESTS=(	#this is array of keys to tests that need file redirection
-					"cstring"
-					"stack"
-					"tree"
-					"inter" #inter // interpreter
-				)
 
 red='\e[0;31m'
 green='\e[0;32m'
@@ -158,41 +152,31 @@ if [[ $tests == true || $MODULES == true  ]]; then
 	for test in "${TESTS[@]}"
 	do
 		#if array contains element
-		if [[ "${FILE_OUT_TESTS[@]}" =~ "${test}" || "${FILE_OUT_TESTS[${#FILE_OUT_TESTS[@]}-1]}" == "${test}" ]]; then
-			#echo "*************************************contained*********************************************************"
-			echo "*** Testing of $test ***"
-			if [[ "inter" == "${test}" ]]; then
+		#if [[ "${FILE_OUT_TESTS[@]}" =~ "${test}" || "${FILE_OUT_TESTS[${#FILE_OUT_TESTS[@]}-1]}" == "${test}" ]]; then
+		
+		echo "*** Testing of $test ***"
+		if [[ "inter" == "${test}" ]]; then
 
-				for inst in "${I_TESTS[@]}"; do
-					"$BIN_TEST" "$test" "$inst" &>"$test"."$inst".out
-					if [[ "$(tail "$test"."$inst".out)" =~ "OK. Everything is fine." ]]; then
-						echo -e "${green}OK.${NC} $inst is correct."
-						rm "$test"."$inst".out
-					else
-						echo -e "${red}ERROR${NC} has occured during test of $test $inst ! \t ${color2}LOG:${NC} \"$test.$inst.out\"  ${color2}Try running:${NC} \"$BIN_TEST $test $inst\" ."
-					fi
-
-				done
-
-			else
-				"$BIN_TEST" "$test" &>"$test".out
-				if [[ "$(tail "$test".out)" =~ "OK. Everything is fine." ]]; then
-					echo -e "${green}OK.${NC} In $test is everything fine."
-					rm "$test".out
+			for inst in "${I_TESTS[@]}"; do
+				"$BIN_TEST" "$test" "$inst" &>"$test"."$inst".out
+				if [[ "$(tail "$test"."$inst".out)" =~ "OK. Everything is fine." ]]; then
+					echo -e "${green}OK.${NC} $inst is correct."
+					rm "$test"."$inst".out
 				else
-					echo -e "${red}ERROR${NC} has occured during test of $test ! \t ${color2}LOG:${NC} \"$test.out\"  ${color2}Try running:${NC} \"$BIN_TEST $test\" ."
+					echo -e "${red}ERROR${NC} has occured during test of $test $inst ! \t ${color2}LOG:${NC} \"$test.$inst.out\"  ${color2}Try running:${NC} \"$BIN_TEST $test $inst\" ."
 				fi
 
-			fi
-		else
-			result=$("$BIN_TEST" "$test" 2>&1)
-			echo "$result"
-			if  echo "$result" | grep 'Result: Failed [1-9]' >/dev/null ; then
-				echo -e "${red}ERROR${NC} has occured during test of $test ! If needed try running \"$BIN_TEST $test\" ."
+			done
 
-			else
+		else
+			"$BIN_TEST" "$test" &>"$test".out
+			if [[ "$(tail "$test".out)" =~ "OK. Everything is fine." ]]; then
 				echo -e "${green}OK.${NC} In $test is everything fine."
+				rm "$test".out
+			else
+				echo -e "${red}ERROR${NC} has occured during test of $test ! \t ${color2}LOG:${NC} \"$test.out\"  ${color2}Try running:${NC} \"$BIN_TEST $test\" ."
 			fi
+
 		fi
 
 		if [[ $mem_check == true ]]; then
