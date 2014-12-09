@@ -81,9 +81,6 @@ const char *symbols[] = {
 void debug_print_token(Token *token)
 {
 	switch (token->type) {
-	case TOKEN_ERROR:
-		debug("Error\n");
-		break;
 	case TOKEN_ID:
 		debug("ID\n");
         debug("%s\n", token->value.value_name);
