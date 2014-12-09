@@ -55,8 +55,8 @@ int test_cstring_complex(void);
 int test_gc(void);
 int test_gc_complex(void);
 
-///=================================INTERPRET=================================
-//void test_scanner_unary(void);
+///=================================Unary Scanner==============================
+void test_scanner_unary(void);
 
 
 ///=================================INTERPRET=================================

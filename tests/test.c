@@ -42,6 +42,11 @@ int main(int argc, char *argv[])
 		{
 			test_buildin(); ///test for buildin copy gives SIGSEGV
 		}
+		
+		if(!argc || !strcmp(argv[i], "unary"))
+		{
+			test_scanner_unary(); ///test for buildin copy gives SIGSEGV
+		}
 		if(!argc || !strcmp(argv[i], "interpreter") || !strcmp(argv[i], "inter"))
 		{
 			if(argv[i+1])
