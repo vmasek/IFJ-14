@@ -16,10 +16,17 @@
  * @brief Counting characters in cstring and returns length of cstring.
  *
  * @param  s cstring String whose characters we want to count.
- * @return   int       Number of characters in string.
+ * @return   int       Number of characters in string. (-1) if error.
+ *
  */
 int length(cstring *s)
 {
+	if(!s)
+	{
+		debug("cstring not given\n");
+		return -1;
+	}
+
     return (s->size);
 }
 
@@ -34,6 +41,11 @@ int length(cstring *s)
  */
 cstring *copy(const cstring *s, int i, int n)
 {
+	if(!s)
+	{
+		debug("cstring not given\n");
+		return NULL;
+	}
 
     char *string = calloc(n + 1, 1);
     strncpy(string, &s->str[i - 1], n);
@@ -49,15 +61,31 @@ cstring *copy(const cstring *s, int i, int n)
  * @return          int        Returns index where ẃas first occurence of substring found.
  *                             If searched substring is empty, returns position 1.
  *                             If string where to search is empty returns 0.
+ *                             IF error -1.
  */
 int find(cstring *s, cstring *search)
 {
-    if (strcmp(s->str, "") == 0)
-        return 0;
-    else if (strcmp(search->str, "") == 0)
-        return 1;
+	if(!s || !search)
+	{
+		debug("cstrings not given\n");
+		return -1;
+	}
+
+	if (s->size == 0)
+	{
+		debug("can not search in empty string\n");
+		return 0;
+	}
+    else if (search->size == 0)
+	{
+		debug("searched is empty\n");
+		return 1;
+	}
     else
-        return (kmp_substr(s->str, search->str) + 1);
+	{
+		debug("calling kmp_substr\n");
+		return (kmp_substr(s->str, search->str) + 1);
+	}
 }
 
 /**
@@ -68,6 +96,12 @@ int find(cstring *s, cstring *search)
  */
 cstring *sort(cstring *s)
 {
+	if(!s)
+	{
+		debug("cstring not given\n");
+		return NULL;
+	}
+
     ms_sort(s->str);
     return s;
 }
