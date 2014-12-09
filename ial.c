@@ -77,6 +77,7 @@ int kmp_substr(const char *string, const char *sub)
             }
         }
     }
+    debug("substring not found\n");
     return -1; /* If we get here, occurance of substring was not found. */
 }
 
@@ -338,7 +339,7 @@ static inline int tree_create_right(Tree *tree, Tree_Node *tmp, cstring *key, vo
  * @param  tree where to insert.
  * @param  key of node to search/insert.
  * @param  data
- * @return ERR. codes (SEMANTIC_ERROR when inserting existing)
+ * @return ERR. codes (UNDEFINED_IDENTIFIER when inserting existing key)
  */
 int tree_insert(Tree *tree, cstring *key, void *data)
 {
@@ -349,6 +350,7 @@ int tree_insert(Tree *tree, cstring *key, void *data)
     Tree_Node *tmp = tree->root;
 
     while (tmp) {
+
 
         if (key->size < tmp->key->size) {
             debug("left shift\n");
@@ -364,7 +366,7 @@ int tree_insert(Tree *tree, cstring *key, void *data)
                 tmp = tmp->right;
         } else {
             if (!cstr_cmp(key, tmp->key)) {
-                return SEMANTIC_ERROR;
+                return UNDEFINED_IDENTIFIER;
             }
             debug("right shift\n");
             if (!tmp->right) {
