@@ -441,6 +441,10 @@ int get_token(Token *token, FILE *input) {
                 token->value.value_float = (double)token->value.value_int;
                 break;
 
+            } else if((symbol >= 'a' && symbol <= 'z') || (symbol >= 'A' && symbol <= 'Z')){
+                return LEXICAL_ERROR;
+                break; 
+
             } else {
                 token->value.value_int = (int)atof(buffer);
                 ungetc(symbol, input);
