@@ -47,6 +47,8 @@ typedef enum
     I_COPY, 			// copy
     I_FIND, 			// find
     I_SORT, 			// sort
+    I_PREP,             // push uninited local var
+    I_PASS,             // push argument
 	I_JMP,				// jump
 	I_CALL,				// call
 	I_HALT,				// halt
