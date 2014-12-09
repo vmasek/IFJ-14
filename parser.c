@@ -35,7 +35,7 @@ static int nt_else(FILE *input, Tree *locals, Tree *globals, Tree *functions,
                    Instruction **instr, Variables *vars);
 static int gen_instr(Instruction **instr_ptr, Instruction_type type, int index,
                      unsigned locals_count, Instruction *alt_instr);
-static int search_trees(cstring *id, Tree *locals, Tree *globals, int *_ret);
+static int search_trees(cstring *id, Tree *locals, Tree *globals, int *_ret, Type *_type);
 
 int parse(FILE *input, Instruction *first_instr, Variables *vars)
 {
@@ -381,6 +381,7 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
     int unique_id;
     Token token;
     Type type;
+    Type type2;
     cstring *id;
     Instruction *tmp_instr = NULL;
     Instruction *tmp_instr2 = NULL;
@@ -392,7 +393,7 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
             CHECK_VALUE(t_symbol(input, PARENTHESIS_L), ret);
             CHECK_VALUE(t_id(input, &id), ret);
             CHECK_VALUE(t_symbol(input, PARENTHESIS_R), ret);
-            CHECK_VALUE(search_trees(id, locals, globals, &unique_id), ret);
+            CHECK_VALUE(search_trees(id, locals, globals, &unique_id, NULL), ret);
             CHECK_VALUE(gen_instr(instr, I_READLN, unique_id, 0, NULL), ret);
             return SUCCESS;
         } else if (token.value.value_keyword == KEYWORD_WRITE) {
@@ -458,7 +459,10 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
         CHECK_VALUE(parse_expr(input, locals, globals, functions, vars, instr, &type, false),
                     ret);
         CHECK_VALUE(search_trees(cstr_create_str(token.value.value_name),
-                                locals, globals, &unique_id), ret);
+                                locals, globals, &unique_id, &type2), ret);
+        if (type != type2) {
+            return INCOMPATIBLE_TYPE;
+        }
         CHECK_VALUE(gen_instr(instr, I_ASSIGN, unique_id, 0, NULL), ret);
         return SUCCESS;
     }
@@ -534,7 +538,7 @@ static int gen_instr(Instruction **instr_ptr, Instruction_type type, int index,
     return SUCCESS;
 }
 
-static int search_trees(cstring *id, Tree *locals, Tree *globals, int *_ret)
+static int search_trees(cstring *id, Tree *locals, Tree *globals, int *_ret, Type *_type)
 {
     Tree_Node *node = NULL;
 
@@ -544,6 +548,14 @@ static int search_trees(cstring *id, Tree *locals, Tree *globals, int *_ret)
         return INTERNAL_ERROR;
     } else if ((node = tree_find_key(globals, id)) != NULL) {
         *_ret = -((int)((Var_record *)(node->data))->index + 1);
+    }
+
+    if (node != NULL) {
+        if (_type != NULL)
+            *_type = ((Var_record *)(node->data))->type;
+        return SUCCESS;
+    } else {
+        return UNDEFINED_IDENTIFIER;
     }
 
     return (node != NULL) ? SUCCESS : UNDEFINED_IDENTIFIER;
