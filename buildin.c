@@ -52,7 +52,7 @@ cstring *copy(const cstring *s, int i, int n)
  */
 int find(cstring *s, cstring *search)
 {
-	if (strcmp(s->str, "") == 0)
+    if (strcmp(s->str, "") == 0)
         return 0;
     else if (strcmp(search->str, "") == 0)
         return 1;

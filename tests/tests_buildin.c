@@ -135,7 +135,6 @@ int test_find()
     debug("\n*** za druhym ***\n");
 
     cstr_assign_str(Albert, "1");
-
     if (find(Vojto, Albert) != 17) {
 		printf("tretie\n");
         print_cstr_all(Albert);

@@ -17,6 +17,7 @@
 #include "../buildin.h"
 #include "../common.h"
 #include "../interpreter.h"
+#include "../scaner.h"
 
 
 ///=================================BUILDIN===================================
@@ -55,7 +56,10 @@ int test_gc(void);
 int test_gc_complex(void);
 
 ///=================================INTERPRET=================================
+//void test_scanner_unary(void);
 
+
+///=================================INTERPRET=================================
 void test_interpreter(int argc, char *argv);
 
 
