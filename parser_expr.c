@@ -39,8 +39,9 @@ enum symbol {
 };
 
 enum terminal {
+    TERM_NEG,       // unary -
     TERM_ADD,       // +
-    TERM_SUB,       // -
+    TERM_SUB,       // - 
     TERM_MUL,       // *
     TERM_DIV,       // /
     TERM_EQ,        // =
@@ -88,31 +89,33 @@ static Handler handle_comp;
 static Handler handle_div;
 static Handler handle_id;
 static Handler handle_literal;
+static Handler handle_neg;
 static Handler handle_not;
 static Handler handle_sub_mul;
 
 /* TABLE OF OPERATOR PRECEDENCE */
 const enum action PREC_TABLE[TERM_COUNT][TERM_COUNT] = {
-    {R, R, S, S, R, R, R, R, R, R, S, R, R, S, R, S, R, S, S, R},
-    {R, R, S, S, R, R, R, R, R, R, S, R, R, S, R, S, R, S, S, R},
-    {R, R, R, R, R, R, R, R, R, R, R, R, R, S, R, S, R, S, S, R},
-    {R, R, R, R, R, R, R, R, R, R, R, R, R, S, R, S, R, S, S, R},
-    {S, S, S, S, R, R, R, R, R, R, S, S, S, S, R, S, R, S, S, R},
-    {S, S, S, S, R, R, R, R, R, R, S, S, S, S, R, S, R, S, S, R},
-    {S, S, S, S, R, R, R, R, R, R, S, S, S, S, R, S, R, S, S, R},
-    {S, S, S, S, R, R, R, R, R, R, S, S, S, S, R, S, R, S, S, R},
-    {S, S, S, S, R, R, R, R, R, R, S, S, S, S, R, S, R, S, S, R},
-    {S, S, S, S, R, R, R, R, R, R, S, S, S, S, R, S, R, S, S, R},
-    {R, R, R, R, R, R, R, R, R, R, R, R, R, S, R, S, R, S, S, R},
-    {R, R, S, S, R, R, R, R, R, R, S, R, R, S, R, S, R, S, S, R},
-    {R, R, S, S, R, R, R, R, R, R, S, R, R, S, R, S, R, S, S, R},
-    {R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, S, R, S, S, R},
-    {S, S, S, S, S, S, S, S, S, S, S, S, S, S, R, S, R, S, S, E},
-    {S, S, S, S, S, S, S, S, S, S, S, S, S, S, S, S, P, S, S, E},
-    {R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, E, R, E, E, R},
-    {R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, E, R, E, E, R},
-    {R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, P, R, E, E, R},
-    {S, S, S, S, S, S, S, S, S, S, S, S, S, S, E, S, E, S, S, F}
+    {R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, S, R, S, S, R},
+    {S, R, R, S, S, R, R, R, R, R, R, S, R, R, S, R, S, R, S, S, R},
+    {S, R, R, S, S, R, R, R, R, R, R, S, R, R, S, R, S, R, S, S, R},
+    {S, R, R, R, R, R, R, R, R, R, R, R, R, R, S, R, S, R, S, S, R},
+    {S, R, R, R, R, R, R, R, R, R, R, R, R, R, S, R, S, R, S, S, R},
+    {S, S, S, S, S, R, R, R, R, R, R, S, S, S, S, R, S, R, S, S, R},
+    {S, S, S, S, S, R, R, R, R, R, R, S, S, S, S, R, S, R, S, S, R},
+    {S, S, S, S, S, R, R, R, R, R, R, S, S, S, S, R, S, R, S, S, R},
+    {S, S, S, S, S, R, R, R, R, R, R, S, S, S, S, R, S, R, S, S, R},
+    {S, S, S, S, S, R, R, R, R, R, R, S, S, S, S, R, S, R, S, S, R},
+    {S, S, S, S, S, R, R, R, R, R, R, S, S, S, S, R, S, R, S, S, R},
+    {S, R, R, R, R, R, R, R, R, R, R, R, R, R, S, R, S, R, S, S, R},
+    {S, R, R, S, S, R, R, R, R, R, R, S, R, R, S, R, S, R, S, S, R},
+    {S, R, R, S, S, R, R, R, R, R, R, S, R, R, S, R, S, R, S, S, R},
+    {R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, S, R, S, S, R},
+    {S, S, S, S, S, S, S, S, S, S, S, S, S, S, S, R, S, R, S, S, E},
+    {S, S, S, S, S, S, S, S, S, S, S, S, S, S, S, S, S, P, S, S, E},
+    {R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, E, R, E, E, R},
+    {R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, E, R, E, E, R},
+    {R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, P, R, E, E, R},
+    {S, S, S, S, S, S, S, S, S, S, S, S, S, S, S, E, S, E, S, S, F}
 };
 
 /* SET OF REDUCTION RULES */
@@ -127,6 +130,7 @@ const struct {
 } RULES[] = {
     {1, {{SYM_TERM, TERM_ID}}, SYM_SNT, handle_id},
     {1, {{SYM_TERM, TERM_LIT}}, SYM_SNT, handle_literal},
+    {2, {{SYM_TERM, TERM_NEG}, {SYM_SNT}}, SYM_SNT, handle_neg},
     {3, {{SYM_TERM, TERM_LP}, {SYM_SNT}, {SYM_TERM, TERM_RP}}, SYM_SNT, NULL},
     {3, {{SYM_SNT}, {SYM_TERM, TERM_ADD}, {SYM_SNT}}, SYM_SNT, handle_add},
     {3, {{SYM_SNT}, {SYM_TERM, TERM_SUB}, {SYM_SNT}}, SYM_SNT, handle_sub_mul},
@@ -346,6 +350,8 @@ static enum terminal get_term(Token *token)
             return TERM_ADD;
         case SUBTRACTION:
             return TERM_SUB;
+        case NEGATION:
+            return TERM_NEG;
         case MULTIPLICATION:
             return TERM_MUL;
         case DIVISION:
@@ -745,6 +751,34 @@ static int handle_literal(Token *tokens, Stack *type_stack, Tree **trees,
         variables_add(global_vars, type, get_value(&tokens[0]), &var_index)
         != SUCCESS ||
         gen_instr(instr_ptr, I_PUSH, var_index, 0, NULL) != SUCCESS)
+        return INTERNAL_ERROR;
+
+    return SUCCESS;
+}
+
+static int handle_neg(Token *tokens, Stack *type_stack, Tree **trees,
+                      Variables *global_vars, Instruction **instr_ptr)
+{
+    Type type;
+
+    IGNORE_PARAM(tokens);
+    IGNORE_PARAM(trees);
+    IGNORE_PARAM(global_vars);
+
+    if (stack_top(type_stack, (int *)&type, NULL) != SUCCESS) {
+        debug("Syntax error\n");
+        return SYNTAX_ERROR;
+    }
+
+    if (type != TYPE_INT && type != TYPE_REAL) {
+        debug("Incompatible type\n");
+        return INCOMPATIBLE_TYPE;
+    }
+
+    stack_pop(type_stack);
+
+    if (stack_push(type_stack, type, NULL) != SUCCESS ||
+        gen_instr(instr_ptr, I_NEG, 0, 0, NULL) != SUCCESS)
         return INTERNAL_ERROR;
 
     return SUCCESS;
