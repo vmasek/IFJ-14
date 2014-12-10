@@ -160,6 +160,7 @@ if(stack_popping_spree(calcs, 2)==INTERNAL_ERROR)                             \
 		debug("Invalid type passed to instruction\n");                        \
 		return INTERNAL_ERROR;                                                \
 	}                                                                         \
+	item = item->next_instruction;                                            \
 	break;                                                                    \
 
 
@@ -194,6 +195,7 @@ if(stack_popping_spree(calcs, 2)==INTERNAL_ERROR)                             \
 		debug("Invalid type passed to instruction\n");                        \
 		return INTERNAL_ERROR;                                                \
 	}                                                                         \
+	item = item->next_instruction;                                            \
 	break;                                                                    \
 
 #endif
