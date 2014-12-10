@@ -20,39 +20,43 @@ int main(int argc, char *argv[])
 #endif
 			debug("Test of DEBUGGING macro %s %s %s %d arguments. Some of them are %f and %d\n", "is OK.", "It has", "printed", 42, 1.6, 9999999);
 		}
-		if(!argc || !strcmp(argv[i], "kmp") )
+		else if(!argc || !strcmp(argv[i], "kmp") )
 			test_kmp_substr();
-		if(!argc || !strcmp(argv[i], "stack"))
+		else if(!argc || !strcmp(argv[i], "stack"))
 		{
 			//test_stack();
 		}
-		if(!argc || !strcmp(argv[i], "tree"))
+		else if(!argc || !strcmp(argv[i], "tree"))
 		{
 			test_tree();
 		}
-		if(!argc || !strcmp(argv[i], "cstring"))
+		else if(!argc || !strcmp(argv[i], "cstring"))
 		{
 			test_cstring();
 		}
-		if(!argc || !strcmp(argv[i], "gc"))
+		else if(!argc || !strcmp(argv[i], "gc"))
 		{
 			test_gc();
 		}
-		if(!argc || !strcmp(argv[i], "buildin"))
+		else if(!argc || !strcmp(argv[i], "buildin"))
 		{
 			test_buildin(); ///test for buildin copy gives SIGSEGV
 		}
-
-		if(!argc || !strcmp(argv[i], "unary"))
+		else if(!argc || !strcmp(argv[i], "unary"))
 		{
-			test_scanner_unary(); ///test for buildin copy gives SIGSEGV
+			test_scanner_unary();
 		}
-		if(!argc || !strcmp(argv[i], "interpreter") || !strcmp(argv[i], "inter"))
+		else if(!argc || !strcmp(argv[i], "interpreter") || !strcmp(argv[i], "inter"))
 		{
 			if(argv[i+1])
 				test_interpreter(argc, argv[i+1]);
 			else
 				test_interpreter(!argc, argv[i]);
+		}
+		else
+		{
+			printf("did not recognized command \"%s\"\n", argv[i]);
+			break;
 		}
 
 	}

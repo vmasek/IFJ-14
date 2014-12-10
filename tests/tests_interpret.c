@@ -47,80 +47,85 @@ void test_interpreter(int argc, char* argv)
 		printf("\n=================================================================================================================\n");
 		test_I_ASSIGN();
 	}
-	if(!argc || !strcmp(argv, "I_PUSH" ))
+	else if(!argc || !strcmp(argv, "I_PUSH" ))
 	{
 		printf("\n=================================================================================================================\n");
 		test_I_PUSH();
 	}
-	if(!argc || !strcmp(argv, "I_ADD" ))
+	else if(!argc || !strcmp(argv, "I_ADD" ))
 	{
 		printf("\n=================================================================================================================\n");
 		test_I_ADD();
 	}
-	if(!argc || !strcmp(argv, "I_SUB" ))
+	else if(!argc || !strcmp(argv, "I_SUB" ))
 	{
 		printf("\n=================================================================================================================\n");
 		test_I_SUB();
 	}
-	if(!argc || !strcmp(argv, "I_MUL" ))
+	else if(!argc || !strcmp(argv, "I_MUL" ))
 	{
 		printf("\n=================================================================================================================\n");
 		test_I_MUL();
 	}
-	if(!argc || !strcmp(argv, "I_DIV" ))
+	else if(!argc || !strcmp(argv, "I_DIV" ))
 	{
 		printf("\n=================================================================================================================\n");
 		test_I_DIV();
 	}
-	if(!argc || !strcmp(argv, "I_LESS" ))
+	else if(!argc || !strcmp(argv, "I_LESS" ))
 	{
 		printf("\n=================================================================================================================\n");
 		test_I_LESS();
 	}
-	if(!argc || !strcmp(argv, "I_GREATER" ))
+	else if(!argc || !strcmp(argv, "I_GREATER" ))
 	{
 		printf("\n=================================================================================================================\n");
 		test_I_GREATER();
 	}
-	if(!argc || !strcmp(argv, "I_LESS_EQUAL" ))
+	else if(!argc || !strcmp(argv, "I_LESS_EQUAL" ))
 	{
 		printf("\n=================================================================================================================\n");
 		test_I_LESS_EQUAL();
 	}
-	if(!argc || !strcmp(argv, "I_GREATER_EQUAL" ))
+	else if(!argc || !strcmp(argv, "I_GREATER_EQUAL" ))
 	{
 		printf("\n=================================================================================================================\n");
 		test_I_GREATER_EQUAL();
 	}
-	if(!argc || !strcmp(argv, "I_EQUAL" ))
+	else if(!argc || !strcmp(argv, "I_EQUAL" ))
 	{
 		printf("\n=================================================================================================================\n");
 		test_I_EQUAL();
 	}
-	if(!argc || !strcmp(argv, "I_NOT_EQUAL" ))
+	else if(!argc || !strcmp(argv, "I_NOT_EQUAL" ))
 	{
 		printf("\n=================================================================================================================\n");
 		test_I_NOT_EQUAL();
 	}
-	if(!argc || !strcmp(argv, "I_AND" ))
+	else if(!argc || !strcmp(argv, "I_AND" ))
 	{
 		printf("\n=================================================================================================================\n");
 		test_I_AND();
 	}
-	if(!argc || !strcmp(argv, "I_OR" ))
+	else if(!argc || !strcmp(argv, "I_OR" ))
 	{
 		printf("\n=================================================================================================================\n");
 		test_I_OR();
 	}
-	if(!argc || !strcmp(argv, "I_XOR" ))
+	else if(!argc || !strcmp(argv, "I_XOR" ))
 	{
 		printf("\n=================================================================================================================\n");
 		test_I_XOR();
 	}
-	if(!argc || !strcmp(argv, "I_NOT" ))
+	else if(!argc || !strcmp(argv, "I_NOT" ))
 	{
 		printf("\n=================================================================================================================\n");
 		test_I_NOT();
+	}
+	else
+	{
+		printf("did not recognized command \"%s\"\n", argv);
+		return;
 	}
 }
 
@@ -135,6 +140,8 @@ void test_I_ASSIGN(void)
 
 ///-----declarations-of-needed-structs----------------------------------------
 	Instruction instruction;
+	instruction.next_instruction = NULL;
+	instruction.alt_instruction  = NULL;
 	instruction.instruction = I_ASSIGN;
 
 
@@ -347,6 +354,8 @@ void test_I_PUSH(void)
 
 ///-----declarations-of-needed-structs----------------------------------------
 	Instruction instruction;
+	instruction.next_instruction = NULL;
+	instruction.alt_instruction  = NULL;
 	instruction.instruction = I_PUSH;
 
 
@@ -570,6 +579,8 @@ void test_I_ADD(void)
 
 ///-----declarations-of-needed-structs----------------------------------------
 	Instruction instruction;
+	instruction.next_instruction = NULL;
+	instruction.alt_instruction  = NULL;
 	instruction.instruction = I_ADD;
 
 	Stack calcs;
@@ -780,6 +791,8 @@ void test_I_SUB(void)
 
 ///-----declarations-of-needed-structs----------------------------------------
 	Instruction instruction;
+	instruction.next_instruction = NULL;
+	instruction.alt_instruction  = NULL;
 	instruction.instruction = I_SUB;
 
 	Stack calcs;
@@ -948,6 +961,8 @@ void test_I_MUL(void)
 
 ///-----declarations-of-needed-structs----------------------------------------
 	Instruction instruction;
+	instruction.next_instruction = NULL;
+	instruction.alt_instruction  = NULL;
 	instruction.instruction = I_MUL;
 
 	Stack calcs;
@@ -1116,6 +1131,8 @@ void test_I_DIV(void)
 
 ///-----declarations-of-needed-structs----------------------------------------
 	Instruction instruction;
+	instruction.next_instruction = NULL;
+	instruction.alt_instruction  = NULL;
 	instruction.instruction = I_DIV;
 
 	Stack calcs;
@@ -1371,6 +1388,8 @@ void test_I_NOT(void)
 	Value temp;
 	int test = 0, errors = 1;
 	Instruction instruction;
+	instruction.next_instruction = NULL;
+	instruction.alt_instruction  = NULL;
 	instruction.instruction = I_NOT;
 	Stack calcs;
 	stack_init(&calcs, VALUE_STACK);
