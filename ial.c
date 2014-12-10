@@ -5,7 +5,7 @@
  *******************************************************************/
 
 #include "ial.h"
-#include    "errors.h"
+#include "errors.h"
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -43,6 +43,20 @@ static int gen_instr(Instruction **instr_ptr, Instruction_type type, int index,
 static int search_trees(cstring *id, Tree *locals, Tree *globals, int *_ret, Type *_type);
 static int insert_tree(Tree *insert, cstring *id, void *data, Tree *other);
 static int update_tree(Tree *update, cstring *id, void *data, Tree *other);
+static int check_functions_init(Tree *functions);
+bool check_init(Tree_Node *node);
+extern int file_end_wololo(FILE *input);
+
+inline int file_end_wololo(FILE *input)
+{
+    Token token;
+    get_token(&token, input);
+    if (token.type == TOKEN_EOF) {
+        return SUCCESS;
+    } else {
+        return SYNTAX_ERROR;
+    }
+}
 
 int parse(FILE *input, Instruction *first_instr, Variables *vars)
 {
@@ -70,6 +84,8 @@ static int nt_program(FILE *input, Tree *globals, Tree *functions,
     variables_occupy(vars, global_count);
     CATCH_VALUE(nt_func_section(input, globals, functions, vars), ret);
     CHECK_VALUE(nt_main(input, globals, functions, first_instr, vars), ret);
+    CHECK_VALUE(file_end_wololo(input), ret);
+    CHECK_VALUE(check_functions_init(functions), ret);
 
     return SUCCESS;
 }
@@ -138,7 +154,6 @@ static int nt_var_sublist(FILE *input, Tree *vars, Tree *functions, Var_record *
             (Var_record **)gc_realloc(__FILE__, *var_ar,
                                       ((*count) + 1) * sizeof(Var_record *)))
                     == NULL) {
-            debug("%d\n", *count);
             return INTERNAL_ERROR;
         }
         (*var_ar)[id] = var;
@@ -265,6 +280,7 @@ static int nt_func(FILE *input, Tree *globals, Tree *functions, Variables *vars)
         token.value.value_keyword == KEYWORD_FUNCTION) {
         MALLOC_FUNC(func, __FILE__);
         tree_create(&(func->locals));
+        CHECK_VALUE(gen_instr(&(func->first_instr), I_NOP, 0, 0, NULL), ret);
 
         CHECK_VALUE(t_id(input, &id), ret);
         CHECK_VALUE(update_tree(functions, id, func, globals), ret);
@@ -321,7 +337,6 @@ static int nt_paramlist(FILE *input, Func_record *func, Tree *functions,  int *c
         }
         func->params[id] = var;
         func->param_count = *count - 1; /* Function identifier */
-        debug("func->param_count: %d\n", func->param_count);
         return SUCCESS;
     } else if (ret == SUCCESS) {
         CHECK_VALUE(nt_paramlist(input, func, functions, count), ret);
@@ -642,5 +657,26 @@ static int update_tree(Tree *update, cstring *id, void *data, Tree *other)
     } else {
         CHECK_VALUE(tree_insert(update, id, data), ret);
         return SUCCESS;
+    }
+}
+
+static int check_functions_init(Tree *functions)
+{
+    if (functions != NULL &&
+        tree_check_all(functions, &check_init)) {
+        return SUCCESS;
+    } else {
+        return UNDEFINED_IDENTIFIER;
+    }
+}
+
+bool check_init(Tree_Node *node) {
+    Func_record *func = NULL;
+    if (node != NULL && node->data != NULL) {
+        func = (Func_record *)(node->data);
+        return (func->first_instr != NULL &&
+                func->first_instr->next_instruction != NULL);
+    } else {
+        return true;
     }
 }
