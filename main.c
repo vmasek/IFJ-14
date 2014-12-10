@@ -2,6 +2,8 @@
 
 #include "errors.h"
 #include "parser.h"
+#include "interpreter.h"
+#include "gc.h"
 
 int main(int argc, char *argv[])
 {
@@ -14,24 +16,22 @@ int main(int argc, char *argv[])
     };
     Variables global_vars;
 
+    if (argc != 2 ||
+        (fp = fopen(argv[1], "rb")) == NULL)
+        return print_error(INTERNAL_ERROR);
+
     variables_init(&global_vars);
 
-    if (argc < 2) {
-        return print_error(INTERNAL_ERROR);
-    }
+    if ((ret = parse(fp, &start, &global_vars)) != SUCCESS)
+        goto fail;
 
-    fp = fopen(argv[1], "rb");
-    if (fp == NULL) {
-        return print_error(INTERNAL_ERROR);
-    }
+    if ((ret = interpret(&start, &global_vars)) != SUCCESS)
+        goto fail;
 
-    ret = print_error(parse(fp, &start, &global_vars));
-
+fail:
     fclose(fp);
-
-    //TODO interpretation here
-
+    gc_free(GC_INSTR);
     variables_free(&global_vars);
 
-    return ret;
+    return print_error(ret);
 }
