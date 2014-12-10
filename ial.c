@@ -412,22 +412,14 @@ static inline bool tree_recursive(Tree_Node *node, tree_function_ptr func)
 
 bool tree_check_all(Tree *tree, tree_function_ptr func)
 {
-	if (!tree)
+	if (!tree||!tree->root)
 	{
-		debug("tree not given\n");
-		return INTERNAL_ERROR;
+		debug("tree not given of tree does not have root (is empty or uninited), returning true\n");
+		return true;
 	}
 
-	if(tree->root)
-	{
-		debug("calling tree recursive\n");
-		return tree_recursive(tree->root, func);
-	}
-	else
-	{
-		debug("tree does not have root (is empty or uninited)\n");
-		return false;
-	}
+	debug("calling tree recursive\n");
+	return tree_recursive(tree->root, func);
 }
 
 
