@@ -631,7 +631,7 @@ static int handle_call(Token *tokens, Stack *type_stack, Tree **trees,
         locals = function->params;
         for (unsigned i = 0; i < param_count; i++) {
             if (stack_index(type_stack, i, (int *)&cur_type, NULL) != SUCCESS ||
-                cur_type != function->params[param_count - i - 1]->type) {
+                cur_type != function->params[param_count - i]->type) {
                 debug("Incompatible type\n");
                 return INCOMPATIBLE_TYPE;
             }
