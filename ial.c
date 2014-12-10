@@ -208,11 +208,11 @@ static void tree_node_free(Tree_Node *node)
     }
 
     if (node->left) {
-        debug(" left\n");
+        debug("\tleft\n");
         tree_node_free(node->left);
     }
     if (node->right) {
-        debug(" right\n");
+        debug("\tright\n");
         tree_node_free(node->right);
     }
 
@@ -385,16 +385,29 @@ int tree_insert(Tree *tree, cstring *key, void *data)
 
 static inline bool tree_recursive(Tree_Node *node, tree_function_ptr func)
 {
-	if(func(node)==false)
-		return false;
 
     if (node->left)
-        return tree_recursive(node->left, func);
+    {
+		debug("node->left\n");
+		return tree_recursive(node->left, func);
+	}
 
     if (node->right)
-        return tree_recursive(node->right, func);
+    {
+		debug("node->right\n");
+		return tree_recursive(node->right, func);
+	}
 
-    return true;
+	if(func(node))
+	{
+		debug("returning true\n");
+		return true;
+	}
+	else
+    {
+		debug("returning false\n");
+		return false;
+	}
 }
 
 bool tree_check_all(Tree *tree, tree_function_ptr func)
@@ -405,7 +418,16 @@ bool tree_check_all(Tree *tree, tree_function_ptr func)
 		return INTERNAL_ERROR;
 	}
 
-	return tree_recursive(tree->root, func);
+	if(tree->root)
+	{
+		debug("calling tree recursive\n");
+		return tree_recursive(tree->root, func);
+	}
+	else
+	{
+		debug("tree does not have root (is empty or uninited)\n");
+		return false;
+	}
 }
 
 
