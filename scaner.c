@@ -101,6 +101,9 @@ static enum token_keyword _get_keyword(char *name) {
         if (!strcmp(name, "false"))
             return KEYWORD_FALSE;
 
+        if (!strcmp(name, "for"))
+            return KEYWORD_FOR;
+
         if (!strcmp(name, "forward"))
             return KEYWORD_FORWARD;
 
@@ -154,6 +157,9 @@ static enum token_keyword _get_keyword(char *name) {
 
         if (!strcmp(name, "true"))
             return KEYWORD_TRUE;
+
+        if (!strcmp(name, "to"))
+            return KEYWORD_TO;
 
         break;
 

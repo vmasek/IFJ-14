@@ -33,6 +33,7 @@ typedef enum
     I_SUB,      		// -
     I_MUL,				// *
     I_DIV,      		// /
+    I_INC,              // ++
     I_LESS,     		// <
     I_GREATER,  		// >
     I_LESS_EQUAL,   	// <=
