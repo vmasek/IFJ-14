@@ -43,7 +43,7 @@ static int nt_func(FILE *input, Tree *globals, Tree *functions, Variables *vars)
 static int t_id(FILE *input, cstring **_id);
 static int nt_paramlist(FILE *input, Func_record *func, Tree *functions, int *count);
 static int nt_func_body(FILE *input, Tree *locals, Tree *globals, Tree *functions,
-                        Instruction *instr, unsigned *_var_count, Variables *vars,
+                        Instruction **instr, unsigned *_var_count, Variables *vars,
                         Var_record ***var_ar);
 static int nt_comp_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
                        Instruction **intr, Variables *vars);
@@ -317,6 +317,7 @@ static int nt_func(FILE *input, Tree *globals, Tree *functions, Variables *vars)
     int count = 0;
     Token token;
     Func_record *func = NULL;
+    Instruction *instr = NULL;
     cstring *id;
 
     CHECK_VALUE(get_token(&token, input), ret);
@@ -326,6 +327,7 @@ static int nt_func(FILE *input, Tree *globals, Tree *functions, Variables *vars)
         MALLOC_FUNC(func, __FILE__);
         tree_create(&(func->locals));
         CHECK_VALUE(gen_instr(&(func->first_instr), I_NOP, 0, NULL), ret);
+        instr = func->first_instr;
 
         CHECK_VALUE(t_id(input, &id), ret);
         CHECK_VALUE(update_tree(functions, id, func, globals), ret);
@@ -344,8 +346,9 @@ static int nt_func(FILE *input, Tree *globals, Tree *functions, Variables *vars)
         CHECK_VALUE(t_symbol(input, SEMICOLON), ret);
 
         CHECK_VALUE(nt_func_body(input, func->locals, globals, functions,
-                                 func->first_instr, &(func->local_count), vars,
+                                 &instr, &(func->local_count), vars,
                                  &(func->params)), ret);
+        debug_print_instruction(func->first_instr);
         return SUCCESS;
     }
 
@@ -395,7 +398,7 @@ static int nt_paramlist(FILE *input, Func_record *func, Tree *functions,  int *c
 }
 
 static int nt_func_body(FILE *input, Tree *locals, Tree *globals, Tree *functions,
-                        Instruction *instr, unsigned *_var_count, Variables *vars,
+                        Instruction **instr, unsigned *_var_count, Variables *vars,
                         Var_record ***var_ar)
 {
     int ret;
@@ -415,12 +418,12 @@ static int nt_func_body(FILE *input, Tree *locals, Tree *globals, Tree *function
         if (_var_count != NULL)
             *_var_count = count;
         //TODO: consider removing I_NOP
-        if (instr == NULL) {
-            CHECK_VALUE(gen_instr(&instr, I_NOP, 0, NULL), ret)
+        if (*instr == NULL) {
+            CHECK_VALUE(gen_instr(instr, I_NOP, 0, NULL), ret)
         }
-        CHECK_VALUE(nt_comp_cmd(input, locals, globals, functions, &instr, vars), ret);
+        CHECK_VALUE(nt_comp_cmd(input, locals, globals, functions, instr, vars), ret);
         CHECK_VALUE(t_symbol(input, SEMICOLON), ret)
-        CHECK_VALUE(gen_instr(&instr, I_HALT, 0, NULL), ret);
+        CHECK_VALUE(gen_instr(instr, I_HALT, 0, NULL), ret);
         return SUCCESS;
     }
 }
@@ -506,17 +509,15 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
             CHECK_VALUE(t_keyword(input, KEYWORD_THEN), ret);
             CHECK_VALUE(gen_instr(instr, I_JMP, 0, NULL), ret);
             tmp_instr = *instr;
+            tmp_instr2 = NULL;
+            CHECK_VALUE(gen_instr(&tmp_instr2, I_NOP, 0, NULL),ret);
+            tmp_instr->alt_instruction = tmp_instr2;
             //TODO: remove I_NOP
-            CHECK_VALUE(gen_instr(&(tmp_instr->alt_instruction), I_NOP, 0, NULL), ret);
             CHECK_VALUE(nt_comp_cmd(input, locals, globals, functions, instr, vars), ret);
             CATCH_VALUE(nt_else(input, locals, globals, functions,
-                                &(tmp_instr->alt_instruction), vars), ret);
+                                &(tmp_instr2), vars), ret);
             CHECK_VALUE(gen_instr(instr, I_NOP, 0, NULL), ret);
-            if (tmp_instr->alt_instruction == NULL) {
-                tmp_instr->alt_instruction = *instr;
-            } else {
-                tmp_instr->alt_instruction->next_instruction = *instr;
-            }
+            tmp_instr2->next_instruction = *instr;
             return SUCCESS;
         } else if (token.value.value_keyword == KEYWORD_WHILE) {
             CHECK_VALUE(gen_instr(instr, I_NOP, 0, NULL), ret);
@@ -531,7 +532,9 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
             tmp_instr2 = *instr;
             CHECK_VALUE(nt_comp_cmd(input, locals, globals, functions, instr, vars), ret);
             (*instr)->next_instruction = tmp_instr;
-            CHECK_VALUE(gen_instr(&(tmp_instr2->alt_instruction), I_NOP, 0, NULL), ret);
+            tmp_instr = NULL;
+            CHECK_VALUE(gen_instr(&tmp_instr, I_NOP, 0, NULL), ret);
+            tmp_instr2->alt_instruction = tmp_instr;
             *instr = tmp_instr2->alt_instruction;
             return SUCCESS;
         } else if (token.value.value_keyword == KEYWORD_REPEAT) {
@@ -546,6 +549,7 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
             }
             CHECK_VALUE(gen_instr(instr, I_JMP, 0, NULL), ret);
             (*instr)->alt_instruction = tmp_instr;
+            CHECK_VALUE(gen_instr(instr, I_NOP, 0, NULL), ret);
             return SUCCESS;
         } else if (token.value.value_keyword == KEYWORD_BEGIN) {
             unget_token(&token);
@@ -574,7 +578,8 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
             CHECK_VALUE(nt_comp_cmd(input, locals, globals, functions, instr, vars), ret);
             CHECK_VALUE(gen_instr(instr, I_INC, unique_id, NULL), ret);
             (*instr)->next_instruction = tmp_instr;
-            CHECK_VALUE(gen_instr(&((*instr)->alt_instruction), I_NOP, 0, NULL), ret);
+            CHECK_VALUE(gen_instr(&tmp_instr, I_NOP, 0, NULL), ret);
+            (*instr)->alt_instruction = tmp_instr;
             *instr = (*instr)->alt_instruction;
             return SUCCESS;
         }

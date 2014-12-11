@@ -171,6 +171,8 @@ void debug_instruction_print(Instruction *instruction)
 		}
 		fprintf(stderr, "\tInstruction %d:\t%s\n", i, INSTRUCTION_NAME[temp->instruction]);
 		i++;
+        if (i > 100)
+            break;
 	} while ((temp=temp->next_instruction));
 }
 
