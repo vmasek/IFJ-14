@@ -27,6 +27,12 @@ typedef struct func_record {
     Instruction *first_instr;
 } Func_record;
 
+/**
+ * Macros for memory allocation
+ */
+#define MALLOC_VAR(val, key) if (((val) = (Var_record *)gc_malloc((key), sizeof(Var_record))) == NULL) return INTERNAL_ERROR
+#define MALLOC_FUNC(val, key) if (((val) = (Func_record *)gc_malloc((key), sizeof(Func_record))) == NULL) return INTERNAL_ERROR
+
 int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions,
                Variables *global_vars, Instruction **instr_ptr, Type *type,
                bool in_arg);
