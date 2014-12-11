@@ -434,8 +434,41 @@ int get_token(Token *token_ret, FILE *input) {
                 cstr_append_chr(token.value.value_string, symbol);
                 state = LEXER_STR_LOAD;
                 break;
+
+            } else if (symbol == '%') {
+                state = LEXER_STR_SPEC_BIN_FIRST;
+                break;
             
             } else if(isdigit(symbol)) {
+                strcatc(buffer, symbol);
+                break; 
+
+            } else {
+                return LEXICAL_ERROR;
+            }
+
+
+        case LEXER_STR_SPEC_BIN_FIRST:
+            if (symbol == '0' || symbol == '1') {
+                strcatc(buffer, symbol);
+                state = LEXER_STR_SPEC_BIN;
+                break;
+
+            } else {
+                return LEXICAL_ERROR;
+            }
+
+        case LEXER_STR_SPEC_BIN:
+            if (symbol == '\'') {
+                // FIXME what if the int is too big?!
+                // SOLUTION: allow max ?? characters (and check the value)
+                // Else: LEXICAL_ERROR
+                symbol = convert_binary((int)atof(buffer));
+                cstr_append_chr(token.value.value_string, symbol);
+                state = LEXER_STR_LOAD;
+                break;
+            
+            } else if(symbol == '0' || symbol == '1') {
                 strcatc(buffer, symbol);
                 break; 
 
