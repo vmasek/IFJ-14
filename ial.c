@@ -72,21 +72,29 @@ int kmp_substr(const char *string, const char *sub)
     kmp_table(sub, table);
 
     debug("curr_match: %d\tcurr_position: %d\n", curr_match, curr_position);
-
-    while (curr_match + curr_position < string_len) {
-        if (sub[curr_position] == string[curr_match + curr_position]) {
-            if (curr_position == sub_len - 1) {
-                return curr_match;
+    if (sub_len > 1) {
+        while (curr_match + curr_position < string_len) {
+            if (sub[curr_position] == string[curr_match + curr_position]) {
+                if (curr_position == sub_len - 1) {
+                    return curr_match;
+                }
+                curr_position++;
+            } else {
+                if (table[curr_position] > -1) {
+                    curr_match = curr_match + curr_position - table[curr_position];
+                    curr_position = table[curr_position];
+                } else {
+                    curr_position = 0;
+                    curr_match++;
+                }
+            }
+        }
+    } else if (sub_len == 1) {
+        while (curr_position < string_len) {
+            if (sub[0] == string[curr_position]) {
+                return curr_position;
             }
             curr_position++;
-        } else {
-            if (table[curr_position] > -1) {
-                curr_match = curr_match + curr_position - table[curr_position];
-                curr_position = table[curr_position];
-            } else {
-                curr_position = 0;
-                curr_match++;
-            }
         }
     }
     debug("substring not found\n");
