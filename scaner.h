@@ -133,4 +133,6 @@ void unget_token(Token *token);
 /* Frees token */
 void free_token(Token *token);
 
+int convert_binary(int binary_number);
+
 #endif //__SCANER_H__

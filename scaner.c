@@ -510,6 +510,7 @@ int get_token(Token *token_ret, FILE *input) {
         case LEXER_MAYBE_BINARY:
             if(symbol == '0' || symbol == '1')
             {
+                strcatc(buffer, symbol);
                 state = LEXER_BINARY_LOADING;
                 break;
 
@@ -651,7 +652,6 @@ void unget_token(Token *token)
 /*
  * Just for testing purpose
  */
-/*
 int main() {
     FILE *input = fopen("test", "r");
     Token *token = malloc(sizeof(Token *));
@@ -681,7 +681,7 @@ int main() {
     }
 
 
-    fclose(input);
+    //fclose(input); segfault.. why?
 
     return 0;
-}  */
+}  
