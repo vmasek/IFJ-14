@@ -37,6 +37,11 @@ int variables_add(Variables *vars, Type type, Value value, unsigned *index)
     return SUCCESS;
 }
 
+int variables_add_empty(Variables *vars, Type type)
+{
+    return variables_add(vars, type, (Value) {.inited = false}, NULL);
+}
+
 int variables_free(Variables *vars)
 {
     if (vars == NULL)

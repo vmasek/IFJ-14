@@ -20,6 +20,7 @@ typedef struct
 
 
 int variables_add(Variables *vars, Type type, Value value, unsigned *index);
+int variables_add_empty(Variables *vars, Type type);
 int variables_free(Variables *vars);
 int variables_init(Variables *vars);
 int variables_occupy(Variables *vars, unsigned count);
