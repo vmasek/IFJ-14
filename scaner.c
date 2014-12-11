@@ -448,6 +448,14 @@ int get_token(Token *token_ret, FILE *input) {
                 state = LEXER_STR_SPEC_BIN_FIRST;
                 break;
             
+            } else if (symbol == '&') {
+                state = LEXER_STR_SPEC_OCT_FIRST;
+                break;
+            
+            } else if (symbol == '$') {
+                state = LEXER_STR_SPEC_HEX_FIRST;
+                break;
+            
             } else if(isdigit(symbol)) {
                 strcatc(buffer, symbol);
                 break; 
@@ -458,7 +466,7 @@ int get_token(Token *token_ret, FILE *input) {
 
 
         case LEXER_STR_SPEC_BIN_FIRST:
-            if (symbol == '0' || symbol == '1') {
+            if (symbol >= '0' && symbol <= '7') {
                 strcatc(buffer, symbol);
                 state = LEXER_STR_SPEC_BIN;
                 break;
@@ -472,12 +480,73 @@ int get_token(Token *token_ret, FILE *input) {
                 // FIXME what if the int is too big?!
                 // SOLUTION: allow max ?? characters (and check the value)
                 // Else: LEXICAL_ERROR
-                symbol = convert_binary((int)atof(buffer));
+                symbol = (int)strtol(buffer,&ptr,2);
                 cstr_append_chr(token.value.value_string, symbol);
                 state = LEXER_STR_LOAD;
                 break;
             
-            } else if(symbol == '0' || symbol == '1') {
+            } else if(symbol >= '0' && symbol <= '7') {
+                strcatc(buffer, symbol);
+                break; 
+
+            } else {
+                return LEXICAL_ERROR;
+            }
+
+        case LEXER_STR_SPEC_OCT_FIRST:
+            if (symbol >= '0' && symbol <= '7') {
+                strcatc(buffer, symbol);
+                state = LEXER_STR_SPEC_OCT;
+                break;
+
+            } else {
+                return LEXICAL_ERROR;
+            }
+
+        case LEXER_STR_SPEC_OCT:
+            if (symbol == '\'') {
+                // FIXME what if the int is too big?!
+                // SOLUTION: allow max ?? characters (and check the value)
+                // Else: LEXICAL_ERROR
+                symbol = (int)strtol(buffer,&ptr,8);
+                cstr_append_chr(token.value.value_string, symbol);
+                state = LEXER_STR_LOAD;
+                break;
+            
+            } else if(symbol >= '0' && symbol <= '7') {
+                strcatc(buffer, symbol);
+                break; 
+
+            } else {
+                return LEXICAL_ERROR;
+            }
+
+
+        case LEXER_STR_SPEC_HEX_FIRST:
+            if ((symbol >= '0' && symbol <= '9') ||
+                (symbol >= 'a' && symbol <= 'f') ||
+                (symbol >= 'A' && symbol <= 'F')) {
+                strcatc(buffer, symbol);
+                state = LEXER_STR_SPEC_HEX;
+                break;
+
+            } else {
+                return LEXICAL_ERROR;
+            }
+
+        case LEXER_STR_SPEC_HEX:
+            if (symbol == '\'') {
+                // FIXME what if the int is too big?!
+                // SOLUTION: allow max ?? characters (and check the value)
+                // Else: LEXICAL_ERROR
+                symbol = (int)strtol(buffer,&ptr,16);
+                cstr_append_chr(token.value.value_string, symbol);
+                state = LEXER_STR_LOAD;
+                break;
+            
+            } else if ((symbol >= '0' && symbol <= '9') ||
+                (symbol >= 'a' && symbol <= 'f') ||
+                (symbol >= 'A' && symbol <= 'F')) {
                 strcatc(buffer, symbol);
                 break; 
 
