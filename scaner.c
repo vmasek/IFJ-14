@@ -214,6 +214,7 @@ int get_token(Token *token_ret, FILE *input) {
     enum token_keyword keyword;
 
     char buffer[100] = {0};
+    char *ptr;
 
     static Token token;
 
@@ -355,6 +356,14 @@ int get_token(Token *token_ret, FILE *input) {
             
             case '%':
                 state = LEXER_BINARY_LOADING_FIRST;
+                break;
+            
+            case '&':
+                state = LEXER_OCT_LOADING_FIRST;
+                break;
+            
+            case '$':
+                state = LEXER_HEX_LOADING_FIRST;
                 break;
 
             default: 
@@ -541,8 +550,7 @@ int get_token(Token *token_ret, FILE *input) {
             break;
 
         case LEXER_BINARY_LOADING_FIRST:
-            if(symbol == '0' || symbol == '1')
-            {
+            if(symbol == '0' || symbol == '1') {
                 strcatc(buffer, symbol);
                 state = LEXER_BINARY_LOADING;
                 break;
@@ -558,7 +566,61 @@ int get_token(Token *token_ret, FILE *input) {
             
             } else {
                 token.type = TOKEN_INT;
-                token.value.value_int = convert_binary((int)atof(buffer));
+                token.value.value_int = (int)strtol(buffer,&ptr,2);
+                ungetc(symbol, input);
+                *token_ret = token;
+                return SUCCESS;
+            }
+
+            break;
+
+        case LEXER_OCT_LOADING_FIRST:
+            if(symbol >= '0' && symbol <= '7') {
+                strcatc(buffer, symbol);
+                state = LEXER_OCT_LOADING;
+                break;
+
+            } else {
+                return LEXICAL_ERROR;
+            }
+
+        case LEXER_OCT_LOADING:
+            if(symbol >= '0' && symbol <= '7') {
+                strcatc(buffer, symbol);
+                break;
+            
+            } else {
+                token.type = TOKEN_INT;
+                token.value.value_int = (int)strtol(buffer,&ptr,8);
+                ungetc(symbol, input);
+                *token_ret = token;
+                return SUCCESS;
+            }
+
+            break;
+
+        case LEXER_HEX_LOADING_FIRST:
+            if ((symbol >= '0' && symbol <= '9') ||
+                (symbol >= 'a' && symbol <= 'f') ||
+                (symbol >= 'A' && symbol <= 'F')) {
+                strcatc(buffer, symbol);
+                state = LEXER_HEX_LOADING;
+                break;
+
+            } else {
+                return LEXICAL_ERROR;
+            }
+
+        case LEXER_HEX_LOADING:
+            if ((symbol >= '0' && symbol <= '9') ||
+                (symbol >= 'a' && symbol <= 'f') ||
+                (symbol >= 'A' && symbol <= 'F')) {
+                strcatc(buffer, symbol);
+                break;
+            
+            } else {
+                token.type = TOKEN_INT;
+                token.value.value_int = (int)strtol(buffer,&ptr,16);
                 ungetc(symbol, input);
                 *token_ret = token;
                 return SUCCESS;
