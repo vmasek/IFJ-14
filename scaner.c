@@ -354,11 +354,14 @@ int get_token(Token *token_ret, FILE *input) {
                 state = LEXER_STR_AP;
                 break;
             }
-            // FIXME: else if (a-z...):
+            // FIXME: else if (a-z...): //FIXED by Tom, please check values
+            else if(isprint(symbol)){
             token.value.value_string = cstr_create_chr(symbol);
             state = LEXER_STR_LOAD;
             break;
-            // FIXME: else ERROR
+            } else 
+                return LEXICAL_ERROR;
+            // FIXME: else ERROR // FIXED by Tom
 
 
         case LEXER_STR_LOAD:
@@ -367,10 +370,14 @@ int get_token(Token *token_ret, FILE *input) {
                 break;
             }
 
-            // FIXME: if printable:
+            // FIXME: if printable: //Fixed by Tom
+            else if(isprint(symbol)){
             cstr_append_chr(token.value.value_string, symbol);
             break;
-            // FIXME: else ERROR
+            }
+            else
+                return LEXICAL_ERROR;
+            // FIXME: else ERROR //Fixe by Tom
 
 
         case LEXER_STR_AP:
@@ -385,9 +392,14 @@ int get_token(Token *token_ret, FILE *input) {
                 break;
             }
 
-            ungetc(symbol, input);
-            *token_ret = token;
-            return SUCCESS;
+            else if(symbol == EOF)
+                return LEXICAL_ERROR;
+            
+            else {
+                ungetc(symbol, input);
+                *token_ret = token;
+                return SUCCESS;
+            }
 
 
         case LEXER_STR_SPEC:
@@ -399,10 +411,14 @@ int get_token(Token *token_ret, FILE *input) {
                 break;
             }
 
-            // FIXME: if number:
-            strcatc(buffer, symbol);
-            break;
-            // FIXME: else ERROR;
+            else if(isdigit(symbol)){
+                strcatc(buffer, symbol);
+                break; 
+            }
+            else
+                return LEXICAL_ERROR;
+
+            // FIXME: else ERROR; //Fixed by Tom
 
         case LEXER_MAYBE_GREATER_EQUAL:
             if (symbol == '=') {
@@ -564,19 +580,17 @@ int get_token(Token *token_ret, FILE *input) {
                 ungetc(symbol, input);
                 *token_ret = token;
                 return SUCCESS;
-            } else {
+            } else if (symbol == EOF) {
+                token.type = TOKEN_EOF;
+                *token_ret = token;
+                return SUCCESS;
+            }
+            else {
                 token.value.value_name[token_name_pos] = tolower(symbol);
                 token_name_pos ++;
                 break;
             }
             // FIXME: this will never happen
-            if (symbol == EOF) {
-                token.type = TOKEN_EOF;
-                *token_ret = token;
-                return SUCCESS;
-            }
-            break;
-
             default:
                 return LEXICAL_ERROR;
                 break;
