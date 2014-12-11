@@ -603,7 +603,10 @@ int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instru
 			if (types[0] == TYPE_STRING)
 			{
 				debug("I_FIND - string\n");
-				result.data.string = sort(result.data.string);
+
+				if (sort(&result.data.string) != SUCCESS)
+                    return INTERNAL_ERROR;
+
 				stack_push(calcs, TYPE_STRING, &result);
 			}
 			else
