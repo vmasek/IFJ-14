@@ -20,6 +20,7 @@ EXPR=false
 SYNTAX=false
 STRINGS=false
 BINARY=false
+SHOW_OK=false
 
 if [ $# -gt 0 ]; then
 
@@ -86,6 +87,10 @@ if [ $# -gt 0 ]; then
 			ALL=false
 		fi
 
+		if [[ "ok" == "$arg" ]]; then			# param "log" to archive all logs
+			SHOW_OK=true
+		fi
+
 	done
 fi
 
@@ -115,6 +120,8 @@ I_TESTS=(	#this is array of keys to coded tests of instructions(will be used as 
 			"I_OR"
 			"I_XOR"
 			"I_NOT"
+
+			"I_HARDCODE_1"
 		)
 
 TESTS=(	#this is array of keys to coded tests (will be used as argument for project)
@@ -282,7 +289,11 @@ if [[ $tests == true || $PROJECT == true  ]]; then
 		diff "$file.current.stdout" "$file.stdout.correct" >$file.diff.out
 		diff_code=$?
 		if [[ "$diff_code" == "0"  &&  "$exit_code" == "$exit_code_correct" ]]; then
-			echo -e "[  ${green}OK${NC}  ]\tfile: $file_name"
+			if [[ $SHOW_OK == true ]]; then			# param "log" to archive all logs
+				echo -e "[  ${green}OK${NC}  ]\tfile: $file_name\t\t\t\treturn code: $exit_code_correct"
+			else
+				echo -e "[  ${green}OK${NC}  ]\tfile: $file_name"
+			fi
 			OK=true
 			((OK_count++))
 		else
