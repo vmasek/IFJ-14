@@ -23,6 +23,21 @@
  * Get a keyword code from it's string representation.
  */
 
+int convert_binary(int binary_number)
+{
+    int base = 1, reminder = 0, decimal = 0;
+    
+    while(binary_number > 0){
+    reminder = binary_number % 10;
+    decimal = decimal + reminder * base;
+    binary_number = binary_number / 10;
+    base = base * 2;
+    
+    }
+    
+    return decimal;
+}
+
 static bool token_register(Token *token, bool set)
 {
     static Token saved_token;
@@ -331,7 +346,11 @@ int get_token(Token *token_ret, FILE *input) {
             case '{':
                 state = LEXER_COMMENT;
                 break;
-                
+            
+            case '%':
+                state = LEXER_MAYBE_BINARY;
+                break;
+
             default: 
                 return LEXICAL_ERROR;
                 break;
@@ -409,13 +428,11 @@ int get_token(Token *token_ret, FILE *input) {
                 cstr_append_chr(token.value.value_string, symbol);
                 state = LEXER_STR_LOAD;
                 break;
-            }
-
-            else if(isdigit(symbol)){
+            
+            } else if(isdigit(symbol)) {
                 strcatc(buffer, symbol);
                 break; 
-            }
-            else
+            } else
                 return LEXICAL_ERROR;
 
             // FIXME: else ERROR; //Fixed by Tom
@@ -483,6 +500,36 @@ int get_token(Token *token_ret, FILE *input) {
 
             break;
 
+        case LEXER_MAYBE_BINARY:
+            if(symbol == '0' || symbol == '1')
+            {
+                state = LEXER_BINARY_LOADING;
+                break;
+            } else {
+                return LEXICAL_ERROR;
+            }
+
+        case LEXER_BINARY_LOADING:
+            if(symbol >= '0' && symbol <= '1') { // if symbol is binary number
+                strcatc(buffer, symbol); //add to buffer
+                break;
+            
+            } else if((symbol >= 'a' && symbol <= 'z') || (symbol >= 'A' && symbol <= 'Z')) {
+                return LEXICAL_ERROR;
+            } else if(symbol == '\'') {
+
+            }   
+
+            else { //else make int from buffer and return; //FIX ME: WHAT IF THERE IS CHAR?, is it correct?
+
+                token.type = TOKEN_INT;
+                token.value.value_int = convert_binary((int)atof(buffer));
+                ungetc(symbol, input);
+                *token_ret = token;
+                return SUCCESS;
+            }
+
+            break;
 
         case LEXER_INT_LOADING:
             if (symbol >= '0' && symbol <= '9') {
