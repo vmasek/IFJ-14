@@ -1,16 +1,19 @@
 /**
- * @file    buildin.h
- * @name    Implementation of buildin functions.
+ * @file    builtin.h
+ * @brief   Implementation of buildin functions.
  * @author  Tomas Paulus (xpaulu01)
  *******************************************************************/
 
-#include "ial.h"
-#include "cstring.h"
-#include "buildin.h"
-#include "errors.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "buildin.h"
+#include "cstring.h"
+#include "debug.h"
+#include "errors.h"
+#include "ial.h"
+
 
 /**
  * @brief Counting characters in cstring and returns length of cstring.
@@ -29,6 +32,7 @@ int length(cstring *s)
 
     return (s->size);
 }
+
 
 /**
  * @brief Copy characters from cstring in to the cstring from position i and copy
@@ -51,6 +55,7 @@ cstring *copy(const cstring *s, int i, int n)
     strncpy(string, &s->str[i - 1], n);
     return cstr_create_str(string);
 }
+
 
 /**
  * @brief Finds first occurence of substring and returns index where substring starts.
@@ -87,6 +92,7 @@ int find(cstring *s, cstring *search)
 		return (kmp_substr(s->str, search->str) + 1);
 	}
 }
+
 
 /**
  * @brief Sorting cstring characters by ordinal value.

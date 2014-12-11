@@ -3,6 +3,7 @@
  * @author  Tomas Paulus (xpaulu01), Vojtech Mašek (xmasek15)
  * @brief   Error messages and error return codes for IFJ2014
  */
+#include <stdio.h>
 
 #include "errors.h"
 

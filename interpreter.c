@@ -4,9 +4,10 @@
  * @author  Vojtech Mašek (xmasek15), Tomas Paulus (xpaulu01)
  *******************************************************************/
 
+
+#include "debug.h"
 #include "interpreter.h"
-
-
+#include "buildin.h"
 
 
 int interpret(Instruction *item, Variables *globals)
@@ -20,25 +21,11 @@ int interpret(Instruction *item, Variables *globals)
 	int err_code;
 
 	Stack calcs;
-	if(stack_init(&calcs, VALUE_STACK)!=SUCCESS)
-	{
-		debug("Initing stack of calc values error.\n");
-		return INTERNAL_ERROR;
-	}
-
+	stack_init(&calcs, VALUE_STACK);
 	Stack locals;
-	if(stack_init(&locals, VALUE_STACK)!=SUCCESS)
-	{
-		debug("Initing stack of local values error.\n");
-		return INTERNAL_ERROR;
-	}
-
+	stack_init(&locals, VALUE_STACK);
 	Stack instructions;
-	if(stack_init(&instructions, INSTR_STACK)!=SUCCESS)
-	{
-		debug("Initing stack of instructions error.\n");
-		return INTERNAL_ERROR;
-	}
+	stack_init(&instructions, INSTR_STACK);
 
 
 	if((err_code = interpret_loop(item, &calcs, &locals, &instructions, globals)) != SUCCESS)

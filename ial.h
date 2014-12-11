@@ -1,15 +1,15 @@
 /**
  * @file    ial.h
- * @name    Functions from Algorithms.
+ * @brief    Functions from Algorithms.
  * @author  Albert Uchytil (xuchyt03), Pavel Tobias (xtobia01), Vojtech Mašek (xmasek15)
  ******************************************************************/
 
 #ifndef __IAL_H__
 #define __IAL_H__
 
-#include    "cstring.h"
-#include    "common.h"
-#include    "gc.h"
+#include <stdbool.h>
+
+#include "cstring.h"
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
@@ -19,7 +19,6 @@ typedef struct Tree_Node {
     struct Tree_Node    *right;
     cstring             *key;
     void                *data;
-
 }   Tree_Node;
 
 typedef struct {

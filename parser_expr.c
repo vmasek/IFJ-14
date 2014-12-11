@@ -1,13 +1,16 @@
-/*
+/**
  * @file    parser_expr.c
- * @name    Expression Parser
  * @author  Pavel Tobias (xtobia01)
- * @brief   Implementation of precedence-table-based expression parser
+ * @brief   Expression Parser
+ *
+ * Implementation of precedence-table-based expression parser
  *****************************************************************************/
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 
+#include "debug.h"
 #include "parser_private.h"
 #include "stack.h"
 
@@ -41,7 +44,7 @@ enum symbol {
 enum terminal {
     TERM_NEG,       // unary -
     TERM_ADD,       // +
-    TERM_SUB,       // - 
+    TERM_SUB,       // -
     TERM_MUL,       // *
     TERM_DIV,       // /
     TERM_EQ,        // =
@@ -72,8 +75,6 @@ enum action {
 };
 
 /* DECLARATION OF STATIC FUNCTIONS */
-static int gen_instr(Instruction **instr_ptr, Instruction_type type, int index,
-                     Instruction *alt_instr);
 static Instruction_type get_instr_type(Token *token);
 static Type get_type(Token *token);
 static enum terminal get_term(Token *token);
@@ -173,11 +174,11 @@ int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions,
         [TREE_LOCALS] = locals,
         [TREE_GLOBALS] = globals,
         [TREE_FUNCS] = functions
-    }; 
-    
+    };
+
     if (input == NULL || globals == NULL || functions == NULL ||
         global_vars == NULL || instr_ptr == NULL)
-        return INTERNAL_ERROR; 
+        return INTERNAL_ERROR;
 
     stack_init(&sym_stack, TOKEN_STACK);
     stack_init(&type_stack, VALUE_STACK);
@@ -195,7 +196,7 @@ int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions,
         goto fail;
 
     while (!finished) {
-        stack_read_first(&sym_stack, SYM_TERM, &stack_token);   
+        stack_read_first(&sym_stack, SYM_TERM, &stack_token);
         stack_term = get_term(&stack_token);
         input_term = get_term(&input_token);
         switch (PREC_TABLE[stack_term][input_term]) {
@@ -249,25 +250,6 @@ fail:
 }
 
 /* DEFINITION OF STATIC FUNCTIONS */
-static int gen_instr(Instruction **instr_ptr, Instruction_type type, int index,
-                     Instruction *alt_instr)
-{
-    if (((*instr_ptr)->next_instruction = gc_malloc(GC_INSTR,
-                                                    sizeof(Instruction)))
-        == NULL)
-        return INTERNAL_ERROR;
-
-    *instr_ptr = (*instr_ptr)->next_instruction;
-    **instr_ptr = (Instruction) {
-        .instruction = type,
-        .index = index,
-        .next_instruction = NULL,
-        .alt_instruction = alt_instr
-    };
-
-    return SUCCESS;
-}
-
 static Instruction_type get_instr_type(Token *token)
 {
     if (token == NULL)
@@ -616,7 +598,7 @@ static int handle_call(Token *tokens, Stack *type_stack, Tree **trees,
         instr_type = I_SORT;
         param_count = 1;
         ret_type = TYPE_STRING;
-    } else { 
+    } else {
         if ((node = tree_find_key_ch(trees[TREE_FUNCS],
                                      tokens[0].value.value_name)) == NULL) {
             debug("Semantic error\n");
@@ -651,7 +633,7 @@ static int handle_call(Token *tokens, Stack *type_stack, Tree **trees,
 
     if (instr_type == I_CALL) {
         while (local_count--) {
-            if (gen_instr(instr_ptr, 
+            if (gen_instr(instr_ptr,
                 !local_count || local_count > param_count ? I_PREP : I_PASS,
                 locals[local_count]->type, NULL) != SUCCESS)
                 return INTERNAL_ERROR;

@@ -7,15 +7,14 @@
 #ifndef __VARIABLES_H__
 #define __VARIABLES_H__
 
-#include "common.h"
-
+#include "value.h"
 
 /// Struct of storing (global) variables
 typedef struct
 {
-    unsigned int count;     ///count of all items
-    Value *values;            ///field of Values
-    Type *types;             ///field of Types paralel to Values
+    unsigned    count;     ///count of all items
+    Value      *values;    ///field of Values
+    Type       *types;     ///field of Types paralel to Values
 } Variables;
 
 

@@ -1,13 +1,10 @@
-#include "scaner.h"
-#include "errors.h"
-#include <stdio.h>
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
 
-#define TOKEN_IDENTIFIER_MAX_LENGTH 127
-
+#include "scaner.h"
+#include "errors.h"
 
 /*
  * Very early pre-alpha release.
@@ -26,15 +23,15 @@
 int convert_binary(int binary_number)
 {
     int base = 1, reminder = 0, decimal = 0;
-    
+
     while(binary_number > 0){
     reminder = binary_number % 10;
     decimal = decimal + reminder * base;
     binary_number = binary_number / 10;
     base = base * 2;
-    
+
     }
-    
+
     return decimal;
 }
 
@@ -272,7 +269,7 @@ int get_token(Token *token_ret, FILE *input) {
                 case TOKEN_INT:
                 case TOKEN_FLOAT:
                 case TOKEN_STRING:
-                    token.value.value_keyword = SUBTRACTION; 
+                    token.value.value_keyword = SUBTRACTION;
                     break;
                 default:
                     token.value.value_keyword = NEGATION;
@@ -353,7 +350,7 @@ int get_token(Token *token_ret, FILE *input) {
             case '{':
                 state = LEXER_COMMENT;
                 break;
-            
+
             case '%':
                 state = LEXER_BINARY_LOADING_FIRST;
                 break;
@@ -366,12 +363,12 @@ int get_token(Token *token_ret, FILE *input) {
                 state = LEXER_HEX_LOADING_FIRST;
                 break;
 
-            default: 
+            default:
                 return LEXICAL_ERROR;
                 break;
 
             }
-            break;
+                break;
 
 
         case LEXER_COMMENT:

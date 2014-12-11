@@ -2,10 +2,10 @@
 #define __SCANER_H__
 
 #include <stdio.h>
-#include <ctype.h>
-#define TOKEN_IDENTIFIER_MAX_LENGTH 127
 
 #include "cstring.h"
+
+#define TOKEN_IDENTIFIER_MAX_LENGTH 127
 
 /*
  * Very early pre-alpha release.

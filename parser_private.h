@@ -1,16 +1,20 @@
+/**
+ * @file    parser_private.h
+ * @brief   Private header for parser
+ * @author  Vojtech Mašek (xmasek15)
+ ****************************************************************************/
+
+
 #ifndef __PARSER_PRIVATE_H__
 #define __PARSER_PRIVATE_H__
 
 #include <stdbool.h>
 #include <stdio.h>
 
-#include "common.h"
 #include "errors.h"
-#include "gc.h"
-#include "ial.h"
-#include "interpreter.h"
-#include "scaner.h"
+#include "instruction.h"
 #include "variables.h"
+#include "ial.h"
 
 typedef struct var_record {
     Value data;

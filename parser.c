@@ -1,7 +1,26 @@
+/**
+ * @file    parser.c
+ * @brief   Parser implementation
+ * @author  Albert Uchytil (xuchyt03)
+ ****************************************************************************/
+
+
 #include "parser.h"
 #include "parser_private.h"
+#include "debug.h"
+#include "instruction.h"
+#include "gc.h"
 
-static int nt_program(FILE *input, Tree *globals, Tree *functions, 
+/**
+ * Value checking macro
+ */
+#define CHECK_VALUE(val, ret) if (((ret) = (val)) != SUCCESS) return (ret);
+#define CATCH_VALUE(val, ret) if (((ret) = (val)) != SUCCESS && (ret) != RETURNING) return (ret)
+
+
+
+
+static int nt_program(FILE *input, Tree *globals, Tree *functions,
                       Instruction **first_instr, Variables *vars);
 static int nt_var_section(FILE *input, Tree *vars_tree, Tree *functions,
                           Var_record ***var_ar, int *count, bool global, Variables *vars);
@@ -25,7 +44,6 @@ static int nt_func_body(FILE *input, Tree *locals, Tree *globals, Tree *function
 static int nt_comp_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
                        Instruction **intr, Variables *vars);
 static int t_keyword(FILE *input, enum token_keyword keyword);
-//static int t_keyword_catch(FILE *input, enum token_keyword keyword);
 static int nt_cmd_list(FILE *input, Tree *locals, Tree *globals, Tree *functions,
                        Instruction **instr, Variables *vars);
 static int nt_cmd_sublist(FILE *input, Tree *locals, Tree *globals, Tree *functions,
@@ -38,8 +56,7 @@ static int nt_arg_list_write(FILE *input, Tree *locals, Tree *globals, Tree *fun
                              Instruction **instr, Variables *vars);
 static int nt_else(FILE *input, Tree *locals, Tree *globals, Tree *functions,
                    Instruction **instr, Variables *vars);
-static int gen_instr(Instruction **instr_ptr, Instruction_type type, int index,
-                     unsigned locals_count, Instruction *alt_instr);
+
 static int search_trees(cstring *id, Tree *locals, Tree *globals, int *_ret, Type *_type);
 static int insert_tree(Tree *insert, cstring *id, void *data, Tree *other);
 static int update_tree(Tree *update, cstring *id, void *data, Tree *other);
@@ -63,11 +80,13 @@ int parse(FILE *input, Instruction *first_instr, Variables *vars)
     int ret = SUCCESS;
     Tree globals;
     Tree functions;
+    Instruction *tmp = first_instr;
 
     tree_init(&globals);
     tree_init(&functions);
     ret = nt_program(input, &globals, &functions, &first_instr, vars);
 
+    *first_instr = *tmp;
     tree_free(&globals);
     tree_free(&functions);
 
@@ -120,7 +139,9 @@ static int nt_var_list(FILE *input, Tree *vars_tree, Tree *functions, Var_record
     Var_record *var;
     CHECK_VALUE(nt_var(input, vars_tree, functions, false, &var, *count), ret);
     if (global && vars != NULL)
+    {
         CHECK_VALUE(variables_add_empty(vars, var->type), ret);
+    }
     CHECK_VALUE(t_symbol(input, SEMICOLON), ret);
     (*count)++;
     CHECK_VALUE(nt_var_sublist(input, vars_tree, functions, var_ar,
@@ -289,7 +310,7 @@ static int nt_func(FILE *input, Tree *globals, Tree *functions, Variables *vars)
         token.value.value_keyword == KEYWORD_FUNCTION) {
         MALLOC_FUNC(func, __FILE__);
         tree_create(&(func->locals));
-        CHECK_VALUE(gen_instr(&(func->first_instr), I_NOP, 0, 0, NULL), ret);
+        CHECK_VALUE(gen_instr(&(func->first_instr), I_NOP, 0, NULL), ret);
 
         CHECK_VALUE(t_id(input, &id), ret);
         CHECK_VALUE(update_tree(functions, id, func, globals), ret);
@@ -380,11 +401,11 @@ static int nt_func_body(FILE *input, Tree *locals, Tree *globals, Tree *function
             *_var_count = count;
         //TODO: consider removing I_NOP
         if (instr == NULL) {
-            CHECK_VALUE(gen_instr(&instr, I_NOP, 0, 0, NULL), ret)
+            CHECK_VALUE(gen_instr(&instr, I_NOP, 0, NULL), ret)
         }
         CHECK_VALUE(nt_comp_cmd(input, locals, globals, functions, &instr, vars), ret);
         CHECK_VALUE(t_symbol(input, SEMICOLON), ret)
-        CHECK_VALUE(gen_instr(&instr, I_HALT, 0, 0, NULL), ret);
+        CHECK_VALUE(gen_instr(&instr, I_HALT, 0, NULL), ret);
         return SUCCESS;
     }
 }
@@ -413,24 +434,6 @@ static int t_keyword(FILE *input, enum token_keyword keyword)
     }
     return SYNTAX_ERROR;
 }
-
-//TODO:remove
-/*
-static int t_keyword_catch(FILE *input, enum token_keyword keyword)
-{
-    int ret;
-    Token token;
-
-    CHECK_VALUE(get_token(&token, input), ret);
-    debug_token(&token);
-    if (token.type == TOKEN_KEYWORD &&
-        token.value.value_keyword == keyword) {
-        return SUCCESS;
-    }
-    unget_token(&token);
-    return RETURNING;
-}
-*/
 
 static int nt_cmd_list(FILE *input, Tree *locals, Tree *globals, Tree *functions,
                        Instruction **instr, Variables *vars)
@@ -472,7 +475,7 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
             CHECK_VALUE(t_id(input, &id), ret);
             CHECK_VALUE(t_symbol(input, PARENTHESIS_R), ret);
             CHECK_VALUE(search_trees(id, locals, globals, &unique_id, NULL), ret);
-            CHECK_VALUE(gen_instr(instr, I_READLN, unique_id, 0, NULL), ret);
+            CHECK_VALUE(gen_instr(instr, I_READLN, unique_id, NULL), ret);
             return SUCCESS;
         } else if (token.value.value_keyword == KEYWORD_WRITE) {
             CHECK_VALUE(t_symbol(input, PARENTHESIS_L), ret);
@@ -486,14 +489,14 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
                 return INCOMPATIBLE_TYPE;
             }
             CHECK_VALUE(t_keyword(input, KEYWORD_THEN), ret);
-            CHECK_VALUE(gen_instr(instr, I_JMP, 0, 0, NULL), ret);
+            CHECK_VALUE(gen_instr(instr, I_JMP, 0, NULL), ret);
             tmp_instr = *instr;
             //TODO: remove I_NOP
-            CHECK_VALUE(gen_instr(&(tmp_instr->alt_instruction), I_NOP, 0, 0, NULL), ret);
+            CHECK_VALUE(gen_instr(&(tmp_instr->alt_instruction), I_NOP, 0, NULL), ret);
             CHECK_VALUE(nt_comp_cmd(input, locals, globals, functions, instr, vars), ret);
             CATCH_VALUE(nt_else(input, locals, globals, functions,
                                 &(tmp_instr->alt_instruction), vars), ret);
-            CHECK_VALUE(gen_instr(instr, I_NOP, 0, 0, NULL), ret);
+            CHECK_VALUE(gen_instr(instr, I_NOP, 0, NULL), ret);
             if (tmp_instr->alt_instruction == NULL) {
                 tmp_instr->alt_instruction = *instr;
             } else {
@@ -501,7 +504,7 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
             }
             return SUCCESS;
         } else if (token.value.value_keyword == KEYWORD_WHILE) {
-            CHECK_VALUE(gen_instr(instr, I_NOP, 0, 0, NULL), ret);
+            CHECK_VALUE(gen_instr(instr, I_NOP, 0, NULL), ret);
             tmp_instr = *instr;
             CHECK_VALUE(parse_expr(input,locals, globals, functions, vars,
                                    instr, &type, false), ret);
@@ -509,15 +512,15 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
                 return INCOMPATIBLE_TYPE;
             }
             CHECK_VALUE(t_keyword(input, KEYWORD_DO), ret);
-            CHECK_VALUE(gen_instr(instr, I_JMP, 0, 0, NULL), ret);
+            CHECK_VALUE(gen_instr(instr, I_JMP, 0, NULL), ret);
             tmp_instr2 = *instr;
             CHECK_VALUE(nt_comp_cmd(input, locals, globals, functions, instr, vars), ret);
             (*instr)->next_instruction = tmp_instr;
-            CHECK_VALUE(gen_instr(&(tmp_instr2->alt_instruction), I_NOP, 0, 0, NULL), ret);
+            CHECK_VALUE(gen_instr(&(tmp_instr2->alt_instruction), I_NOP, 0, NULL), ret);
             *instr = tmp_instr2->alt_instruction;
             return SUCCESS;
         } else if (token.value.value_keyword == KEYWORD_REPEAT) {
-            CHECK_VALUE(gen_instr(instr, I_NOP, 0, 0, NULL), ret);
+            CHECK_VALUE(gen_instr(instr, I_NOP, 0, NULL), ret);
             tmp_instr = *instr;
             CHECK_VALUE(nt_cmd_list(input, locals, globals, functions, instr, vars), ret);
             CHECK_VALUE(t_keyword(input, KEYWORD_UNTIL), ret);
@@ -526,7 +529,7 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
             if (type != TYPE_BOOL) {
                 return INCOMPATIBLE_TYPE;
             }
-            CHECK_VALUE(gen_instr(instr, I_JMP, 0, 0, NULL), ret);
+            CHECK_VALUE(gen_instr(instr, I_JMP, 0, NULL), ret);
             (*instr)->alt_instruction = tmp_instr;
             return SUCCESS;
         } else if (token.value.value_keyword == KEYWORD_BEGIN) {
@@ -546,17 +549,17 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
             if (type != type2) {
                 return INCOMPATIBLE_TYPE;
             }
-            CHECK_VALUE(gen_instr(instr, I_ASSIGN, unique_id, 0, NULL), ret);
+            CHECK_VALUE(gen_instr(instr, I_ASSIGN, unique_id, NULL), ret);
             CHECK_VALUE(t_keyword(input, KEYWORD_TO), ret);
-            CHECK_VALUE(gen_instr(instr, I_NOP, 0, 0, NULL), ret);
+            CHECK_VALUE(gen_instr(instr, I_NOP, 0, NULL), ret);
             tmp_instr = *instr;
             CHECK_VALUE(parse_expr(input, locals, globals,functions,
                                    vars, instr, &type, false), ret);
             CHECK_VALUE(t_keyword(input, KEYWORD_DO), ret);
             CHECK_VALUE(nt_comp_cmd(input, locals, globals, functions, instr, vars), ret);
-            CHECK_VALUE(gen_instr(instr, I_INC, unique_id, 0, NULL), ret);
+            CHECK_VALUE(gen_instr(instr, I_INC, unique_id, NULL), ret);
             (*instr)->next_instruction = tmp_instr;
-            CHECK_VALUE(gen_instr(&((*instr)->alt_instruction), I_NOP, 0, 0, NULL), ret);
+            CHECK_VALUE(gen_instr(&((*instr)->alt_instruction), I_NOP, 0, NULL), ret);
             *instr = (*instr)->alt_instruction;
             return SUCCESS;
         }
@@ -570,13 +573,12 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
         if (type != type2) {
             return INCOMPATIBLE_TYPE;
         }
-        CHECK_VALUE(gen_instr(instr, I_ASSIGN, unique_id, 0, NULL), ret);
+        CHECK_VALUE(gen_instr(instr, I_ASSIGN, unique_id, NULL), ret);
         return SUCCESS;
     }
     unget_token(&token);
     return RETURNING;
 }
-
 
 
 static int nt_main(FILE *input, Tree *globals, Tree *functions,
@@ -595,7 +597,7 @@ static int nt_arg_list_write(FILE *input, Tree *locals, Tree *globals, Tree *fun
     Token token;
 
     CHECK_VALUE(parse_expr(input, locals, globals, functions, vars, instr, NULL, true), ret);
-    CHECK_VALUE(gen_instr(instr, I_WRITE, 1337, 0, NULL), ret);
+    CHECK_VALUE(gen_instr(instr, I_WRITE, 1337, NULL), ret);
     CHECK_VALUE(get_token(&token, input), ret);
     debug_token(&token);
     if (token.type == TOKEN_SYMBOL &&
@@ -621,31 +623,6 @@ static int nt_else(FILE *input, Tree *locals, Tree *globals, Tree *functions,
     }
     unget_token(&token);
     return RETURNING;
-}
-
-/* DEFINITION OF MISCELLANEOUS FUNCTIONS */
-static int gen_instr(Instruction **instr_ptr, Instruction_type type, int index,
-                     unsigned locals_count, Instruction *alt_instr)
-{
-    Instruction *new_ptr = NULL;
-    if ((new_ptr = gc_malloc(GC_INSTR, sizeof(Instruction))) == NULL) {
-        return INTERNAL_ERROR;
-    }
-    *new_ptr = (Instruction) {
-        .instruction = type,
-        .index = index,
-        .locals_count = locals_count,
-        .next_instruction = NULL,
-        .alt_instruction = alt_instr
-    };
-
-    if (*instr_ptr == NULL) {
-        *instr_ptr = new_ptr;
-    } else {
-        (*instr_ptr)->next_instruction = new_ptr;
-    }
-
-    return SUCCESS;
 }
 
 static int search_trees(cstring *id, Tree *locals, Tree *globals, int *_ret, Type *_type)

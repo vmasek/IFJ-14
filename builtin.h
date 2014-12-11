@@ -1,8 +1,7 @@
 /**
- * @file    buildin.h
- * @name    Buildin functions (header file).
+ * @file    builtin.h
  * @author  Tomas Paulus (xpaulu01)
- * @brief   Implementacia cstrig retazcov pre projekt do predmetu IFJ
+ * @brief   Builtin functions (header file).
  ****************************************************************************/
 
 #ifndef __BUILDIN_H__

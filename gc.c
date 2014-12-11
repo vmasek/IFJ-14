@@ -1,8 +1,9 @@
 /**
  * @file    gc.c
- * @name    Garbage Collector
  * @author  Pavel Tobias (xtobia01)
- * @brief   Implementation of simple garbage collector
+ * @brief   Garbage Collector
+ *
+ * Implementation of simple garbage collector
  ****************************************************************************/
 
 #include <stdlib.h>

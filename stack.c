@@ -1,14 +1,19 @@
 /**
  * @file    stack.c
- * @name    Stack datatype
  * @author  Vojtech Mašek (xmasek15), Pavel Tobias (xtobia01)
- * @brief   Implementation of Stack datatype for IFJ projekt
+ * @brief   Stack datatype
+ *
+ * Implementation of Stack datatype for IFJ projekt
  ****************************************************************************/
 
-#include "common.h"
-#include "interpreter.h"
+#include <stdlib.h>
+
+#include "instruction.h"
 #include "scaner.h"
 #include "stack.h"
+#include "debug.h"
+#include "errors.h"
+#include "value.h"
 
 struct stack_node {
     int type;

@@ -7,13 +7,6 @@
 #ifndef __STACK_H__
 #define __STACK_H__
 
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "common.h"
-#include "cstring.h"
-#include "errors.h"
-
 struct stack_node;
 
 typedef enum {

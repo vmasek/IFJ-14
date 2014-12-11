@@ -1,15 +1,14 @@
 /**
  * @file    gc.h
- * @name    Garbage Collector (interface)
  * @author  Pavel Tobias (xtobia01)
- * @brief   Interface for simple garbage collector
+ * @brief   Garbage Collector (interface)
+ *
+ * Interface for simple garbage collector
  ****************************************************************************/
 
 #ifndef __GC_H__
 #define __GC_H__
 
-#include <stdlib.h>
-#include "common.h"
 
 void *gc_calloc(const char *tag, size_t number, size_t size);
 void gc_free(const char *tag);

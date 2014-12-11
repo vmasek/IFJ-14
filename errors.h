@@ -7,7 +7,7 @@
 #ifndef __ERRORS_H__
 #define __ERRORS_H__
 
-#include <stdio.h>
+
 
 extern const char *err_table[];
 

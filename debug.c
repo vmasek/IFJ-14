@@ -1,24 +1,14 @@
 /**
- * @file	common.c
- * @name	Common functions that could be used across modules
+ * @file	debug.c
  * @author	Albert Uchytil (xuchyt03)
  ****************************************************************************/
 
-#include "common.h"
-#include "scaner.h"
+#include <stdarg.h>
+#include <stdio.h>
+#include <string.h>
 
-/**
- * @brief Function converts char to int.
- * @param c char that's going to be converted
- * @returns integer value between 0 and 9
- *
- * Function converts char to numeric value represented by the char.
- * Returns 0 when the char is not a digit.
- */
-inline int char_to_int(char c)
-{
-    return ('0' <= c && c <= '9') ? (int)(c - '0') : 0;
-}
+#include "debug.h"
+#include "scaner.h"
 
 inline void debug_printf(const char* file, const int line, const char* func, const char *fmt, ...)
 {
@@ -30,8 +20,6 @@ inline void debug_printf(const char* file, const int line, const char* func, con
 	vfprintf(stderr, format, arg);
 	va_end(arg);
 }
-
-#ifdef DEBUG
 
 static const char *keywords[] = {
     "none",
@@ -116,6 +104,61 @@ void debug_print_token(Token *token)
 		break;
 	}
 }
-#endif
+/*
+const char *TYPE_NAMES[] = {
+	"TYPE_OTHER",
+	"TYPE_INT",
+	"TYPE_REAL",
+	"TYPE_STRING",
+	"TYPE_BOOL"
+};*/
+
+const char *INSTRUCTION_NAME[] = {
+	"I_ERR",
+	"I_WRITE",
+	"I_READLN",
+	"I_PUSH",
+	"I_ASSIGN",
+	"I_ADD",
+	"I_NEG",
+	"I_SUB",
+	"I_MUL",
+	"I_DIV",
+	"I_INC",
+	"I_DEC",
+	"I_LESS",
+	"I_GREATER",
+	"I_LESS_EQUAL",
+	"I_GREATER_EQUAL",
+	"I_EQUAL",
+	"I_NOT_EQUAL",
+	"I_AND",
+	"I_OR",
+	"I_XOR",
+	"I_NOT",
+	"I_LEN",
+	"I_COPY",
+	"I_FIND",
+	"I_SORT",
+	"I_PREP",
+	"I_PASS",
+	"I_JMP",
+	"I_CALL",
+	"I_HALT",
+	"I_NOP"
+};
+
+
+void debug_instruction_print(Instruction *instruction)
+{
+	unsigned int i = 1;
+	Instruction *temp = instruction;
+	do
+	{
+		fprintf(stderr, "\tInstruction %d:\t%s\n", i, INSTRUCTION_NAME[temp->instruction]);
+		i++;
+	} while ((temp=temp->next_instruction));
+}
+
 
 //__FILE__, __LINE__, __func__

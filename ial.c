@@ -4,17 +4,19 @@
  * @author  Albert Uchytil (xuchyt03), Pavel Tobias (xtobia01), Vojtech Mašek (xmasek15)
  *******************************************************************/
 
-#include "ial.h"
-#include "errors.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "debug.h"
+#include "errors.h"
+#include "ial.h"
 
 
 #define TREE_LEFT 1
 #define TREE_RIGT (-1)
 #define TREE_ROOT 0
+
 
 /**
  * @brief Creates Partial match table for Knuth–Morris–Pratt algorithm.
@@ -45,6 +47,7 @@ void kmp_table(const char *word, int *_out)
         }
     }
 }
+
 
 /**
  * @brief Knuth–Morris–Pratt algorithm that searches for occurances of substring.
@@ -85,6 +88,7 @@ int kmp_substr(const char *string, const char *sub)
     debug("substring not found\n");
     return -1; /* If we get here, occurance of substring was not found. */
 }
+
 
 /**
  * @brief Merging function for merge-sort.
@@ -135,6 +139,7 @@ void ms_sort(char *str)
     }
 }
 
+
 /**
  * @brief Pointer-swapping helper function for merge-sort.
  * @param str1 Pointer to first pointer.
@@ -170,6 +175,7 @@ int tree_init(Tree *tree)
 
 	return SUCCESS;
 }
+
 
 /**
  * @brief Creates tree.
@@ -251,6 +257,7 @@ static inline int tree_string_cmp( const char *str, const cstring *cstr)
     return ((strcmp(str, cstr->str) == 0) ? 0 : -1 );
 }
 
+
 Tree_Node *tree_find_node_recursive(Tree_Node *node, cstring *key)
 {
     if (node == NULL)
@@ -262,6 +269,7 @@ Tree_Node *tree_find_node_recursive(Tree_Node *node, cstring *key)
     else
         return tree_find_node_recursive(node->right, key);
 }
+
 
 Tree_Node *tree_node_find(Tree_Node *node, char *key)
 {
@@ -291,10 +299,12 @@ Tree_Node *tree_find_key(Tree *tree, cstring *key)
     //return tree_find_node_recursive(tree->root, key);
 }
 
+
 Tree_Node *tree_find_key_ch(Tree *tree, char *key)
 {
     return tree_node_find(tree->root, key);
 }
+
 
 static inline int tree_create_root(Tree *tree, cstring *key, void *data)
 {
@@ -310,6 +320,7 @@ static inline int tree_create_root(Tree *tree, cstring *key, void *data)
     return SUCCESS;
 }
 
+
 static inline int tree_create_left(Tree *tree, Tree_Node *tmp, cstring *key, void *data)
 {
     debug("left insert\n");
@@ -323,6 +334,7 @@ static inline int tree_create_left(Tree *tree, Tree_Node *tmp, cstring *key, voi
     tree->last = tmp->left;
     return SUCCESS;
 }
+
 
 static inline int tree_create_right(Tree *tree, Tree_Node *tmp, cstring *key, void *data)
 {
@@ -383,6 +395,7 @@ int tree_insert(Tree *tree, cstring *key, void *data)
     return SUCCESS;
 }
 
+
 static inline bool tree_recursive(Tree_Node *node, tree_function_ptr func)
 {
 
@@ -410,6 +423,7 @@ static inline bool tree_recursive(Tree_Node *node, tree_function_ptr func)
 	}
 }
 
+
 bool tree_check_all(Tree *tree, tree_function_ptr func)
 {
 	if (!tree||!tree->root)
@@ -421,7 +435,6 @@ bool tree_check_all(Tree *tree, tree_function_ptr func)
 	debug("calling tree recursive\n");
 	return tree_recursive(tree->root, func);
 }
-
 
 
 static void tree_print_nodes(Tree_Node *node, const char *sufix, const char fromdir)
@@ -465,8 +478,6 @@ void tree_print(Tree *tree)
         fprintf(stderr, "Tree uninicialized\n");
     printf("\n");
 }
-
-
 
 
 

@@ -4,10 +4,10 @@
  * @brief   Implementation of cstrig strings for IFJ projekt
  ****************************************************************************/
 
+#include    "debug.h"
 #include    "errors.h"
 #include    "gc.h"
 #include    "cstring.h"
-#include    "common.h"
 #include    <string.h>
 #include    <stdlib.h>
 #include    <ctype.h>

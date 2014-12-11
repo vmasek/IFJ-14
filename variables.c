@@ -4,9 +4,11 @@
  * @author  Vojtech Mašek (xmasek15), Pavel Tobias (xtobia01)
  ****************************************************************************/
 
-#include "variables.h"
+#include <stdlib.h>
 
-#include "interpreter.h"
+#include "debug.h"
+#include "variables.h"
+#include "errors.h"
 
 int variables_add(Variables *vars, Type type, Value value, unsigned *index)
 {
