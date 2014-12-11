@@ -362,7 +362,7 @@ int get_token(Token *token_ret, FILE *input) {
                 break;
 
             }
-                break;
+            break;
 
 
         case LEXER_COMMENT:
@@ -511,23 +511,17 @@ int get_token(Token *token_ret, FILE *input) {
             {
                 state = LEXER_BINARY_LOADING;
                 break;
+
             } else {
                 return LEXICAL_ERROR;
             }
 
         case LEXER_BINARY_LOADING:
-            if(symbol >= '0' && symbol <= '1') { // if symbol is binary number
-                strcatc(buffer, symbol); //add to buffer
+            if(symbol == '0' || symbol == '1') {
+                strcatc(buffer, symbol);
                 break;
             
-            } else if((symbol >= 'a' && symbol <= 'z') || (symbol >= 'A' && symbol <= 'Z')) {
-                return LEXICAL_ERROR;
-            } else if(symbol == '\'') {
-
-            }   
-
-            else { //else make int from buffer and return; //FIX ME: WHAT IF THERE IS CHAR?, is it correct?
-
+            } else {
                 token.type = TOKEN_INT;
                 token.value.value_int = convert_binary((int)atof(buffer));
                 ungetc(symbol, input);
@@ -555,10 +549,6 @@ int get_token(Token *token_ret, FILE *input) {
                 token.type = TOKEN_FLOAT;
                 token.value.value_float = (double)token.value.value_int;
                 break;
-
-            } else if((symbol >= 'a' && symbol <= 'z') || (symbol >= 'A' && symbol <= 'Z')){
-                return LEXICAL_ERROR;
-                break; 
 
             } else {
                 token.value.value_int = (int)atof(buffer);
@@ -633,17 +623,18 @@ int get_token(Token *token_ret, FILE *input) {
                 ungetc(symbol, input);
                 *token_ret = token;
                 return SUCCESS;
+
             } else if (symbol == EOF) {
                 token.type = TOKEN_EOF;
                 *token_ret = token;
                 return SUCCESS;
-            }
-            else {
+
+            } else {
                 token.value.value_name[token_name_pos] = tolower(symbol);
                 token_name_pos ++;
                 break;
             }
-            // FIXME: this will never happen
+
             default:
                 return LEXICAL_ERROR;
                 break;
