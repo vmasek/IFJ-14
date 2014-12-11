@@ -3,12 +3,12 @@
 
 static int nt_program(FILE *input, Tree *globals, Tree *functions, 
                       Instruction **first_instr, Variables *vars);
-static int nt_var_section(FILE *input, Tree *vars, Tree *functions, Var_record ***var_ar,
-                          int *count);
-static int nt_var_list(FILE *input, Tree *vars, Tree *functions, Var_record ***var_ar,
-                       int *count);
-static int nt_var_sublist(FILE *input, Tree *vars, Tree *functions, Var_record ***var_ar,
-                          int *count);
+static int nt_var_section(FILE *input, Tree *vars_tree, Tree *functions,
+                          Var_record ***var_ar, int *count, bool global, Variables *vars);
+static int nt_var_list(FILE *input, Tree *vars_tree, Tree *functions, Var_record ***var_ar,
+                       int *count, bool global, Variables *vars);
+static int nt_var_sublist(FILE *input, Tree *vars_tree, Tree *functions,
+                          Var_record ***var_ar, int *count, bool global, Variables *vars);
 static int nt_var(FILE *input, Tree *vars, Tree *functions, bool eps,
                   Var_record **_var, int count);
 static int t_symbol(FILE *input, enum token_symbol symbol);
@@ -45,9 +45,9 @@ static int insert_tree(Tree *insert, cstring *id, void *data, Tree *other);
 static int update_tree(Tree *update, cstring *id, void *data, Tree *other);
 static int check_functions_init(Tree *functions);
 bool check_init(Tree_Node *node);
-extern int file_end_wololo(FILE *input);
+extern int file_end(FILE *input);
 
-inline int file_end_wololo(FILE *input)
+inline int file_end(FILE *input)
 {
     Token token;
     get_token(&token, input);
@@ -80,18 +80,19 @@ static int nt_program(FILE *input, Tree *globals, Tree *functions,
     int ret;
     int global_count;
     Var_record **var_ar = NULL;
-    CATCH_VALUE(nt_var_section(input, globals, functions, &var_ar, &global_count), ret);
-    variables_occupy(vars, global_count);
+    CATCH_VALUE(nt_var_section(input, globals, functions, &var_ar, &global_count,
+                               true, vars), ret);
     CATCH_VALUE(nt_func_section(input, globals, functions, vars), ret);
     CHECK_VALUE(nt_main(input, globals, functions, first_instr, vars), ret);
-    CHECK_VALUE(file_end_wololo(input), ret);
+    CHECK_VALUE(file_end(input), ret);
     CHECK_VALUE(check_functions_init(functions), ret);
 
     return SUCCESS;
 }
 
-static int nt_var_section(FILE *input, Tree *vars, Tree *functions, Var_record ***var_ar,
-                          int *count)
+static int nt_var_section(FILE *input, Tree *vars_tree, Tree *functions,
+                          Var_record ***var_ar, int *count, bool global,
+                          Variables *vars)
 {
     int ret;
     *count = 0;
@@ -101,7 +102,8 @@ static int nt_var_section(FILE *input, Tree *vars, Tree *functions, Var_record *
     debug_token(&token);
     if (token.type == TOKEN_KEYWORD &&
         token.value.value_keyword == KEYWORD_VAR) {
-        CHECK_VALUE(nt_var_list(input, vars, functions, var_ar, count), ret);
+        CHECK_VALUE(nt_var_list(input, vars_tree, functions, var_ar, count,
+                                global, vars), ret);
         return SUCCESS;
     }
 
@@ -110,23 +112,26 @@ static int nt_var_section(FILE *input, Tree *vars, Tree *functions, Var_record *
     return RETURNING;
 }
 
-static int nt_var_list(FILE *input, Tree *vars, Tree *functions, Var_record ***var_ar,
-                       int *count)
+static int nt_var_list(FILE *input, Tree *vars_tree, Tree *functions, Var_record ***var_ar,
+                       int *count, bool global, Variables *vars)
 {
     int ret;
     int id = *count;
     Var_record *var;
-    CHECK_VALUE(nt_var(input, vars, functions, false, &var, *count), ret);
+    CHECK_VALUE(nt_var(input, vars_tree, functions, false, &var, *count), ret);
+    if (global && vars != NULL)
+        CHECK_VALUE(variables_add_empty(vars, var->type), ret);
     CHECK_VALUE(t_symbol(input, SEMICOLON), ret);
     (*count)++;
-    CHECK_VALUE(nt_var_sublist(input, vars, functions, var_ar, count), ret);
+    CHECK_VALUE(nt_var_sublist(input, vars_tree, functions, var_ar,
+                               count, global, vars), ret);
 
-    if ((ret = nt_var_sublist(input, vars, functions, var_ar, count)) == RETURNING) {
+    if ((ret = nt_var_sublist(input, vars_tree, functions, var_ar,
+                              count, global, vars)) == RETURNING) {
        if ((*var_ar =
            (Var_record **)gc_realloc(__FILE__, *var_ar,
                                      ((*count) + 1) * sizeof(Var_record *)))
                    == NULL) {
-           debug("tu");
            return INTERNAL_ERROR;
        }
        (*var_ar)[id] = var;
@@ -140,16 +145,20 @@ static int nt_var_list(FILE *input, Tree *vars, Tree *functions, Var_record ***v
     return SUCCESS;
 }
 
-static int nt_var_sublist(FILE *input, Tree *vars, Tree *functions, Var_record ***var_ar,
-                          int *count)
+static int nt_var_sublist(FILE *input, Tree *vars_tree, Tree *functions,
+                          Var_record ***var_ar, int *count, bool global,
+                          Variables *vars)
 {
     int ret;
     int id = *count;
     Var_record *var;
-    CHECK_VALUE(nt_var(input, vars, functions, true, &var, *count), ret);
+    CHECK_VALUE(nt_var(input, vars_tree, functions, true, &var, *count), ret);
+    if (global && vars != NULL)
+        CHECK_VALUE(variables_add_empty(vars, var->type), ret);
     CHECK_VALUE(t_symbol(input, SEMICOLON), ret);
     (*count)++;
-    if ((ret = nt_var_sublist(input, vars, functions, var_ar, count)) == RETURNING) {
+    if ((ret = nt_var_sublist(input, vars_tree, functions, var_ar,
+                              count, global, vars)) == RETURNING) {
         if ((*var_ar =
             (Var_record **)gc_realloc(__FILE__, *var_ar,
                                       ((*count) + 1) * sizeof(Var_record *)))
@@ -365,8 +374,8 @@ static int nt_func_body(FILE *input, Tree *locals, Tree *globals, Tree *function
         return SUCCESS;
     } else {
         unget_token(&token);
-        CATCH_VALUE(nt_var_section(input, locals, functions, var_ar,  &count),
-                    ret);
+        CATCH_VALUE(nt_var_section(input, locals, functions, var_ar,  &count,
+                                   false, NULL), ret);
         if (_var_count != NULL)
             *_var_count = count;
         //TODO: consider removing I_NOP
