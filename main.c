@@ -22,16 +22,36 @@ int main(int argc, char *argv[])
 
     variables_init(&global_vars);
 
-    if ((ret = parse(fp, &start, &global_vars)) != SUCCESS)
-        goto fail;
+	debug("calling PARSE\n");
+    if ((ret = parse(fp, &start, &global_vars)) == SUCCESS)
+    {
+		debug("PARSE ok\n\n");
 
-    if ((ret = interpret(&start, &global_vars)) != SUCCESS)
-        goto fail;
+#ifdef DEBUG
+		debug("\n========================PRINTING GLOBAL VARIABLES==========================\n");
+		variables_print(&global_vars);
+		fprintf(stderr, "\n===========================================================================\n\n");
+#endif
 
-fail:
+		debug("calling INTERPRETER\n");
+		if ((ret = interpret(&start, &global_vars)) == SUCCESS)
+		{
+			debug("INTERPRETER OK\n");
+		}
+		else
+		{
+			debug("INTERPRETER: NOT success return code\n");
+		}
+	}
+	else
+	{
+		debug("PARSER: NOT success return code\n");
+	}
+
     fclose(fp);
     gc_free(GC_INSTR);
     variables_free(&global_vars);
 
+	debug("MAIN RETURN CODE is: [ %d ]\n", ret);
     return print_error(ret);
 }
