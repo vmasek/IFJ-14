@@ -470,20 +470,46 @@ int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instru
 
 		case I_READLN:
 			debug("I_READLN\n");
+
+			if(item->index < 0)																		/// index indicates local stack operation
+			{
+				debug("I_READLN - locals stack\n");
+				if (stack_index(locals, (-(item->index+1)), (int *)&types[0], &result) == INTERNAL_ERROR) ///
+				{
+					debug("I_PUSH - locals stack_index error.\n");
+					return INTERNAL_ERROR;
+				}
+			}
+			else
+			{
+				debug("I_READLN - globals field\n");
+				if (variables_value_read(globals, &types[0], &result, item->index) == INTERNAL_ERROR)		/// index indicates global variables field operation
+				{
+					debug("I_PUSH - globals variables_value_read error.\n");
+					return INTERNAL_ERROR;
+				}
+			}
+
+			if(result.inited == false)
+			{
+				debug("I_READLN - uninitialized\n");
+				return RUNTIME_UNINITIALIZED;
+			}
+
 			if (types[0] == TYPE_INT)
 			{
 				debug("I_READLN - integer\n");
-				//scanf("%d", &(item->result.data.data.integer));
+				scanf("%d", &(result.data.integer));
 			}
 			else if (types[0] == TYPE_REAL)
 			{
 				debug("I_READLN - double\n");
-				//scanf("%lf", &(item->result.data.data.real));
+				scanf("%lf", &(result.data.real));
 			}
 			else if (types[0] == TYPE_STRING)
 			{
 				debug("I_READLN - cstring\n");
-				//cstr_read_line(item->result.data.data.string = cstr_create_str(""));
+				cstr_read_line(result.data.string = cstr_create_str(""));
 			}
 			else
 			{
