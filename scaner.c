@@ -816,6 +816,7 @@ void unget_token(Token *token)
 /*
  * Just for testing purpose
  */
+/*
 int main() {
     FILE *input = fopen("test", "r");
     Token *token = malloc(sizeof(Token *));
@@ -848,4 +849,4 @@ int main() {
     //fclose(input); segfault.. why?
 
     return 0;
-}
+} */
