@@ -457,7 +457,7 @@ int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instru
 			else if (types[0] == TYPE_BOOL)
 			{
 				debug("I_WRITE - BOOL\n");
-				printf("%s", result.data.boolean ? "true" : "false");
+				printf("%s", result.data.boolean ? "TRUE" : "FALSE");
 			}
 			else
 			{

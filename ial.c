@@ -428,7 +428,7 @@ bool tree_check_all(Tree *tree, tree_function_ptr func)
 {
 	if (!tree||!tree->root)
 	{
-		debug("tree not given of tree does not have root (is empty or uninited), returning true\n");
+		debug("tree not given or tree does not have root (is empty or uninited), returning true\n");
 		return true;
 	}
 
