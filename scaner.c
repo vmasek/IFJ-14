@@ -378,31 +378,29 @@ int get_token(Token *token_ret, FILE *input) {
                 token.value.value_string = cstr_create_str(NULL);
                 state = LEXER_STR_AP;
                 break;
-            }
-            // FIXME: else if (a-z...): //FIXED by Tom, please check values
-            else if(isprint(symbol)){
-            token.value.value_string = cstr_create_chr(symbol);
-            state = LEXER_STR_LOAD;
-            break;
-            } else 
+
+            } else if (isprint(symbol)){ // is this right? any more valid chars?
+                token.value.value_string = cstr_create_chr(symbol);
+                state = LEXER_STR_LOAD;
+                break;
+
+            } else {
                 return LEXICAL_ERROR;
-            // FIXME: else ERROR // FIXED by Tom
+            }
 
 
         case LEXER_STR_LOAD:
             if (symbol == '\'') {
                 state = LEXER_STR_AP;
                 break;
-            }
 
-            // FIXME: if printable: //Fixed by Tom
-            else if(isprint(symbol)){
-            cstr_append_chr(token.value.value_string, symbol);
-            break;
-            }
-            else
+            } else if(isprint(symbol)) { // is this right? any more valid chars?
+                cstr_append_chr(token.value.value_string, symbol);
+                break;
+
+            } else {
                 return LEXICAL_ERROR;
-            // FIXME: else ERROR //Fixe by Tom
+            }
 
 
         case LEXER_STR_AP:
@@ -430,6 +428,8 @@ int get_token(Token *token_ret, FILE *input) {
         case LEXER_STR_SPEC:
             if (symbol == '\'') {
                 // FIXME what if the int is too big?!
+                // SOLUTION: allow max three characters and then check the
+                // value. Else: LEXICAL_ERROR
                 symbol = (int)atof(buffer);
                 cstr_append_chr(token.value.value_string, symbol);
                 state = LEXER_STR_LOAD;
@@ -438,10 +438,11 @@ int get_token(Token *token_ret, FILE *input) {
             } else if(isdigit(symbol)) {
                 strcatc(buffer, symbol);
                 break; 
-            } else
-                return LEXICAL_ERROR;
 
-            // FIXME: else ERROR; //Fixed by Tom
+            } else {
+                return LEXICAL_ERROR;
+            }
+
 
         case LEXER_MAYBE_GREATER_EQUAL:
             if (symbol == '=') {
