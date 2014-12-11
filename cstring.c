@@ -97,7 +97,13 @@ static int cstr_quick_resize(cstring *s)
  */
 cstring *cstr_append_chr(cstring *s, char c)
 {
-	/** As long as false is evaluated in the first condition resize will not be called, the principe is essentially the same as for @see append() but with modifications excluding unnecessary operations */
+	if (!s)
+    {
+        debug("Cstring where to append is not given.\n");
+        return NULL;
+    }
+
+    /** As long as false is evaluated in the first condition resize will not be called, the principe is essentially the same as for @see append() but with modifications excluding unnecessary operations */
     if (s->size + 1 >= s->tab_size && cstr_quick_resize(s))
     {
 		debug("resize error\n");
@@ -251,7 +257,7 @@ cstring *cstr_create_str(char const *str)
 
 	if(!str)
 	{
-		debug("str not given.");
+		debug("str not given.\n");
 		return s;
 	}
 
@@ -277,7 +283,7 @@ cstring *cstr_create_cstr(cstring const *cstr)
 
 	if(!cstr)
 	{
-		debug("str not given. was created.");
+		debug("str not given. was created.\n");
 		return s;
 	}
 
@@ -303,7 +309,7 @@ cstring *cstr_copy(cstring const *cstr)
 {
 	if(!cstr)
 	{
-		debug("str not given.");
+		debug("str not given.\n");
 		return NULL;
 	}
     return cstr_create_str(cstr->str);
@@ -373,7 +379,7 @@ void print_cstr(cstring const *s)
 {
 	if(!s)
 	{
-		debug("Cstrings to print not given.");
+		debug("Cstrings to print not given.\n");
 		return;
 	}
     printf("%s",s->str);
@@ -393,7 +399,7 @@ int cstr_cmp(cstring const *s1, cstring const *s2)
 {
 	if(!s1||!s2)
 	{
-		debug("one of cstrings to compare not given.");
+		debug("one of cstrings to compare not given.\n\n");
 	}
 
     return strcmp(s1->str, s2->str);
@@ -411,7 +417,7 @@ int cstr_cmp_str(cstring const *s1, const char *str)
 {
 	if(!s1||!str)
 	{
-		debug("one of strings to compare not given.");
+		debug("one of strings to compare not given.\n");
 	}
 
     return strcmp(s1->str, str);
@@ -425,7 +431,7 @@ void cstr_to_lower(cstring *s)
 {
 	if(!s)
 	{
-		debug("Cstring to lower not given.");
+		debug("Cstring to lower not given.\n");
 		return;
 	}
 
@@ -446,7 +452,7 @@ void print_cstr_all(cstring const *s)
 {
 	if(!s)
 	{
-		debug("cstirng to print not given.");
+		debug("cstirng to print not given.\n");
 		return;
 	}
     printf("\t%lu / %lu - [ %s ]\n", s->size, s->tab_size, s->str);
@@ -461,7 +467,7 @@ cstring *cstr_read_line(cstring *cstr)
 {
 	if(!cstr)
 	{
-		debug("cstirng not given.");
+		debug("cstirng not given.\n");
 		return NULL;
 	}
 
