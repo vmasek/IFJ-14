@@ -40,6 +40,11 @@ void test_I_XOR(void);
 void test_I_NOT(void);
 
 
+/**************************HARDCODED*TESTS***********************************/
+
+void test_I_HARDCODE_1(void);
+
+
 void test_interpreter(int argc, char* argv)
 {
 	if(!argc || !strcmp(argv, "I_ASSIGN" ))
@@ -122,6 +127,12 @@ void test_interpreter(int argc, char* argv)
 		printf("\n=================================================================================================================\n");
 		test_I_NOT();
 	}
+/*******************calling*******HARDCODED*TESTS****************************/
+	else if(!argc || !strcmp(argv, "I_HARDCODE_1" ))
+	{
+		printf("\n=================================================================================================================\n");
+		test_I_HARDCODE_1();
+	}
 	else
 	{
 		printf("did not recognized command \"%s\"\n", argv);
@@ -129,6 +140,81 @@ void test_interpreter(int argc, char* argv)
 	}
 }
 
+
+void test_I_HARDCODE_1(void)
+{
+	int errors = 1;
+
+///-----declarations-of-needed-structs----------------------------------------
+	Instruction inst_NOP;
+	Instruction inst_PUSH1;
+	Instruction inst_PUSH2;
+	Instruction inst_ADD;
+	Instruction inst_WRITE;
+	Instruction inst_HALT;
+
+	/****************************************/
+	inst_NOP.next_instruction = &inst_PUSH1;
+	inst_NOP.alt_instruction  = NULL;
+	inst_NOP.instruction = I_NOP;
+	/****************************************/
+	inst_PUSH1.next_instruction = &inst_PUSH2;
+	inst_PUSH1.alt_instruction  = NULL;
+	inst_PUSH1.instruction = I_PUSH;
+	/****************************************/
+	inst_PUSH2.next_instruction = &inst_ADD;
+	inst_PUSH2.alt_instruction  = NULL;
+	inst_PUSH2.instruction = I_PUSH;
+	/****************************************/
+	inst_ADD.next_instruction = &inst_WRITE;
+	inst_ADD.alt_instruction  = NULL;
+	inst_ADD.instruction = I_ADD;
+	/****************************************/
+	inst_WRITE.next_instruction = &inst_HALT;
+	inst_WRITE.alt_instruction  = NULL;
+	inst_WRITE.instruction = I_WRITE;
+	/****************************************/
+	inst_HALT.next_instruction = NULL;
+	inst_HALT.alt_instruction  = NULL;
+	inst_HALT.instruction = I_HALT;
+
+	Value values[2];
+	values[0].data.integer	= 5;
+	values[0].inited = true;
+	values[1].data.integer	= 6;
+	values[1].inited = true;
+
+///-----Variables globals--------------
+	Variables globals;
+	variables_init(&globals);
+	variables_add(&globals, TYPE_INT, values[0], (unsigned*)&(inst_PUSH1.index));
+	variables_add(&globals, TYPE_INT, values[1], (unsigned*)&(inst_PUSH2.index));
+
+
+BEGINE_OF_TEST();
+
+	if(interpret(&inst_NOP, &globals) != SUCCESS)
+	{
+		printf("\n%s: ERROR: Interpreter ended with bad error code.\n\n", __func__);
+		break;
+	}
+
+errors=0;
+}while(0);
+
+    if(errors)
+    {
+        printf("\n\n!!! ERROR has occured during testing !!!\n\n");
+        exit(errors);
+    }
+    else
+    {
+        printf("\n\nOK. Everything is fine.\n\n");
+    }
+
+variables_free(&globals);
+
+}
 
 
 void test_I_ASSIGN(void)
