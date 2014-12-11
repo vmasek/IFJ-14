@@ -5,7 +5,7 @@
 
 #include "scaner.h"
 #include "errors.h"
-
+#include "debug.h"
 /*
  * Very early pre-alpha release.
  *
@@ -219,8 +219,9 @@ int get_token(Token *token_ret, FILE *input) {
         *token_ret = token;
         return SUCCESS;
     }
-
+debug("LEXER\n");
     while (1) {
+        
         symbol = getc(input);
         switch (state) {
         case LEXER_START:
@@ -228,6 +229,7 @@ int get_token(Token *token_ret, FILE *input) {
                 break;
 
             if (symbol == EOF) {
+                debug("EOF\n");
                 token.type = TOKEN_EOF;
                 *token_ret = token;
                 return SUCCESS;
@@ -344,6 +346,7 @@ int get_token(Token *token_ret, FILE *input) {
 
             case '\'':
                 token.type = TOKEN_STRING;
+                debug("LEXER_STR_START");
                 state = LEXER_STR_START;
                 break;
 
@@ -356,6 +359,7 @@ int get_token(Token *token_ret, FILE *input) {
                 break;
             
             case '&':
+                debug("AND OCTAL \n");
                 state = LEXER_OCT_LOADING_FIRST;
                 break;
             
@@ -380,12 +384,20 @@ int get_token(Token *token_ret, FILE *input) {
 
 
         case LEXER_STR_START:
+            debug("lexer str start\n");
             if (symbol == '\'') {
-                token.value.value_string = cstr_create_str(NULL);
+                token.value.value_string = cstr_create_str("");
                 state = LEXER_STR_AP;
                 break;
 
-            } else if (isprint(symbol)){ // is this right? any more valid chars?
+            } else if(symbol == '#')
+            {
+                debug("vosiel som do hashtagu\n");
+                token.value.value_string = cstr_create_str("");
+                state = LEXER_STR_SPEC;
+                break; 
+            }
+            else if (isprint(symbol)){ // is this right? any more valid chars?
                 token.value.value_string = cstr_create_chr(symbol);
                 state = LEXER_STR_LOAD;
                 break;
@@ -396,11 +408,13 @@ int get_token(Token *token_ret, FILE *input) {
 
 
         case LEXER_STR_LOAD:
+        debug("lexer str load \n");
             if (symbol == '\'') {
                 state = LEXER_STR_AP;
                 break;
 
-            } else if(isprint(symbol)) { // is this right? any more valid chars?
+            } 
+                else if(isprint(symbol)) { // is this right? any more valid chars?
                 cstr_append_chr(token.value.value_string, symbol);
                 break;
 
@@ -410,28 +424,35 @@ int get_token(Token *token_ret, FILE *input) {
 
 
         case LEXER_STR_AP:
+            debug("LEXER STR AP\n");
             if (symbol == '\'') {
                 cstr_append_chr(token.value.value_string, symbol);
                 state = LEXER_STR_LOAD;
                 break;
             }
 
-            if (symbol =='#') {
+            else if (symbol =='#') {
+                debug("special char #\n");
+                 cstr_append_chr(token.value.value_string, symbol);
                 state = LEXER_STR_SPEC;
                 break;
             }
 
             else if(symbol == EOF)
-                return LEXICAL_ERROR;
+                {debug("EOF\n");
+                return LEXICAL_ERROR;}
             
             else {
+                debug("KONIEC ELSE V STR_AP__\n");
                 ungetc(symbol, input);
                 *token_ret = token;
+                state = LEXER_START;
                 return SUCCESS;
             }
 
 
         case LEXER_STR_SPEC:
+            debug("lexer str_spec\n");
             if (symbol == '\'') {
                 // FIXME what if the int is too big?!
                 // SOLUTION: allow max three characters and then check the
@@ -447,12 +468,13 @@ int get_token(Token *token_ret, FILE *input) {
             
             } else if (symbol == '&') {
                 state = LEXER_STR_SPEC_OCT_FIRST;
+                debug("SOM V AND\n");
                 break;
             
             } else if (symbol == '$') {
                 state = LEXER_STR_SPEC_HEX_FIRST;
                 break;
-            
+            debug("WAAAAAAA\n");
             } else if(isdigit(symbol)) {
                 strcatc(buffer, symbol);
                 break; 
@@ -463,7 +485,7 @@ int get_token(Token *token_ret, FILE *input) {
 
 
         case LEXER_STR_SPEC_BIN_FIRST:
-            if (symbol >= '0' && symbol <= '7') {
+            if (symbol >= '0' && symbol <= '1') {
                 strcatc(buffer, symbol);
                 state = LEXER_STR_SPEC_BIN;
                 break;
@@ -482,7 +504,7 @@ int get_token(Token *token_ret, FILE *input) {
                 state = LEXER_STR_LOAD;
                 break;
             
-            } else if(symbol >= '0' && symbol <= '7') {
+            } else if(symbol >= '0' && symbol <= '1') {
                 strcatc(buffer, symbol);
                 break; 
 
@@ -491,30 +513,42 @@ int get_token(Token *token_ret, FILE *input) {
             }
 
         case LEXER_STR_SPEC_OCT_FIRST:
+            debug("spec oct first \n");
             if (symbol >= '0' && symbol <= '7') {
+                
                 strcatc(buffer, symbol);
                 state = LEXER_STR_SPEC_OCT;
+                debug("idem do spec oct a aktualny symbol mam %c\n",symbol);
                 break;
 
             } else {
+                debug("error v spec oct first\n");
                 return LEXICAL_ERROR;
             }
 
         case LEXER_STR_SPEC_OCT:
+            debug("som v spec oct\n");
             if (symbol == '\'') {
+                debug("SPEC_OCT koniec stringu\n");
                 // FIXME what if the int is too big?!
                 // SOLUTION: allow max ?? characters (and check the value)
                 // Else: LEXICAL_ERROR
+                debug("string pred symbol strtol je %s\n",buffer);
                 symbol = (int)strtol(buffer,&ptr,8);
+                debug("posledny symbol je %d\n",symbol);
                 cstr_append_chr(token.value.value_string, symbol);
+                debug("spec_koniec za appendom\n");
                 state = LEXER_STR_LOAD;
+                debug("odchadzam do str_load z spec_oct\n");
                 break;
-            
+             
             } else if(symbol >= '0' && symbol <= '7') {
+                debug("VOSIEL SOM DO SPEC_OCT a mam symbol %c\n",symbol);
                 strcatc(buffer, symbol);
                 break; 
 
             } else {
+                debug("SPEC_OCT lexical_error\n");
                 return LEXICAL_ERROR;
             }
 
@@ -647,8 +681,11 @@ int get_token(Token *token_ret, FILE *input) {
                 break;
 
             } else {
+                debug("JEBEM NA TEBA V OCT LOADING FIRST\n");
                 return LEXICAL_ERROR;
             }
+            debug("JEBEM NA TEBA V OCT LOADING FIRST\n");
+            break;
 
         case LEXER_OCT_LOADING:
             if(symbol >= '0' && symbol <= '7') {
