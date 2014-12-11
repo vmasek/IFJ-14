@@ -100,14 +100,20 @@ int find(cstring *s, cstring *search)
  * @param  s cstring String which will be sorted.
  * @return   cstring String which was sorted.
  */
-cstring *sort(cstring *s)
+int sort(cstring **cstr)
 {
-	if(!s)
-	{
-		debug("cstring not given\n");
-		return NULL;
-	}
+    cstring *new_cstr;
 
-    ms_sort(s->str);
-    return s;
+    if (cstr == NULL || *cstr == NULL) {
+        debug("cstring not given\n");
+        return INTERNAL_ERROR;
+    }
+
+    if ((new_cstr = cstr_create_cstr(*cstr)) == NULL)
+        return INTERNAL_ERROR;
+
+    merge_sort(new_cstr->str);
+    *cstr = new_cstr;
+
+    return SUCCESS;
 }

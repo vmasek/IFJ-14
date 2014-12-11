@@ -7,11 +7,12 @@
 #ifndef __BUILDIN_H__
 #define __BUILDIN_H__
 
-#include "ial.h"
-#include "cstring.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "ial.h"
+#include "cstring.h"
 
 /**
  * @brief Counting characters in cstring and returns length of cstring.
@@ -38,7 +39,7 @@ cstring *copy(const cstring *s, int i, int n);
  * @param  s cstring String which will be sorted.
  * @return   cstring String which was sorted.
  */
-cstring *sort(cstring *s);
+int sort(cstring **cstr);
 
 /**
  * @brief Finds first occurence of substring and returns index where substring starts.
