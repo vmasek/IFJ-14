@@ -547,7 +547,8 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
         CHECK_VALUE(gen_instr(instr, I_ASSIGN, unique_id, 0, NULL), ret);
         return SUCCESS;
     }
-    return SYNTAX_ERROR;
+    unget_token(&token);
+    return RETURNING;
 }
 
 static int nt_main(FILE *input, Tree *globals, Tree *functions,
