@@ -11,9 +11,6 @@
 
 #include "cstring.h"
 
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-
-
 typedef struct Tree_Node {
     struct Tree_Node    *left;
     struct Tree_Node    *right;
@@ -45,31 +42,8 @@ void kmp_table(const char *word, int *_out);
  */
 int kmp_substr(const char *string, const char *sub);
 
-/**
- * @brief Merging function for merge-sort.
- *
- * @param src    Source array of characters.
- * @param dst    Destination array where source array is merged.
- * @param len    Length of src/dst.
- * @param middle Initial index of right-hand sub-array.
- */
-void ms_merge(const char *src, char *dst, unsigned len, unsigned middle);
 
-/**
- * @brief Bottom-up implementation of merge-sort.
- *
- * @param str Null-terminated character array to sort.
- */
-void ms_sort(char *str);
-
-/**
- * Pointer-swapping helper function for merge-sort.
- *
- * @param str1 Pointer to first pointer.
- * @param str2 Pointer to second pointer.
- */
-void ms_swap(char **str1, char **str2);
-
+void merge_sort(char *string);
 
 
 int         tree_insert(Tree *, cstring *, void *);

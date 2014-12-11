@@ -12,11 +12,15 @@
 #include "errors.h"
 #include "ial.h"
 
-
 #define TREE_LEFT 1
 #define TREE_RIGT (-1)
 #define TREE_ROOT 0
 
+/* Returns lowest value of x1 and x2 */
+#define MIN(x1, x2) ((x1) < (x2) ? (x1) : (x2))
+
+/* Returns x if x is non-negative, otherwise 0 */
+#define NN(x) ((x) > 0 ? (x) : 0)
 
 /**
  * @brief Creates Partial match table for Knuth–Morris–Pratt algorithm.
@@ -89,75 +93,68 @@ int kmp_substr(const char *string, const char *sub)
     return -1; /* If we get here, occurance of substring was not found. */
 }
 
-
-/**
- * @brief Merging function for merge-sort.
- * @param src    Source array of characters.
- * @param dst    Destination array where source array is merged.
- * @param len    Length of src/dst.
- * @param middle Initial index of right-hand sub-array.
- */
-void ms_merge(const char *src, char *dst, unsigned len, unsigned middle)
-{
-    unsigned index_l = 0;
-    unsigned index_r = middle;
-
-    index_r = middle;
-
-    for (unsigned index_dst = 0; index_dst < len; index_dst++) {
-        if (index_r >= len || (index_l < middle &&
-                               src[index_l] < src[index_r])) {
-            dst[index_dst] = src[index_l];
-            index_l++;
-        } else {
-            dst[index_dst] = src[index_r];
-            index_r++;
-        }
-    }
-}
-
-/**
- * @brief Bottom-up implementation of merge-sort.
- * @param str Null-terminated character array to sort.
- */
-void ms_sort(char *str)
-{
-    unsigned str_len = strlen(str);
-    char buffer[str_len];
-    char *src = str;
-    char *dst = buffer;
-
-    for (unsigned sub_len = 2; sub_len < str_len * 2; sub_len *= 2) {
-        for (unsigned pos = 0; pos < str_len; pos += sub_len)
-            ms_merge(src + pos, dst + pos, MIN(sub_len, str_len - pos),
-                     sub_len / 2);
-        ms_swap(&src, &dst);
-    }
-
-    if (src == buffer) {
-        memcpy(str, buffer, str_len);
-    }
-}
-
-
-/**
- * @brief Pointer-swapping helper function for merge-sort.
- * @param str1 Pointer to first pointer.
- * @param str2 Pointer to second pointer.
- */
-void ms_swap(char **str1, char **str2)
-{
-    char *swap_str = *str1;
-
-    *str1 = *str2;
-    *str2 = swap_str;
-}
-
-
-
 /****************************************************************************/
 
+static void merge(char **left, unsigned left_len, char **right,
+                  unsigned right_len, char **dest, bool left2right)
+{
+    unsigned dest_len = left_len + right_len;
 
+    while (dest_len--) {
+        if (left_len && (!right_len || **left < **right)) {
+            **dest = **left;
+            (*left)++;
+            left_len--;
+        } else {
+            **dest = **right;
+            (*right)--;
+            right_len--;
+        }
+        *dest += left2right ? 1 : -1;
+    }
+}
+
+void merge_sort(char *string)
+{
+    unsigned string_len = strlen(string);
+    char string_copy[string_len];
+    char *source = string;
+    char *dest = string_copy;
+    char *source_left;
+    char *source_right;
+    char *dest_left;
+    char *dest_right;
+    bool left2right;
+
+    if (string == NULL) {
+        debug("No string given to sort");
+        return;
+    }
+
+    for (unsigned seq_len = 1; seq_len < string_len; seq_len *= 2) {
+        source_left = source;
+        source_right = &source[string_len - 1];
+        dest_left = dest;
+        dest_right = &dest[string_len - 1];
+        left2right = true;
+        while (dest_left <= dest_right) {
+            merge(&source_left,
+                  MIN(seq_len, source_right - source_left + 1),
+                  &source_right,
+                  NN(MIN(seq_len, source_right - source_left + 1 - seq_len)),
+                  left2right ? &dest_left : &dest_right,
+                  left2right);
+            left2right = !left2right;
+        }
+        source = (source == string) ? string_copy : string;
+        dest = (dest == string) ? string_copy : string;
+    }
+
+    if (source == string_copy)
+        memcpy(string, string_copy, string_len);
+}
+
+/****************************************************************************/
 
 /**
  * @brief Inicialize binary tree.
