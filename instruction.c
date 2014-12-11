@@ -9,6 +9,7 @@
 #include "errors.h"
 #include "gc.h"
 #include "instruction.h"
+#include "debug.h"
 
 /* GC tag for instructions */
 #define GC_INSTR "instructions"
@@ -17,22 +18,22 @@
 int gen_instr(Instruction **instr_ptr, Instruction_type type, int index,
               Instruction *alt_instr)
 {
-    Instruction *new_ptr = NULL;
-    if ((new_ptr = gc_malloc(GC_INSTR, sizeof(Instruction))) == NULL) {
+    Instruction *new_instr = NULL;
+
+    if ((new_instr = gc_malloc(GC_INSTR, sizeof(Instruction))) == NULL)
         return INTERNAL_ERROR;
-    }
-    *new_ptr = (Instruction) {
+
+    *new_instr = (Instruction) {
         .instruction = type,
         .index = index,
         .next_instruction = NULL,
         .alt_instruction = alt_instr
     };
 
-    if (*instr_ptr == NULL) {
-        *instr_ptr = new_ptr;
-    } else {
-        (*instr_ptr)->next_instruction = new_ptr;
-    }
+    if (*instr_ptr != NULL)
+        (*instr_ptr)->next_instruction = new_instr;
+
+    *instr_ptr = new_instr;
 
     return SUCCESS;
 }

@@ -246,6 +246,8 @@ fail:
     stack_free(&sym_stack);
     stack_free(&type_stack);
 
+    debug("Expression parsing done %ssuccessfully\n", finished ? "" : "un");
+
     return error;
 }
 
