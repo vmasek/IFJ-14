@@ -7,7 +7,7 @@
 
 #include "debug.h"
 #include "interpreter.h"
-#include "buildin.h"
+#include "builtin.h"
 
 
 int interpret(Instruction *item, Variables *globals)

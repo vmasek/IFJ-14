@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "buildin.h"
+#include "builtin.h"
 #include "cstring.h"
 #include "debug.h"
 #include "errors.h"
