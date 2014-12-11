@@ -122,7 +122,7 @@ enum lexer_state {
     LEXER_MAYBE_GREATER_EQUAL,
     LEXER_MAYBE_LESS_EQUAL, // also applies for <>
     LEXER_BINARY_LOADING,
-    LEXER_MAYBE_BINARY,
+    LEXER_BINARY_LOADING_FIRST,
 };
 
 
