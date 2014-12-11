@@ -14,8 +14,8 @@
 #include "../cstring.h"
 #include "../stack.h"
 #include "../ial.h"
-#include "../buildin.h"
-#include "../common.h"
+#include "../builtin.h"
+#include "../debug.h"
 #include "../interpreter.h"
 #include "../scaner.h"
 
