@@ -80,13 +80,13 @@ int parse(FILE *input, Instruction *first_instr, Variables *vars)
     int ret = SUCCESS;
     Tree globals;
     Tree functions;
-    Instruction *tmp = first_instr;
+    //Instruction *tmp = first_instr; TODO REMOVE
 
     tree_init(&globals);
     tree_init(&functions);
     ret = nt_program(input, &globals, &functions, &first_instr, vars);
 
-    *first_instr = *tmp;
+    //*first_instr = *tmp; TODO REMOVE
     tree_free(&globals);
     tree_free(&functions);
 
@@ -630,11 +630,11 @@ static int search_trees(cstring *id, Tree *locals, Tree *globals, int *_ret, Typ
     Tree_Node *node = NULL;
 
     if (locals != NULL && (node = tree_find_key(locals, id)) != NULL) {
-        *_ret = (int)((Var_record *)(node->data))->index;
+        *_ret = -((int)((Var_record *)(node->data))->index + 1);
     } else if (globals == NULL) {
         return INTERNAL_ERROR;
     } else if ((node = tree_find_key(globals, id)) != NULL) {
-        *_ret = -((int)((Var_record *)(node->data))->index + 1);
+        *_ret = (int)((Var_record *)(node->data))->index;
     }
 
     if (node != NULL) {

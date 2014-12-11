@@ -720,11 +720,18 @@ static int handle_id(Token *tokens, Stack *type_stack, Tree **trees,
         (node = tree_find_key_ch(trees[TREE_LOCALS],
                                  tokens[0].value.value_name)) != NULL) {
         index = -((struct var_record *)(node->data))->index - 1;
+        debug("Variable \"%s\" (to be indexed as %d) found in locals\n",
+              tokens[0].value.value_name, index);
     } else if ((node = tree_find_key_ch(trees[TREE_GLOBALS],
                                  tokens[0].value.value_name)) != NULL) {
         index = ((struct var_record *)(node->data))->index;
-    } else
+        debug("Variable \"%s\" (to be indexed as %d) found in globals\n",
+              tokens[0].value.value_name, index);
+    } else {
+        debug("Variable \"%s\" not found in any tree\n",
+              tokens[0].value.value_name);
         return UNDEFINED_IDENTIFIER;
+    }
 
     if (stack_push(type_stack, ((struct var_record *)(node->data))->type, NULL)
         != SUCCESS ||
