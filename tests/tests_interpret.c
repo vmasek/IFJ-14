@@ -194,17 +194,7 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 		break;
 	}
 
-	if(interpret(&instruction, &calcs, NULL, NULL, NULL) == INTERNAL_ERROR)
-	{
-		printf("\n%s:[test -1.] OK: NULL variables test.\n\n", __func__);
-	}
-	else
-	{
-		printf("\n%s:[test -1.] ERROR: NULL variables test.\n\n", __func__);
-		break;
-	}
-
-	if(interpret(&instruction, &calcs, &locals, NULL, &globals) != SUCCESS)
+	if(interpret_loop(&instruction, &calcs, &locals, NULL, &globals) != SUCCESS)
 	{
 		printf("\n%s:[test %d.] ERROR: Interpreter ended with bad error code.\n\n", __func__, test);
 		break;
@@ -240,7 +230,7 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 
 	stack_push(&calcs, TYPE_REAL, &(values[test]));
 
-	if(interpret(&instruction, &calcs, &locals, NULL, &globals) != SUCCESS)
+	if(interpret_loop(&instruction, &calcs, &locals, NULL, &globals) != SUCCESS)
 	{
 		printf("\n%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -275,7 +265,7 @@ instruction.index		= -2;
 
 	stack_push(&calcs, TYPE_BOOL, &(values[test]));
 
-	if(interpret(&instruction, &calcs, &locals, NULL, &globals) != SUCCESS)
+	if(interpret_loop(&instruction, &calcs, &locals, NULL, &globals) != SUCCESS)
 	{
 		printf("\n%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -311,7 +301,7 @@ instruction.index		= -1;
 	stack_print(&locals);
 	stack_push(&calcs, TYPE_STRING, &values[test]);
 
-	if(interpret(&instruction, &calcs, &locals, NULL, &globals) != SUCCESS)
+	if(interpret_loop(&instruction, &calcs, &locals, NULL, &globals) != SUCCESS)
 	{
 		printf("\n%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -410,7 +400,7 @@ BEGINE_OF_TEST();
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
 
 
-	if(interpret(&instruction, &calcs, &locals, NULL, &globals) != SUCCESS)
+	if(interpret_loop(&instruction, &calcs, &locals, NULL, &globals) != SUCCESS)
 	{
 		printf("\n%s:[test %d.] ERROR: Interpreter ended with bad error code.\n\n", __func__, test);
 		break;
@@ -443,7 +433,7 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 
 	instruction.index		= -2;
 
-	if(interpret(&instruction, &calcs, &locals, NULL, &globals) != SUCCESS)
+	if(interpret_loop(&instruction, &calcs, &locals, NULL, &globals) != SUCCESS)
 	{
 		printf("\n%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -474,7 +464,7 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 
 instruction.index		= -3;
 
-	if(interpret(&instruction, &calcs, &locals, NULL, &globals) != SUCCESS)
+	if(interpret_loop(&instruction, &calcs, &locals, NULL, &globals) != SUCCESS)
 	{
 		printf("\n%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -506,7 +496,7 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 
 	instruction.index		= 0; ///zoberie z globals index 0 (prve)
 
-	if(interpret(&instruction, &calcs, &locals, NULL, &globals) != SUCCESS)
+	if(interpret_loop(&instruction, &calcs, &locals, NULL, &globals) != SUCCESS)
 	{
 		printf("\n%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -538,7 +528,7 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 instruction.index		= 0; ///toto je momentalne nepotrebne
 instruction.instruction		= I_ADD;
 
-	if(interpret(&instruction, &calcs, &locals, NULL, &globals) != SUCCESS)
+	if(interpret_loop(&instruction, &calcs, &locals, NULL, &globals) != SUCCESS)
 	{
 		printf("\n%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;
@@ -1296,7 +1286,7 @@ Value nula = { .data.real=0.0 };
 	stack_push(&calcs, TYPE_REAL, &(nula));
 
 	///zavolanie interpretera na delenie nulou
-	if(interpret(&instruction, &calcs, NULL, NULL, NULL) != RUNTIME_DIV_BY_ZERO)
+	if(interpret_loop(&instruction, &calcs, NULL, NULL, NULL) != RUNTIME_DIV_BY_ZERO)
 	{
 		printf("\n%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);
 		break;

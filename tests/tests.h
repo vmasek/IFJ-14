@@ -75,7 +75,7 @@ void test_interpreter(int argc, char *argv);
 
 
 #define CALL_INTERPRET()                                                      \
-    if(interpret(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)          \
+    if(interpret_loop(&instruction, &calcs, NULL, NULL, NULL) != SUCCESS)          \
     {                                                                         \
         printf("\n%s:[test %d.] ERROR: Interpreter ended with bad error code.\n", __func__, test);\
         break;                                                                \
