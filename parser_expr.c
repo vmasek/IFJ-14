@@ -96,7 +96,7 @@ static Handler handle_sub_mul;
 
 /* TABLE OF OPERATOR PRECEDENCE */
 const enum action PREC_TABLE[TERM_COUNT][TERM_COUNT] = {
-    {R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, S, R, S, S, R},
+    {S, R, R, R, R, R, R, R, R, R, R, R, R, R, S, R, S, R, S, S, R},
     {S, R, R, S, S, R, R, R, R, R, R, S, R, R, S, R, S, R, S, S, R},
     {S, R, R, S, S, R, R, R, R, R, R, S, R, R, S, R, S, R, S, S, R},
     {S, R, R, R, R, R, R, R, R, R, R, R, R, R, S, R, S, R, S, S, R},
@@ -110,7 +110,7 @@ const enum action PREC_TABLE[TERM_COUNT][TERM_COUNT] = {
     {S, R, R, R, R, R, R, R, R, R, R, R, R, R, S, R, S, R, S, S, R},
     {S, R, R, S, S, R, R, R, R, R, R, S, R, R, S, R, S, R, S, S, R},
     {S, R, R, S, S, R, R, R, R, R, R, S, R, R, S, R, S, R, S, S, R},
-    {R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, S, R, S, S, R},
+    {S, R, R, R, R, R, R, R, R, R, R, R, R, R, S, R, S, R, S, S, R},
     {S, S, S, S, S, S, S, S, S, S, S, S, S, S, S, R, S, R, S, S, E},
     {S, S, S, S, S, S, S, S, S, S, S, S, S, S, S, S, S, P, S, S, E},
     {R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, E, R, E, E, R},
