@@ -419,11 +419,11 @@ int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instru
 			debug("I_NOT\n");
 			CALCS_STACK_OPERATIONS_RESULT();
 
-			if ((types[0] == TYPE_INT))
+			if ((types[0] == TYPE_BOOL))
 			{
-				debug("I_NOT - INT\n");
+				debug("I_NOT - BOOL\n");
 				result.data.integer = ~ result.data.integer;
-				stack_push(calcs, TYPE_INT, &(result));
+				stack_push(calcs, TYPE_BOOL, &(result));
 			}
 			else
 			{
