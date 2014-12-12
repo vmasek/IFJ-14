@@ -287,7 +287,7 @@ if [[ $tests == true || $PROJECT == true  ]]; then
 
 		#touch "$file.current.stdout"
 
-		"$BIN_PROJECT" "$source" 1>"$file.current.stdout" 2>"$file.current.stderr"
+		cat "$file.stdin" 2>/dev/null | "$BIN_PROJECT" "$source" 1>"$file.current.stdout" 2>"$file.current.stderr"
 		exit_code="$?"
 
 
