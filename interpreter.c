@@ -493,23 +493,37 @@ int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instru
 			if (types[0] == TYPE_INT)
 			{
 				debug("I_READLN - integer\n");
-				scanf("%d", &(result.data.integer));
+				if(scanf("%d", &(result.data.integer))!=1)
+				{
+					debug("I_READLN - error loading int\n");
+					return INTERNAL_ERROR;
+				}
 			}
 			else if (types[0] == TYPE_REAL)
 			{
 				debug("I_READLN - double\n");
-				scanf("%lf", &(result.data.real));
+				if(scanf("%lf", &(result.data.real))!=1)
+				{
+					debug("I_READLN - error loading real\n");
+					return INTERNAL_ERROR;
+				}
 			}
 			else if (types[0] == TYPE_STRING)
 			{
 				debug("I_READLN - cstring\n");
-				cstr_read_line(result.data.string = cstr_create_str(""));
+				if(cstr_read_line(result.data.string = cstr_create_str(""))!=NULL)
+				{
+					debug("I_READLN - error loading int\n");
+					return INTERNAL_ERROR;
+				}
 			}
 			else
 			{
 				debug("Invalid type passed to instruction\n");
 				return INTERNAL_ERROR;
 			}
+
+			result.inited = true; ///mark as inited
 
 			///                         Instruction operations
 			if(item->index < 0)																		/// index indicates locals stack operation
