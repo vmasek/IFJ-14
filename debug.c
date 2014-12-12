@@ -45,6 +45,7 @@ static const char *keywords[] = {
 static const char *symbols[] = {
     "+",
     "-",
+    "-",
     "*",
     "/",
     "=",
