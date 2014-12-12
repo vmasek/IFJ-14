@@ -504,15 +504,34 @@ int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instru
 
 		case I_AND:
 
-			LOGICAL_OPERATOR_INSTRUCTION("I_AND", & );
+			LOGICAL_OPERATOR_INSTRUCTION("I_AND", && );
 
 		case I_OR:
 
-			LOGICAL_OPERATOR_INSTRUCTION("II_OR", | );
+			LOGICAL_OPERATOR_INSTRUCTION("II_OR", || );
 
 		case I_XOR:
-
-			LOGICAL_OPERATOR_INSTRUCTION("I_XOR", ^ );
+			debug("I_XOR\n");
+			CALCS_STACK_OPERATIONS();
+			if ((types[0] == TYPE_INT) && (types[1] == TYPE_INT))
+			{
+				debug("I_XOR - INT\n");
+				result.data.integer = MACRO_FOR_XOR(values[1].data.integer, values[0].data.integer);
+				stack_push(calcs, TYPE_INT, &(result));
+			}
+			else if ((types[0] == TYPE_BOOL) && (types[1] == TYPE_BOOL))
+			{
+				debug("I_XOR - BOOL\n");
+				result.data.boolean = MACRO_FOR_XOR(values[1].data.boolean, values[0].data.boolean);
+				stack_push(calcs, TYPE_BOOL, &(result));
+			}
+			else
+			{
+				debug("Invalid type passed to instruction\n");
+				return INTERNAL_ERROR;
+			}
+			item = item->next_instruction;
+			break;
 
 		case I_NOT:
 			debug("I_NOT\n");
@@ -521,7 +540,7 @@ int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instru
 			if ((types[0] == TYPE_BOOL))
 			{
 				debug("I_NOT - BOOL\n");
-				result.data.integer = ~ result.data.integer;
+				result.data.boolean = !( result.data.boolean);
 				stack_push(calcs, TYPE_BOOL, &(result));
 			}
 			else

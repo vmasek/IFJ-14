@@ -13,6 +13,13 @@
 #include "instruction.h"
 
 
+/**
+ * @brief Boolean xor macro
+ * @param a operand
+ * @param b opera
+ * @return boolean xor of a, b
+ */
+#define MACRO_FOR_XOR(a, b) ( ( (a) || (b) ) && ( (!a) || (!b) ) )
 
 
 int interpret(Instruction *item, Variables *globals);
