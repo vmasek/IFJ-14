@@ -511,9 +511,9 @@ int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instru
 			else if (types[0] == TYPE_STRING)
 			{
 				debug("I_READLN - cstring\n");
-				if(cstr_read_line(result.data.string = cstr_create_str(""))!=NULL)
+				if(cstr_read_line(result.data.string = cstr_create_str(""))==NULL)
 				{
-					debug("I_READLN - error loading int\n");
+					debug("I_READLN - error loading string\n");
 					return INTERNAL_ERROR;
 				}
 			}
