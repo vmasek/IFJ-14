@@ -49,9 +49,9 @@ static int nt_comp_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions
                        Instruction **intr, Variables *vars);
 static int t_keyword(FILE *input, enum token_keyword keyword);
 static int nt_cmd_list(FILE *input, Tree *locals, Tree *globals, Tree *functions,
-                       Instruction **instr, Variables *vars);
+                       Instruction **instr, Variables *vars, bool empty);
 static int nt_cmd_sublist(FILE *input, Tree *locals, Tree *globals, Tree *functions,
-                          Instruction **instr, Variables *vars);
+                          Instruction **instr, Variables *vars, bool empty);
 static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
                   Instruction **instr, Variables *vars);
 static int nt_main(FILE *input, Tree *globals, Tree *functions,
@@ -338,6 +338,9 @@ static int nt_func(FILE *input, Tree *globals, Tree *functions, Variables *vars)
         //TODO: Pavluv vymysl urezat
         CATCH_VALUE(nt_paramlist(input, func, functions, (int *)&(func->local_count)),
                     ret);
+        if (func->params == NULL) {
+            func->params = (Var_record **)gc_malloc(__FILE__, sizeof(Var_record *));
+        }
         func->params[0] = &(func->ret_value);
         CHECK_VALUE(t_symbol(input, PARENTHESIS_R), ret);
         CHECK_VALUE(t_symbol(input, COLON), ret);
@@ -433,7 +436,7 @@ static int nt_comp_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions
 {
     int ret;
     CHECK_VALUE(t_keyword(input, KEYWORD_BEGIN), ret);
-    CATCH_VALUE(nt_cmd_list(input, locals, globals, functions, instr, vars), ret);
+    CATCH_VALUE(nt_cmd_list(input, locals, globals, functions, instr, vars, true), ret);
     CHECK_VALUE(t_keyword(input, KEYWORD_END), ret);
 
     return SUCCESS;
@@ -454,21 +457,24 @@ static int t_keyword(FILE *input, enum token_keyword keyword)
 }
 
 static int nt_cmd_list(FILE *input, Tree *locals, Tree *globals, Tree *functions,
-                       Instruction **instr, Variables *vars)
+                       Instruction **instr, Variables *vars, bool empty)
 {
     int ret;
-    CATCH_VALUE(nt_cmd_sublist(input, locals, globals, functions, instr, vars), ret);
+    CATCH_VALUE(nt_cmd_sublist(input, locals, globals, functions, instr, vars, empty), ret);
 
     return SUCCESS;
 }
 
 static int nt_cmd_sublist(FILE *input, Tree *locals, Tree *globals, Tree *functions,
-                          Instruction **instr, Variables *vars)
+                          Instruction **instr, Variables *vars, bool empty)
 {
     int ret;
-    CHECK_VALUE(nt_cmd(input, locals, globals, functions, instr, vars), ret);
+    CATCH_VALUE(nt_cmd(input, locals, globals, functions, instr, vars), ret);
+    if (ret == RETURNING) {
+        return (empty) ? RETURNING : SYNTAX_ERROR;
+    }
     CHECK_VALUE(t_symbol_catch(input, SEMICOLON), ret);
-    CHECK_VALUE(nt_cmd_sublist(input, locals, globals, functions, instr, vars), ret);
+    CHECK_VALUE(nt_cmd_sublist(input, locals, globals, functions, instr, vars, false), ret);
 
     return SUCCESS;
 }
@@ -540,7 +546,7 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
         } else if (token.value.value_keyword == KEYWORD_REPEAT) {
             CHECK_VALUE(gen_instr(instr, I_NOP, 0, NULL), ret);
             tmp_instr = *instr;
-            CHECK_VALUE(nt_cmd_list(input, locals, globals, functions, instr, vars), ret);
+            CHECK_VALUE(nt_cmd_list(input, locals, globals, functions, instr, vars, false), ret);
             CHECK_VALUE(t_keyword(input, KEYWORD_UNTIL), ret);
             CHECK_VALUE(parse_expr(input, locals, globals, functions, vars,
                                    instr, &type, false), ret);
