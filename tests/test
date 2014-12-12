@@ -331,14 +331,14 @@ if [[ $tests == true || $PROJECT == true  ]]; then
     MAKE_RET=$?
 	cd ./tests/             #POZOR make
 
-	read -a FILES_SKAL <<< $( find ./files/skal -name '*.pas' | sort) #filling up the field of paths to files
-	read -a FILES_OURS <<< $( find ./files/ours -maxdepth 1 -name '*.pas' | sort) #filling up the field of paths to files
-	read -a FILES_OURS_SCANNER <<< $( find ./files/ours/scanner -maxdepth 1 -name  '*.pas' | sort)
-	read -a FILES_OURS_EXPR <<< $( find ./files/ours/scanner/expr -name '*.pas' | sort)
-	read -a FILES_OURS_SYNTAX_ERRORS <<< $( find ./files/ours/scanner -name '*.pas' | sort)
-	read -a FILES_OURS_FLOAT_ERRORS <<< $( find ./files/ours/scanner/float_errors -name '*.pas' | sort)
-	read -a FILES_OURS_STRINGS <<< $( find ./files/ours/scanner/strings -name '*.pas' | sort)
-	read -a FILES_OURS_BINARY <<< $( find ./files/ours/scanner/binary -name '*.pas' | sort)
+	read -a FILES_SKAL 					<<< $( find ./files/skal -name '*.pas' | sort) #filling up the field of paths to files
+	read -a FILES_OURS 					<<< $( find ./files/ours -maxdepth 1 -name '*.pas' | sort) #filling up the field of paths to files
+	read -a FILES_OURS_SCANNER 			<<< $( find ./files/ours/scanner -maxdepth 1 -name  '*.pas' | sort)
+	read -a FILES_OURS_EXPR 			<<< $( find ./files/ours/scanner/expr -name '*.pas' | sort)
+	read -a FILES_OURS_SYNTAX_ERRORS 	<<< $( find ./files/ours/scanner/syntax_erors -name '*.pas' | sort)
+	read -a FILES_OURS_FLOAT_ERRORS 	<<< $( find ./files/ours/scanner/float_errors -name '*.pas' | sort)
+	read -a FILES_OURS_STRINGS 			<<< $( find ./files/ours/scanner/strings -name '*.pas' | sort)
+	read -a FILES_OURS_BINARY 			<<< $( find ./files/ours/scanner/binary -name '*.pas' | sort)
 
 	if [[ "$MAKE_RET" != "0" ]]; then
         echo -e "${red}ERROR:${color2} Failed to build project.${NC}"
