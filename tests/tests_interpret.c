@@ -1439,21 +1439,181 @@ TEST_OF_COMPARE("Not_equal", != , I_NOT_EQUAL);
 void test_I_AND(void)
 {
 
-TEST_OF_BIT_OPERATORS("And", & , I_AND);
+TEST_OF_BIT_OPERATORS("And", && , I_AND);
 
 }
 
 void test_I_OR(void)
 {
 
-TEST_OF_BIT_OPERATORS("Or", | , I_OR);
+TEST_OF_BIT_OPERATORS("Or", || , I_OR);
 
 }
 
 void test_I_XOR(void)
 {
 
-TEST_OF_BIT_OPERATORS("Xor", ^ , I_XOR);
+	Type typ;
+    Value temp;
+    int test = 0, errors = 1;
+    Instruction instruction;
+    instruction.next_instruction = NULL;
+    instruction.alt_instruction  = NULL;
+    instruction.instruction = I_XOR;
+    Stack calcs;
+    stack_init(&calcs, VALUE_STACK);
+    Value values[12];
+    values[0].data.integer  = 8;
+    values[1].data.integer  = 100;
+    values[2].data.integer  = 16;
+    values[3].data.boolean  = true;
+    values[4].data.boolean  = false;
+    values[5].data.integer  = false;
+    values[5].data.boolean  = true;
+    values[6].data.boolean  = false;
+    values[7].data.boolean  = true;
+    values[8].data.boolean  = false;
+    values[9].data.integer  = 22;
+    values[10].data.integer = 1500;
+BEGINE_OF_TEST();
+printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
+    stack_push(&calcs, TYPE_INT, &(values[0]));
+    stack_push(&calcs, TYPE_INT, &(values[1]));
+    CALL_INTERPRET();
+    if(calcs.count==1)
+    {
+    stack_index(&calcs, 0, (int*)&typ, &temp);
+        if(typ == TYPE_INT && (temp.data.integer == MACRO_FOR_XOR( values[0].data.integer, values[1].data.integer )))
+            printf("\n%s:[test %d.] %s was OK.\n", __func__, test, "I_XOR");
+        else
+        {
+            printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.integer, MACRO_FOR_XOR(values[0].data.integer, values[1].data.integer));
+            break;
+        }
+    }
+    else
+    {
+        printf("\n%s:[test %d.] ERROR: stack counter should be %d and its %u\n", __func__, test, 1, calcs.count);
+        break;
+    }
+    printf("\n");
+    POP_OUT_LAST();
+test++;
+printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
+    stack_push(&calcs, TYPE_BOOL, &(values[3]));
+    stack_push(&calcs, TYPE_BOOL, &(values[4]));
+    CALL_INTERPRET();
+    if(calcs.count==1)
+    {
+    stack_index(&calcs, 0, (int*)&typ, &temp);
+        if(typ == TYPE_BOOL && (temp.data.boolean == MACRO_FOR_XOR( values[3].data.boolean, values[4].data.boolean )))
+            printf("\n%s:[test %d.] %s was OK.\n", __func__, test, "I_XOR");
+        else
+        {
+            printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.boolean, MACRO_FOR_XOR(values[3].data.boolean, values[4].data.boolean));
+            break;
+        }
+    }
+    else
+    {
+        printf("\n%s:[test %d.] ERROR: stack counter should be %d and its %u\n", __func__, test, 1, calcs.count);
+        break;
+    }
+    printf("\n");
+    POP_OUT_LAST();
+test++;
+printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
+    stack_push(&calcs, TYPE_BOOL, &(values[5]));
+    stack_push(&calcs, TYPE_BOOL, &(values[6]));
+    CALL_INTERPRET();
+    if(calcs.count==1)
+    {
+        stack_index(&calcs, 0, (int*)&typ, &temp);
+        if(typ == TYPE_BOOL && (temp.data.boolean == MACRO_FOR_XOR( values[5].data.boolean, values[6].data.boolean )))
+            printf("\n%s:[test %d.] %s was OK.\n", __func__, test, "I_XOR");
+        else
+        {
+            printf("\n%s:[test %d.] ERROR: stack value is  %d and should be %d\n", __func__, test, temp.data.boolean, MACRO_FOR_XOR(values[5].data.boolean, values[6].data.boolean));
+            break;
+        }
+    }
+    else
+    {
+        printf("\n%s:[test %d.] ERROR: stack counter should be %d and its %u\n", __func__, test, 1, calcs.count);
+        break;
+    }
+    printf("\n");
+    POP_OUT_LAST();
+test++;
+printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
+    stack_push(&calcs, TYPE_BOOL, &(values[5]));
+    stack_push(&calcs, TYPE_BOOL, &(values[7]));
+    CALL_INTERPRET();
+    if(calcs.count==1)
+    {
+    stack_index(&calcs, 0, (int*)&typ, &temp);
+        if(typ == TYPE_BOOL && (temp.data.boolean == MACRO_FOR_XOR( values[5].data.boolean, values[7].data.boolean )))
+            printf("\n%s:[test %d.] %s was OK.\n", __func__, test, "I_XOR");
+        else
+        {
+            printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.boolean, MACRO_FOR_XOR(values[5].data.boolean, values[7].data.boolean));
+            break;
+        }
+    }
+    else
+    {
+        printf("\n%s:[test %d.] ERROR: stack counter should be %d and its %u\n", __func__, test, 1, calcs.count);
+        break;
+    }
+    printf("\n");
+    POP_OUT_LAST();
+test++;
+printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
+    stack_push(&calcs, TYPE_INT, &(values[3]));
+    stack_push(&calcs, TYPE_INT, &(values[5]));
+    CALL_INTERPRET();
+    if(calcs.count==1)
+    {
+    stack_index(&calcs, 0, (int*)&typ, &temp);
+        if(typ == TYPE_INT && (temp.data.integer == MACRO_FOR_XOR( values[3].data.boolean, values[5].data.integer )))
+            printf("\n%s:[test %d.] %s was OK.\n", __func__, test, "I_XOR");
+        else
+        {
+            printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.integer, MACRO_FOR_XOR(values[3].data.boolean, values[5].data.boolean));
+            break;
+        }
+    }
+    else
+    {
+        printf("\n%s:[test %d.] ERROR: stack counter should be %d and its %u\n", __func__, test, 1, calcs.count);
+        break;
+    }
+    printf("\n");
+    POP_OUT_LAST();
+test++;
+printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
+    stack_push(&calcs, TYPE_INT, &(values[9]));
+    stack_push(&calcs, TYPE_INT, &(values[10]));
+    CALL_INTERPRET();
+    if(calcs.count==1)
+    {
+    stack_index(&calcs, 0, (int*)&typ, &temp);
+        if(typ == TYPE_INT && (temp.data.integer == MACRO_FOR_XOR( values[9].data.integer, values[10].data.integer )))
+            printf("\n%s:[test %d.] %s was OK.\n", __func__, test, "I_XOR");
+        else
+        {
+            printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.integer, MACRO_FOR_XOR(values[9].data.integer, values[10].data.integer));
+            break;
+        }
+    }
+    else
+    {
+        printf("\n%s:[test %d.] ERROR: stack counter should be %d and its %u\n", __func__, test, 1, calcs.count);
+        break;
+    }
+    printf("\n");
+    POP_OUT_LAST();
+END_OF_TEST();
 
 }
 
@@ -1470,28 +1630,28 @@ void test_I_NOT(void)
 	Stack calcs;
 	stack_init(&calcs, VALUE_STACK);
 	Value values[6];
-	values[0].data.integer	= 8;
-	values[1].data.integer	= 100;
-	values[2].data.integer	= 0;
-	values[3].data.integer	= -1;
-	values[4].data.integer	= -54646406;
-	values[5].data.integer	= 2154668;
+	values[0].data.boolean	= true;
+	values[1].data.boolean	= true;
+	values[2].data.boolean	= false;
+	values[3].data.boolean	= true;
+	values[4].data.boolean	= false;
+	values[5].data.boolean	= false;
 
 BEGINE_OF_TEST();
 
 
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
-	stack_push(&calcs, TYPE_INT, &(values[0]));
+	stack_push(&calcs, TYPE_BOOL, &(values[0]));
 
 	CALL_INTERPRET();
 	if(calcs.count==1)
 	{
 	stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_INT && (temp.data.integer == ( ~values[0].data.integer )))
+		if(typ == TYPE_BOOL && (temp.data.boolean == ( !(values[0].data.boolean) )))
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, "NOT");
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.integer, ~values[0].data.integer );
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.boolean, !(values[0].data.boolean) );
 			break;
 		}
 	}
@@ -1506,17 +1666,17 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 
 test++;
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
-	stack_push(&calcs, TYPE_INT, &(values[1]));
+	stack_push(&calcs, TYPE_BOOL, &(values[1]));
 
 	CALL_INTERPRET();
 	if(calcs.count==1)
 	{
 	stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_INT && (temp.data.integer == ( ~values[1].data.integer )))
+		if(typ == TYPE_BOOL && (temp.data.boolean == ( !values[1].data.boolean )))
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, "NOT");
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.integer, ( ~values[1].data.integer ));
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.boolean, ( !values[1].data.boolean ));
 			break;
 		}
 	}
@@ -1531,17 +1691,17 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 
 test++;
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
-	stack_push(&calcs, TYPE_INT, &(values[5]));
+	stack_push(&calcs, TYPE_BOOL, &(values[5]));
 
 	CALL_INTERPRET();
 	if(calcs.count==1)
 	{
 		stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_INT && (temp.data.integer == ( ~values[5].data.integer  )))
+		if(typ == TYPE_BOOL && (temp.data.boolean == ( !values[5].data.boolean  )))
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, "NOT");
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is  %d and should be %d\n", __func__, test, temp.data.integer, ( ~values[5].data.integer ));
+			printf("\n%s:[test %d.] ERROR: stack value is  %d and should be %d\n", __func__, test, temp.data.boolean, ( !values[5].data.boolean ));
 			break;
 		}
 	}
@@ -1556,17 +1716,17 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 
 test++;
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
-	stack_push(&calcs, TYPE_INT, &(values[4]));
+	stack_push(&calcs, TYPE_BOOL, &(values[4]));
 
 	CALL_INTERPRET();
 	if(calcs.count==1)
 	{
 	stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_INT && (temp.data.integer == ( ~values[4].data.integer  )))
+		if(typ == TYPE_BOOL && (temp.data.boolean == ( !values[4].data.boolean  )))
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, "NOT");
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.integer, ( ~values[4].data.integer ));
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.boolean, ( !values[4].data.boolean ));
 			break;
 		}
 	}
@@ -1581,17 +1741,17 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 
 test++;
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
-	stack_push(&calcs, TYPE_INT, &(values[3]));
+	stack_push(&calcs, TYPE_BOOL, &(values[3]));
 
 	CALL_INTERPRET();
 	if(calcs.count==1)
 	{
 	stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_INT && (temp.data.integer == ( ~values[3].data.integer  )))
+		if(typ == TYPE_BOOL && (temp.data.boolean == ( !values[3].data.boolean  )))
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, "NOT");
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.integer, ( ~values[3].data.integer ));
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.boolean, ( !values[3].data.boolean ));
 			break;
 		}
 	}
@@ -1606,17 +1766,17 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 
 test++;
 printf("\n\n\n%s:[test %d.]------------------------------------------------------------------------------------\n\n", __func__, test);
-	stack_push(&calcs, TYPE_INT, &(values[2]));
+	stack_push(&calcs, TYPE_BOOL, &(values[2]));
 
 	CALL_INTERPRET();
 	if(calcs.count==1)
 	{
 	stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_INT && (temp.data.integer == ( ~values[2].data.integer )))
+		if(typ == TYPE_BOOL && (temp.data.boolean == ( !values[2].data.boolean )))
 			printf("\n%s:[test %d.] %s was OK.\n", __func__, test, "NOT");
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.integer, ~values[2].data.integer );
+			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.integer, !values[2].data.integer );
 			break;
 		}
 	}
