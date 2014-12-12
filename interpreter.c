@@ -404,6 +404,79 @@ int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instru
 			item = item->next_instruction;
 			break;
 
+		case I_INC:
+			debug("I_INC\n");
+
+			///                         Instruction operations
+			if(item->index < 0)																		/// index indicates locals stack operation
+			{
+				debug("I_INC - locals stack\n");
+				if (stack_index(locals, (-(item->index+1)), (int *)&types[0], &result) == INTERNAL_ERROR) ///
+				{
+					debug("I_INC - locals stack_index error.\n");
+					return INTERNAL_ERROR;
+				}
+				result.data.integer++; ///incrementation
+				if (stack_update(locals, (-(item->index+1)), (int)types[0], &result) == INTERNAL_ERROR)
+				{
+					debug("I_INC - locals stack error.\n");
+					return INTERNAL_ERROR;
+				}
+			}
+			else
+			{
+				debug("I_INC - globals field\n");
+				if (variables_value_read(globals, &types[0], &result, item->index) == INTERNAL_ERROR)		/// index indicates global variables field operation
+				{
+					debug("I_INC - globals variables_value_read error.\n");
+					return INTERNAL_ERROR;
+				}
+				result.data.integer++; ///incrementation
+				if (variables_value_write(globals, &result, item->index) == INTERNAL_ERROR)	/// index indicates global variables field operation
+				{
+					debug("I_INC - globals field error.\n");
+					return INTERNAL_ERROR;
+				}
+			}
+
+		case I_DEC:
+			debug("I_DEC\n");
+
+			///                         Instruction operations
+			if(item->index < 0)																		/// index indicates locals stack operation
+			{
+				debug("I_DEC - locals stack\n");
+				if (stack_index(locals, (-(item->index+1)), (int *)&types[0], &result) == INTERNAL_ERROR) ///
+				{
+					debug("I_DEC - locals stack_index error.\n");
+					return INTERNAL_ERROR;
+				}
+				result.data.integer--; ///decrementation
+				if (stack_update(locals, (-(item->index+1)), (int)types[0], &result) == INTERNAL_ERROR)
+				{
+					debug("I_DEC - locals stack error.\n");
+					return INTERNAL_ERROR;
+				}
+			}
+			else
+			{
+				debug("I_DEC - globals field\n");
+				if (variables_value_read(globals, &types[0], &result, item->index) == INTERNAL_ERROR)		/// index indicates global variables field operation
+				{
+					debug("I_DEC - globals variables_value_read error.\n");
+					return INTERNAL_ERROR;
+				}
+				result.data.integer--; ///decrementation
+				if (variables_value_write(globals, &result, item->index) == INTERNAL_ERROR)	/// index indicates global variables field operation
+				{
+					debug("I_DEC - globals field error.\n");
+					return INTERNAL_ERROR;
+				}
+			}
+
+			item = item->next_instruction;
+			break;
+
 		case I_LESS:
 
 			COMPARISON_INSTRUCTION("I_LESS",  < );
