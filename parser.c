@@ -11,6 +11,10 @@
 #include "instruction.h"
 #include "gc.h"
 
+#ifdef DEBUG
+#include "ial.h"
+#endif
+
 /**
  * Value checking macro
  */
@@ -86,9 +90,20 @@ int parse(FILE *input, Instruction *first_instr, Variables *vars)
     tree_init(&functions);
     ret = nt_program(input, &globals, &functions, &first_instr, vars);
 
+
+#ifdef DEBUG
+	debug("\n==============================PRINTING TREE globals================================\n");
+	tree_print(&globals);
+	fprintf(stderr, "\n===========================================================================\n\n");
+	debug("\n==============================PRINTING TREE functions==============================\n");
+	tree_print(&functions);
+	fprintf(stderr, "\n===========================================================================\n\n");
+#endif
+
     //*first_instr = *tmp; TODO REMOVE
     tree_free(&globals);
     tree_free(&functions);
+
 
     return ret;
 }
