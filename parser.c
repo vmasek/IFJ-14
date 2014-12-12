@@ -70,8 +70,9 @@ extern int file_end(FILE *input);
 
 inline int file_end(FILE *input)
 {
+    int ret;
     Token token;
-    get_token(&token, input);
+    CHECK_VALUE(get_token(&token, input), ret);
     if (token.type == TOKEN_EOF) {
         return SUCCESS;
     } else {
