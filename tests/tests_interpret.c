@@ -151,7 +151,7 @@ void test_I_HARDCODE_1(void)
 	Instruction inst_PUSH2;
 	Instruction inst_ADD;
 	Instruction inst_WRITE;
-	Instruction inst_HALT;
+	Instruction inst_NOPend;
 
 	/****************************************/
 	inst_NOP.next_instruction = &inst_PUSH1;
@@ -170,13 +170,13 @@ void test_I_HARDCODE_1(void)
 	inst_ADD.alt_instruction  = NULL;
 	inst_ADD.instruction = I_ADD;
 	/****************************************/
-	inst_WRITE.next_instruction = &inst_HALT;
+	inst_WRITE.next_instruction = &inst_NOPend;
 	inst_WRITE.alt_instruction  = NULL;
 	inst_WRITE.instruction = I_WRITE;
 	/****************************************/
-	inst_HALT.next_instruction = NULL;
-	inst_HALT.alt_instruction  = NULL;
-	inst_HALT.instruction = I_HALT;
+	inst_NOPend.next_instruction = NULL;
+	inst_NOPend.alt_instruction  = NULL;
+	inst_NOPend.instruction = I_NOP;
 
 	Value values[2];
 	values[0].data.integer	= 5;

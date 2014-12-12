@@ -176,7 +176,8 @@ int test_sort()
     printf("\n*** Testing buildin sort ***\n");
     cstring *Vojto = cstr_create_str("abcABCdefDEF");
 
-    cstring *Albert = sort(Vojto);
+    cstring *Albert = Vojto;
+    sort(&Albert);
 
     if (strcmp(Albert->str, "ABCDEFabcdef") != 0) {
         print_cstr_all(Vojto);
@@ -185,7 +186,8 @@ int test_sort()
 
     cstr_clear(Vojto);
     cstr_append_str(Vojto, "123987");
-    cstring *Pavel = sort(Vojto);
+    cstring *Pavel = Vojto;
+    sort(&Pavel);
 
     if ((strcmp(Pavel->str, "123789") != 0)) {
         print_cstr_all(Vojto);
@@ -194,7 +196,8 @@ int test_sort()
 
     cstr_clear(Vojto);
     cstr_append_str(Vojto, "1234abCDefGH");
-    cstring *Adam = sort(Vojto);
+    cstring *Adam = Vojto;
+    sort(&Adam);
 
     if ((strcmp(Adam->str, "1234CDGHabef") != 0)) {
         print_cstr_all(Vojto);
