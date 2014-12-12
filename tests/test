@@ -21,6 +21,7 @@ SYNTAX=false
 STRINGS=false
 BINARY=false
 SHOW_OK=false
+FLOAT_ERRORS=false
 
 if [ $# -gt 0 ]; then
 
@@ -69,6 +70,11 @@ if [ $# -gt 0 ]; then
 
 		if [[ "syntax" == "$arg" ]]; then			# param "log" to archive all logs
 			SYNTAX=true
+			ALL=false
+		fi
+
+		if [[ "float" == "$arg" ]]; then			# param "log" to archive all logs
+			FLOAT_ERRORS=true
 			ALL=false
 		fi
 
@@ -330,7 +336,8 @@ if [[ $tests == true || $PROJECT == true  ]]; then
 	read -a FILES_OURS_SCANNER <<< $( find ./files/ours/scanner -maxdepth 1 -name  '*.pas' | sort)
 	read -a FILES_OURS_EXPR <<< $( find ./files/ours/scanner/expr -name '*.pas' | sort)
 	read -a FILES_OURS_SYNTAX_ERRORS <<< $( find ./files/ours/scanner -name '*.pas' | sort)
-	read -a FILES_OURS_STRINGS <<< $( find ./files/ours/scanner/expr -name '*.pas' | sort)
+	read -a FILES_OURS_FLOAT_ERRORS <<< $( find ./files/ours/scanner/float_errors -name '*.pas' | sort)
+	read -a FILES_OURS_STRINGS <<< $( find ./files/ours/scanner/strings -name '*.pas' | sort)
 	read -a FILES_OURS_BINARY <<< $( find ./files/ours/scanner/binary -name '*.pas' | sort)
 
 	if [[ "$MAKE_RET" != "0" ]]; then
@@ -385,6 +392,18 @@ if [[ $tests == true || $PROJECT == true  ]]; then
 	    OK_count=0
 	    echo "---------------------------------------SYNTAX-ERRORS--------------------------------------------------------------------------"
 	    for file in "${FILES_OURS_SYNTAX_ERRORS[@]}"; do
+		    run_test $file
+		    ((counter++))
+	    done
+	    echo -e "TESTS:\t\t${green}PASSED: $OK_count ${NC} of $counter"
+	fi
+
+	counter=0
+	if [[ $ALL == true || $FLOAT_ERRORS == true ]]; then
+	    counter=0
+	    OK_count=0
+	    echo "---------------------------------------FLOAT-ERRORS--------------------------------------------------------------------------"
+	    for file in "${FILES_OURS_FLOAT_ERRORS[@]}"; do
 		    run_test $file
 		    ((counter++))
 	    done

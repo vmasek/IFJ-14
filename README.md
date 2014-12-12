@@ -63,6 +63,7 @@ Use script arguments to specify test:
 
 - `delete`:		test will be forced to delete every log and temp file
 - `log`:		test will be forced to STORE all log files
+- `ok`:			test will always show returned err. code
 
 
 - `modules`:	modules will be tested
@@ -75,6 +76,9 @@ Running project test located in directories/subdirectories:
 - `expr`:		our expr tests
 - `syntax`:		our syntax tests
 - `strins`:		our syntax tests
+- `float`:		our float errors tests
+- `strings`:	our strings tests
+
 
 - `skal`:		tests made by "Skal"
 
