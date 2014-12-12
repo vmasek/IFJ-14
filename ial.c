@@ -441,19 +441,19 @@ static void tree_print_nodes(Tree_Node *node, const char *sufix, const char from
         strcpy(suf2, sufix);
         if (fromdir == 'L') {
             suf2 = strcat(suf2, "  |");
-            printf("%s\n", suf2);
+            fprintf(stderr,"%s\n", suf2);
         } else
             suf2 = strcat(suf2, "   ");
 
         tree_print_nodes(node->right, suf2, 'R');
-        printf("%s  +-[%s]\n", sufix, node->key->str);
+        fprintf(stderr,"%s  +-[%s]\n", sufix, node->key->str);
         strcpy(suf2, sufix);
         if (fromdir == 'R')
             suf2 = strcat(suf2, "  |");
         else
             suf2 = strcat(suf2, "   ");
         tree_print_nodes(node->left, suf2, 'L');
-        if (fromdir == 'R') printf("%s\n", suf2);
+        if (fromdir == 'R') fprintf(stderr,"%s\n", suf2);
         free(suf2);
     }
 }
@@ -468,12 +468,12 @@ static void tree_print_nodes(Tree_Node *node, const char *sufix, const char from
  */
 void tree_print(Tree *tree)
 {
-    printf("\n");
+    fprintf(stderr,"\n");
     if (tree != NULL)
         tree_print_nodes(tree->root, "", 'X');
     else
         fprintf(stderr, "Tree uninicialized\n");
-    printf("\n");
+    fprintf(stderr,"\n");
 }
 
 
