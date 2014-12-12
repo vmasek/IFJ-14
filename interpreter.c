@@ -490,12 +490,6 @@ int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instru
 				}
 			}
 
-			if(result.inited == false)
-			{
-				debug("I_READLN - uninitialized\n");
-				return RUNTIME_UNINITIALIZED;
-			}
-
 			if (types[0] == TYPE_INT)
 			{
 				debug("I_READLN - integer\n");
