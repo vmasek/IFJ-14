@@ -62,11 +62,14 @@ static bool token_register(Token *token, bool set)
 
 static enum token_keyword _get_keyword(char *name)
 {
+	///zmazat !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // lowercase it before
-    for (int i = 0; name[i]; i++)
-    {
-        name[i] = tolower(name[i]);
-    }
+    //for (int i = 0; name[i]; i++)
+    //{
+	//	debug("LOWERING - char [ '%c' ] -> [ '%c' ]\n",name[i],tolower(name[i]));
+    //    name[i] = tolower(name[i]);
+    //}
+
     switch (name[0])
     {
     case 'a':
@@ -953,13 +956,22 @@ int get_token(Token *token_ret, FILE *input)
             {
                 token.value.value_name[token_name_pos] = 0;
                 token_name_pos = 0;
+                debug("\tLEXER_ID_KEYWORD - String is [ %s ]\n", token.value.value_name);
+                for (int i = 0; token.value.value_name[i]; i++)
+				{
+					debug("LOWERING - char [ '%c' ] -> [ '%c' ]\n",token.value.value_name[i],tolower(token.value.value_name[i]));
+					token.value.value_name[i] = tolower(token.value.value_name[i]);
+				}
                 keyword = _get_keyword(token.value.value_name);
                 if (!keyword)
                 {
+					debug("\tLEXER_ID_KEYWORD -\tIS TOKEN\n");
                     token.type = TOKEN_ID;
+                    //token.value.value_keyword = keyword;
                 }
                 else
                 {
+					debug("\tLEXER_ID_KEYWORD -\tIS KEYWORD\n");
                     token.type = TOKEN_KEYWORD;
                     token.value.value_keyword = keyword;
                 }
