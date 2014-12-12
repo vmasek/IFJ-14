@@ -22,6 +22,7 @@ STRINGS=false
 BINARY=false
 SHOW_OK=false
 FLOAT_ERRORS=false
+OPERATIONS=false
 
 if [ $# -gt 0 ]; then
 
@@ -90,6 +91,11 @@ if [ $# -gt 0 ]; then
 
 		if [[ "skal" == "$arg" ]]; then			# param "log" to archive all logs
 			SKAL=true
+			ALL=false
+		fi
+
+		if [[ "operations" == "$arg" ]]; then			# param "log" to archive all logs
+			OPERATIONS=true
 			ALL=false
 		fi
 
@@ -339,6 +345,8 @@ if [[ $tests == true || $PROJECT == true  ]]; then
 	read -a FILES_OURS_FLOAT_ERRORS 	<<< $( find ./files/ours/scanner/float_errors -name '*.pas' | sort)
 	read -a FILES_OURS_STRINGS 			<<< $( find ./files/ours/scanner/strings -name '*.pas' | sort)
 	read -a FILES_OURS_BINARY 			<<< $( find ./files/ours/scanner/binary -name '*.pas' | sort)
+	read -a FILES_OURS_OPERATIONS 		<<< $( find ./files/ours/operations -name '*.pas' | sort)
+
 
 	if [[ "$MAKE_RET" != "0" ]]; then
         echo -e "${red}ERROR:${color2} Failed to build project.${NC}"
@@ -428,6 +436,18 @@ if [[ $tests == true || $PROJECT == true  ]]; then
 	    OK_count=0
 	    echo "---------------------------------------BINARY-------------------------------------------------------------------------------"
 	    for file in "${FILES_OURS_BINARY[@]}"; do
+		    run_test $file
+		    ((counter++))
+	    done
+	    echo -e "TESTS:\t\t${green}PASSED: $OK_count ${NC} of $counter"
+	fi
+
+	counter=0
+	if [[ $ALL == true || $OPERATIONS == true ]]; then
+	    counter=0
+	    OK_count=0
+	    echo "---------------------------------------OPERATIONS-------------------------------------------------------------------------------"
+	    for file in "${FILES_OURS_OPERATIONS[@]}"; do
 		    run_test $file
 		    ((counter++))
 	    done
