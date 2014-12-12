@@ -222,7 +222,8 @@ static int nt_var(FILE *input, Tree *vars, Tree *functions, bool eps,
     debug_token(&token);
     if (token.type == TOKEN_ID) {
         MALLOC_VAR(var, __FILE__);
-
+        debug("printing token before inserting to tree:\t [%s]\n", token.value.value_name);
+        debug("printing token cstring before inserting to tree:\t [%s]\n", cstr_create_str(token.value.value_name)->str);
         CHECK_VALUE(insert_tree(vars, cstr_create_str(token.value.value_name),
                                 var, functions), ret);
         CHECK_VALUE(t_symbol(input, COLON), ret);
