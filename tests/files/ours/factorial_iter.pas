@@ -3,12 +3,12 @@ var
     vysl : integer;
 
 begin
-    write('Zadejte cislo pro vypocet faktorialu:');
-    readln(a);
+    {write('Zadejte cislo pro vypocet faktorialu:');}
+    {readln(a);}
     a := 3;
     if a < 0 then
     begin
-        write('Faktorial nelze spocitat'#10'')
+        {write('Faktorial nelze spocitat'#10'')}
     end
     else
         begin
@@ -18,6 +18,6 @@ begin
             vysl := vysl * a;
             a := a - 1
         end;
-        write('Vysledek je:', vysl,''#10'')
+        write({'Vysledek je:', }vysl,''#10'')
     end
 end.
