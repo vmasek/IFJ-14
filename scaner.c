@@ -24,11 +24,12 @@ int convert_binary(int binary_number)
 {
     int base = 1, reminder = 0, decimal = 0;
 
-    while(binary_number > 0){
-    reminder = binary_number % 10;
-    decimal = decimal + reminder * base;
-    binary_number = binary_number / 10;
-    base = base * 2;
+    while (binary_number > 0)
+    {
+        reminder = binary_number % 10;
+        decimal = decimal + reminder * base;
+        binary_number = binary_number / 10;
+        base = base * 2;
 
     }
 
@@ -43,7 +44,8 @@ static bool token_register(Token *token, bool set)
     if (token == NULL)
         return false;
 
-    if (set) {
+    if (set)
+    {
         saved_token = *token;
         saved = true;
         return true;
@@ -58,12 +60,15 @@ static bool token_register(Token *token, bool set)
     return true;
 }
 
-static enum token_keyword _get_keyword(char *name) {
+static enum token_keyword _get_keyword(char *name)
+{
     // lowercase it before
-    for(int i = 0; name[i]; i++){
+    for (int i = 0; name[i]; i++)
+    {
         name[i] = tolower(name[i]);
     }
-    switch (name[0]) {
+    switch (name[0])
+    {
     case 'a':
         if (!strcmp(name, "and"))
             return KEYWORD_AND;
@@ -194,7 +199,8 @@ static enum token_keyword _get_keyword(char *name) {
 /*
  * Append a character to a string
  */
-static void strcatc(char * destination, char c) {
+static void strcatc(char *destination, char c)
+{
     char buffer[2] = {c};
     strcat(destination, buffer);
 }
@@ -203,7 +209,8 @@ static void strcatc(char * destination, char c) {
  * Load (another) lexeme from the source file
  * and return it's Token representation
  */
-int get_token(Token *token_ret, FILE *input) {
+int get_token(Token *token_ret, FILE *input)
+{
     int symbol = 0;
     enum lexer_state state = LEXER_START;
 
@@ -215,56 +222,67 @@ int get_token(Token *token_ret, FILE *input) {
 
     static Token token;
 
-    if (token_register(&token, false)) {
+    if (token_register(&token, false))
+    {
         *token_ret = token;
         return SUCCESS;
     }
-debug("LEXER\n");
-    while (1) {
-        
+    debug("LEXER\n");
+    while (1)
+    {
+
         symbol = getc(input);
-        switch (state) {
+        switch (state)
+        {
         case LEXER_START:
+            debug("case\t'LEXER_START'\n");
             if (isspace(symbol))
                 break;
 
-            if (symbol == EOF) {
-                debug("EOF\n");
+            if (symbol == EOF)
+            {
+                debug("\tLEXER_START - EOF\n");
                 token.type = TOKEN_EOF;
                 *token_ret = token;
                 return SUCCESS;
             }
 
             if ((symbol >= 'a' && symbol <= 'z') ||
-                (symbol >= 'A' && symbol <= 'Z') ||
-                (symbol == '_')) {
+                    (symbol >= 'A' && symbol <= 'Z') ||
+                    (symbol == '_'))
+            {
                 token.value.value_name[token_name_pos] = symbol;
                 token_name_pos ++;
                 state = LEXER_ID_KEYWORD;
                 break;
             }
 
-            if (symbol >= '0' && symbol <= '9') {
+            if (symbol >= '0' && symbol <= '9')
+            {
                 strcatc(buffer, symbol);
                 token.type = TOKEN_INT;
                 state = LEXER_INT_LOADING;
                 break;
             }
 
-            switch (symbol) {
+            switch (symbol)
+            {
             case '+':
+                debug("case\t'+'\n");
                 token.type = TOKEN_SYMBOL;
                 token.value.value_symbol = ADDITION;
                 *token_ret = token;
                 return SUCCESS;
 
             case '-':
-                switch (token.type) {
+                debug("case\t'-'\n");
+                switch (token.type)
+                {
                 case TOKEN_KEYWORD:
                     token.value.value_keyword = (token.value.value_keyword
-                                                == KEYWORD_TRUE ||
-                                                token.value.value_keyword
-                                                == KEYWORD_FALSE) ?
+                                                 == KEYWORD_TRUE ||
+                                                 token.value.value_keyword
+                                                 == KEYWORD_FALSE) ?
                                                 SUBTRACTION : NEGATION;
                     break;
                 case TOKEN_ID:
@@ -282,88 +300,102 @@ debug("LEXER\n");
                 return SUCCESS;
 
             case '*':
+                debug("case\t'*'\n");
                 token.type = TOKEN_SYMBOL;
                 token.value.value_symbol = MULTIPLICATION;
                 *token_ret = token;
                 return SUCCESS;
 
             case '/':
+                debug("case\t'+'\n");
                 token.type = TOKEN_SYMBOL;
                 token.value.value_symbol = DIVISION;
                 *token_ret = token;
                 return SUCCESS;
 
             case '=':
+                debug("case\t'='\n");
                 token.type = TOKEN_SYMBOL;
                 token.value.value_symbol = COMPARISON;
                 *token_ret = token;
                 return SUCCESS;
 
             case ':':
+                debug("case\t':'\n");
                 token.type = TOKEN_SYMBOL;
                 state = LEXER_MAYBE_ASSIGNMENT;
                 break; // can be ':=' or ':'
 
             case ';':
+                debug("case\t';'\n");
                 token.type = TOKEN_SYMBOL;
                 token.value.value_symbol = SEMICOLON;
                 *token_ret = token;
                 return SUCCESS;
 
             case '.':
+                debug("case\t'.'\n");
                 token.type = TOKEN_SYMBOL;
                 state = LEXER_MAYBE_DOUBLE_DOT;
                 break; // can be '..' or '.'
 
             case ',':
+                debug("case\t','\n");
                 token.type = TOKEN_SYMBOL;
                 token.value.value_symbol = COMMA;
                 *token_ret = token;
                 return SUCCESS;
 
             case '(':
+                debug("case\t'('\n");
                 token.type = TOKEN_SYMBOL;
                 token.value.value_symbol = PARENTHESIS_L;
                 *token_ret = token;
                 return SUCCESS;
 
             case ')':
+                debug("case\t')'\n");
                 token.type = TOKEN_SYMBOL;
                 token.value.value_symbol = PARENTHESIS_R;
                 *token_ret = token;
                 return SUCCESS;
 
             case '>':
+                debug("case\t'>'\n");
                 token.type = TOKEN_SYMBOL;
                 state = LEXER_MAYBE_GREATER_EQUAL;
                 break; // can be '>=' or '>'
 
             case '<':
+                debug("case\t'<'\n");
                 token.type = TOKEN_SYMBOL;
                 state = LEXER_MAYBE_LESS_EQUAL;
                 break; // can be '<=' or '<>' or '<'
 
 
             case '\'':
+                debug("case\t'''\n");
                 token.type = TOKEN_STRING;
-                debug("LEXER_STR_START");
                 state = LEXER_STR_START;
                 break;
 
             case '{':
+                debug("case\t'{'\n");
                 state = LEXER_COMMENT;
                 break;
 
             case '%':
+                debug("case\t'%'\n");
                 state = LEXER_BINARY_LOADING_FIRST;
                 break;
-            
+
             case '&':
-                debug("AND OCTAL \n");
+                debug("case\t'&'\n");
                 state = LEXER_OCT_LOADING_FIRST;
                 break;
-            
+
             case '$':
+                debug("case\t'$'\n");
                 state = LEXER_HEX_LOADING_FIRST;
                 break;
 
@@ -372,11 +404,13 @@ debug("LEXER\n");
                 break;
 
             }
-                break;
+            break;
 
 
         case LEXER_COMMENT:
-            if (symbol == '}') {
+            debug("case\t'LEXER_COMMENT'\n");
+            if (symbol == '}')
+            {
                 state = LEXER_START;
                 break;
             }
@@ -384,66 +418,73 @@ debug("LEXER\n");
 
 
         case LEXER_STR_START:
-            debug("lexer str start\n");
-            if (symbol == '\'') {
+            debug("case\t'LEXER_STR_START'\n");
+            if (symbol == '\'')
+            {
                 token.value.value_string = cstr_create_str("");
                 state = LEXER_STR_AP;
                 break;
-
-            } else if(symbol == '#')
-            {
-                debug("vosiel som do hashtagu\n");
-                token.value.value_string = cstr_create_str("");
-                state = LEXER_STR_SPEC;
-                break; 
             }
-            else if (isprint(symbol)){ // is this right? any more valid chars?
+            else if (isprint(symbol))  // is this right? any more valid chars?
+            {
+                debug("\tLEXER_STR_START - creating cstr char [ '%c' ]\n", symbol);
                 token.value.value_string = cstr_create_chr(symbol);
                 state = LEXER_STR_LOAD;
                 break;
-
-            } else {
+            }
+            else
+            {
                 return LEXICAL_ERROR;
             }
 
 
         case LEXER_STR_LOAD:
-        debug("lexer str load \n");
-            if (symbol == '\'') {
+            debug("case\t'LEXER_STR_LOAD'\n");
+            if (symbol == '\'')
+            {
                 state = LEXER_STR_AP;
                 break;
 
-            } 
-                else if(isprint(symbol)) { // is this right? any more valid chars?
+            }
+            else if (isprint(symbol))    // is this right? any more valid chars?
+            {
+                debug("\tLEXER_STR_LOAD - appending char [ '%c' ]\n", symbol);
                 cstr_append_chr(token.value.value_string, symbol);
                 break;
 
-            } else {
+            }
+            else
+            {
                 return LEXICAL_ERROR;
             }
 
 
         case LEXER_STR_AP:
-            debug("LEXER STR AP\n");
-            if (symbol == '\'') {
+            debug("case\t'LEXER_STR_AP'\n");
+            if (symbol == '\'')
+            {
+                debug("\tLEXER_STR_AP - appending char [ '%c' ]\n", symbol);
                 cstr_append_chr(token.value.value_string, symbol);
                 state = LEXER_STR_LOAD;
                 break;
             }
 
-            else if (symbol =='#') {
-                debug("special char #\n");
-                 cstr_append_chr(token.value.value_string, symbol);
+            else if (symbol == '#')
+            {
+                debug("\tLEXER_STR_AP - special char (#)\n");
+                //cstr_append_chr(token.value.value_string, symbol); //toto je zle
                 state = LEXER_STR_SPEC;
                 break;
             }
 
-            else if(symbol == EOF)
-                {debug("EOF\n");
-                return LEXICAL_ERROR;}
-            
-            else {
-                debug("KONIEC ELSE V STR_AP__\n");
+            else if (symbol == EOF)
+            {
+                debug("EOF\n");
+                return LEXICAL_ERROR;
+            }
+
+            else
+            {
                 ungetc(symbol, input);
                 *token_ret = token;
                 state = LEXER_START;
@@ -452,146 +493,189 @@ debug("LEXER\n");
 
 
         case LEXER_STR_SPEC:
-            debug("lexer str_spec\n");
-            if (symbol == '\'') {
+            debug("case\t'LEXER_STR_SPEC'\n");
+            if (symbol == '\'')
+            {
                 // FIXME what if the int is too big?!
                 // SOLUTION: allow max three characters and then check the
                 // value. Else: LEXICAL_ERROR
+                debug("\tLEXER_STR_SPEC - buffer pred atof : \"%s\"\n", buffer);
                 symbol = (int)atof(buffer);
+                buffer[0] = '\0';
+                debug("\tLEXER_STR_SPEC - appending char [ '%c' ]\n", symbol);
                 cstr_append_chr(token.value.value_string, symbol);
+                ///debug("LEXER_STR_SPEC - [ %s ]\n", token.value.value_string->str);
                 state = LEXER_STR_LOAD;
                 break;
 
-            } else if (symbol == '%') {
+            }
+            else if (symbol == '%')
+            {
+                debug("\tLEXER_STR_SPEC - BINARY (%)\n");
                 state = LEXER_STR_SPEC_BIN_FIRST;
                 break;
-            
-            } else if (symbol == '&') {
+            }
+            else if (symbol == '&')
+            {
+                debug("\tLEXER_STR_SPEC - OCTAL (&)\n");
                 state = LEXER_STR_SPEC_OCT_FIRST;
-                debug("SOM V AND\n");
                 break;
-            
-            } else if (symbol == '$') {
+            }
+            else if (symbol == '$')
+            {
+                debug("\tLEXER_STR_SPEC - HEXA ($)\n");
                 state = LEXER_STR_SPEC_HEX_FIRST;
                 break;
-            debug("WAAAAAAA\n");
-            } else if(isdigit(symbol)) {
+            }
+            else if (isdigit(symbol))
+            {
+                debug("\tLEXER_STR_SPEC - is digit [ '%c' ]\n", symbol);
                 strcatc(buffer, symbol);
-                break; 
-
-            } else {
+                break;
+            }
+            else
+            {
+                debug("\tLEXER_STR_SPEC - LEXICAL ERROR !!! (&)\n");
                 return LEXICAL_ERROR;
             }
 
 
         case LEXER_STR_SPEC_BIN_FIRST:
-            if (symbol >= '0' && symbol <= '1') {
+            debug("case\t'LEXER_STR_SPEC_BIN_FIRST'\n");
+            if (symbol >= '0' && symbol <= '1')
+            {
                 strcatc(buffer, symbol);
                 state = LEXER_STR_SPEC_BIN;
                 break;
 
-            } else {
+            }
+            else
+            {
                 return LEXICAL_ERROR;
             }
 
         case LEXER_STR_SPEC_BIN:
-            if (symbol == '\'') {
+            debug("case\t'LEXER_STR_SPEC_BIN'\n");
+            if (symbol == '\'')
+            {
                 // FIXME what if the int is too big?!
                 // SOLUTION: allow max ?? characters (and check the value)
                 // Else: LEXICAL_ERROR
-                symbol = (int)strtol(buffer,&ptr,2);
+                symbol = (int)strtol(buffer, &ptr, 2);
+                debug("\tLEXER_STR_SPEC_BIN - appending char [ '%c' ]\n", symbol);
                 cstr_append_chr(token.value.value_string, symbol);
                 state = LEXER_STR_LOAD;
                 break;
-            
-            } else if(symbol >= '0' && symbol <= '1') {
-                strcatc(buffer, symbol);
-                break; 
 
-            } else {
+            }
+            else if (symbol >= '0' && symbol <= '1')
+            {
+                strcatc(buffer, symbol);
+                break;
+
+            }
+            else
+            {
                 return LEXICAL_ERROR;
             }
 
         case LEXER_STR_SPEC_OCT_FIRST:
-            debug("spec oct first \n");
-            if (symbol >= '0' && symbol <= '7') {
-                
+            debug("case\t'LEXER_STR_SPEC_BIN'\n");
+            if (symbol >= '0' && symbol <= '7')
+            {
+
                 strcatc(buffer, symbol);
                 state = LEXER_STR_SPEC_OCT;
-                debug("idem do spec oct a aktualny symbol mam %c\n",symbol);
                 break;
 
-            } else {
-                debug("error v spec oct first\n");
+            }
+            else
+            {
                 return LEXICAL_ERROR;
             }
 
         case LEXER_STR_SPEC_OCT:
-            debug("som v spec oct\n");
-            if (symbol == '\'') {
+            debug("case\t'LEXER_STR_SPEC_OCT'\n");
+            if (symbol == '\'')
+            {
                 debug("SPEC_OCT koniec stringu\n");
                 // FIXME what if the int is too big?!
                 // SOLUTION: allow max ?? characters (and check the value)
                 // Else: LEXICAL_ERROR
-                debug("string pred symbol strtol je %s\n",buffer);
-                symbol = (int)strtol(buffer,&ptr,8);
-                debug("posledny symbol je %d\n",symbol);
+                symbol = (int)strtol(buffer, &ptr, 8);
+                debug("\tLEXER_STR_SPEC_OCT - appending char [ '%c' ]\n", symbol);
                 cstr_append_chr(token.value.value_string, symbol);
-                debug("spec_koniec za appendom\n");
                 state = LEXER_STR_LOAD;
-                debug("odchadzam do str_load z spec_oct\n");
                 break;
-             
-            } else if(symbol >= '0' && symbol <= '7') {
-                debug("VOSIEL SOM DO SPEC_OCT a mam symbol %c\n",symbol);
-                strcatc(buffer, symbol);
-                break; 
 
-            } else {
+            }
+            else if (symbol >= '0' && symbol <= '7')
+            {
+                strcatc(buffer, symbol);
+                break;
+
+            }
+            else
+            {
                 debug("SPEC_OCT lexical_error\n");
                 return LEXICAL_ERROR;
             }
 
 
         case LEXER_STR_SPEC_HEX_FIRST:
+            debug("case\t'LEXER_STR_SPEC_HEX_FIRST'\n");
             if ((symbol >= '0' && symbol <= '9') ||
-                (symbol >= 'a' && symbol <= 'f') ||
-                (symbol >= 'A' && symbol <= 'F')) {
+                    (symbol >= 'a' && symbol <= 'f') ||
+                    (symbol >= 'A' && symbol <= 'F'))
+            {
                 strcatc(buffer, symbol);
                 state = LEXER_STR_SPEC_HEX;
                 break;
 
-            } else {
+            }
+            else
+            {
                 return LEXICAL_ERROR;
             }
 
         case LEXER_STR_SPEC_HEX:
-            if (symbol == '\'') {
+            debug("case\t'LEXER_STR_SPEC_HEX'\n");
+            if (symbol == '\'')
+            {
                 // FIXME what if the int is too big?!
                 // SOLUTION: allow max ?? characters (and check the value)
                 // Else: LEXICAL_ERROR
-                symbol = (int)strtol(buffer,&ptr,16);
+                symbol = (int)strtol(buffer, &ptr, 16);
+                debug("\tLEXER_STR_SPEC_HEX - appending char [ '%c' ]\n", symbol);
                 cstr_append_chr(token.value.value_string, symbol);
                 state = LEXER_STR_LOAD;
                 break;
-            
-            } else if ((symbol >= '0' && symbol <= '9') ||
-                (symbol >= 'a' && symbol <= 'f') ||
-                (symbol >= 'A' && symbol <= 'F')) {
-                strcatc(buffer, symbol);
-                break; 
 
-            } else {
+            }
+            else if ((symbol >= '0' && symbol <= '9') ||
+                     (symbol >= 'a' && symbol <= 'f') ||
+                     (symbol >= 'A' && symbol <= 'F'))
+            {
+                strcatc(buffer, symbol);
+                break;
+
+            }
+            else
+            {
                 return LEXICAL_ERROR;
             }
 
 
         case LEXER_MAYBE_GREATER_EQUAL:
-            if (symbol == '=') {
+            debug("case\t'LEXER_MAYBE_GREATER_EQUAL'\n");
+            if (symbol == '=')
+            {
                 token.value.value_symbol = GREATER_EQUAL;
                 *token_ret = token;
                 return SUCCESS;
-            } else {
+            }
+            else
+            {
                 ungetc(symbol, input);
                 token.value.value_symbol = GREATER_THAN;
                 *token_ret = token;
@@ -602,15 +686,21 @@ debug("LEXER\n");
 
 
         case LEXER_MAYBE_LESS_EQUAL:
-            if (symbol == '=') {
+            debug("case\t'LEXER_MAYBE_LESS_EQUAL'\n");
+            if (symbol == '=')
+            {
                 token.value.value_symbol = LESS_EQUAL;
                 *token_ret = token;
                 return SUCCESS;
-            } else if (symbol == '>') {
+            }
+            else if (symbol == '>')
+            {
                 token.value.value_symbol = NOT_EQUAL;
                 *token_ret = token;
                 return SUCCESS;
-            } else {
+            }
+            else
+            {
                 ungetc(symbol, input);
                 token.value.value_symbol = LESS_THAN;
                 *token_ret = token;
@@ -621,11 +711,15 @@ debug("LEXER\n");
 
 
         case LEXER_MAYBE_ASSIGNMENT:
-            if (symbol == '=') {
+            debug("case\t'LEXER_MAYBE_ASSIGNMENT'\n");
+            if (symbol == '=')
+            {
                 token.value.value_symbol = ASSIGNMENT;
                 *token_ret = token;
                 return SUCCESS;
-            } else {
+            }
+            else
+            {
                 ungetc(symbol, input);
                 token.value.value_symbol = COLON;
                 *token_ret = token;
@@ -636,11 +730,15 @@ debug("LEXER\n");
 
 
         case LEXER_MAYBE_DOUBLE_DOT:
-            if (symbol == '.') {
+            debug("case\t'LEXER_MAYBE_DOUBLE_DOT'\n");
+            if (symbol == '.')
+            {
                 token.value.value_symbol = DOUBLE_DOT;
                 *token_ret = token;
                 return SUCCESS;
-            } else {
+            }
+            else
+            {
                 ungetc(symbol, input);
                 token.value.value_symbol = DOT;
                 *token_ret = token;
@@ -650,23 +748,31 @@ debug("LEXER\n");
             break;
 
         case LEXER_BINARY_LOADING_FIRST:
-            if(symbol == '0' || symbol == '1') {
+            debug("case\t'LEXER_BINARY_LOADING_FIRST'\n");
+            if (symbol == '0' || symbol == '1')
+            {
                 strcatc(buffer, symbol);
                 state = LEXER_BINARY_LOADING;
                 break;
 
-            } else {
+            }
+            else
+            {
                 return LEXICAL_ERROR;
             }
 
         case LEXER_BINARY_LOADING:
-            if(symbol == '0' || symbol == '1') {
+            debug("case\t'LEXER_BINARY_LOADING'\n");
+            if (symbol == '0' || symbol == '1')
+            {
                 strcatc(buffer, symbol);
                 break;
-            
-            } else {
+
+            }
+            else
+            {
                 token.type = TOKEN_INT;
-                token.value.value_int = (int)strtol(buffer,&ptr,2);
+                token.value.value_int = (int)strtol(buffer, &ptr, 2);
                 ungetc(symbol, input);
                 *token_ret = token;
                 return SUCCESS;
@@ -675,26 +781,32 @@ debug("LEXER\n");
             break;
 
         case LEXER_OCT_LOADING_FIRST:
-            if(symbol >= '0' && symbol <= '7') {
+            debug("case\t'LEXER_OCT_LOADING_FIRST'\n");
+            if (symbol >= '0' && symbol <= '7')
+            {
                 strcatc(buffer, symbol);
                 state = LEXER_OCT_LOADING;
                 break;
 
-            } else {
-                debug("JEBEM NA TEBA V OCT LOADING FIRST\n");
+            }
+            else
+            {
                 return LEXICAL_ERROR;
             }
-            debug("JEBEM NA TEBA V OCT LOADING FIRST\n");
             break;
 
         case LEXER_OCT_LOADING:
-            if(symbol >= '0' && symbol <= '7') {
+            debug("case\t'LEXER_OCT_LOADING'\n");
+            if (symbol >= '0' && symbol <= '7')
+            {
                 strcatc(buffer, symbol);
                 break;
-            
-            } else {
+
+            }
+            else
+            {
                 token.type = TOKEN_INT;
-                token.value.value_int = (int)strtol(buffer,&ptr,8);
+                token.value.value_int = (int)strtol(buffer, &ptr, 8);
                 ungetc(symbol, input);
                 *token_ret = token;
                 return SUCCESS;
@@ -703,27 +815,35 @@ debug("LEXER\n");
             break;
 
         case LEXER_HEX_LOADING_FIRST:
+            debug("case\t'LEXER_OCT_LOADING'\n");
             if ((symbol >= '0' && symbol <= '9') ||
-                (symbol >= 'a' && symbol <= 'f') ||
-                (symbol >= 'A' && symbol <= 'F')) {
+                    (symbol >= 'a' && symbol <= 'f') ||
+                    (symbol >= 'A' && symbol <= 'F'))
+            {
                 strcatc(buffer, symbol);
                 state = LEXER_HEX_LOADING;
                 break;
 
-            } else {
+            }
+            else
+            {
                 return LEXICAL_ERROR;
             }
 
         case LEXER_HEX_LOADING:
+            debug("case\t'LEXER_HEX_LOADING'\n");
             if ((symbol >= '0' && symbol <= '9') ||
-                (symbol >= 'a' && symbol <= 'f') ||
-                (symbol >= 'A' && symbol <= 'F')) {
+                    (symbol >= 'a' && symbol <= 'f') ||
+                    (symbol >= 'A' && symbol <= 'F'))
+            {
                 strcatc(buffer, symbol);
                 break;
-            
-            } else {
+
+            }
+            else
+            {
                 token.type = TOKEN_INT;
-                token.value.value_int = (int)strtol(buffer,&ptr,16);
+                token.value.value_int = (int)strtol(buffer, &ptr, 16);
                 ungetc(symbol, input);
                 *token_ret = token;
                 return SUCCESS;
@@ -732,25 +852,33 @@ debug("LEXER\n");
             break;
 
         case LEXER_INT_LOADING:
-            if (symbol >= '0' && symbol <= '9') {
+            debug("case\t'LEXER_INT_LOADING'\n");
+            if (symbol >= '0' && symbol <= '9')
+            {
                 strcatc(buffer, symbol);
                 break;
 
-            } else if (symbol == '.') {
+            }
+            else if (symbol == '.')
+            {
                 strcatc(buffer, symbol);
                 state = LEXER_FLOAT_LOADING_FIRST;
                 token.type = TOKEN_FLOAT;
                 token.value.value_float = (double)token.value.value_int;
                 break;
 
-            } else if ((symbol == 'e') || (symbol == 'E')) {
+            }
+            else if ((symbol == 'e') || (symbol == 'E'))
+            {
                 strcatc(buffer, symbol);
                 state = LEXER_FLOAT_EXP_LOADING_FIRST;
                 token.type = TOKEN_FLOAT;
                 token.value.value_float = (double)token.value.value_int;
                 break;
 
-            } else {
+            }
+            else
+            {
                 token.value.value_int = (int)atof(buffer);
                 ungetc(symbol, input);
                 *token_ret = token;
@@ -760,7 +888,9 @@ debug("LEXER\n");
             break;
 
         case LEXER_FLOAT_LOADING_FIRST:
-            if (! ((symbol >= '0' && symbol <= '9'))) {
+            debug("case\t'LEXER_FLOAT_LOADING_FIRST'\n");
+            if (! ((symbol >= '0' && symbol <= '9')))
+            {
                 return LEXICAL_ERROR;
             }
 
@@ -769,14 +899,18 @@ debug("LEXER\n");
             break;
 
         case LEXER_FLOAT_LOADING:
-            if ((symbol == 'e') || (symbol == 'E')) {
+            debug("case\t'LEXER_FLOAT_LOADING'\n");
+            if ((symbol == 'e') || (symbol == 'E'))
+            {
                 strcatc(buffer, symbol);
                 state = LEXER_FLOAT_EXP_LOADING_FIRST;
                 token.type = TOKEN_FLOAT;
                 token.value.value_float = (double)token.value.value_int;
                 break;
 
-            } else if (! ((symbol >= '0' && symbol <= '9'))) {
+            }
+            else if (! ((symbol >= '0' && symbol <= '9')))
+            {
                 token.value.value_float = atof(buffer);
                 ungetc(symbol, input);
                 *token_ret = token;
@@ -787,7 +921,9 @@ debug("LEXER\n");
             break;
 
         case LEXER_FLOAT_EXP_LOADING_FIRST:
-            if (! (symbol >= '0' && symbol <= '9')) {
+            debug("case\t'LEXER_FLOAT_EXP_LOADING_FIRST'\n");
+            if (! (symbol >= '0' && symbol <= '9'))
+            {
                 return LEXICAL_ERROR;
             }
 
@@ -796,7 +932,9 @@ debug("LEXER\n");
             break;
 
         case LEXER_FLOAT_EXP_LOADING:
-            if (! (symbol >= '0' && symbol <= '9')) {
+            debug("case\t'LEXER_FLOAT_EXP_LOADING'\n");
+            if (! (symbol >= '0' && symbol <= '9'))
+            {
                 token.value.value_float = atof(buffer);
                 ungetc(symbol, input);
                 *token_ret = token;
@@ -807,16 +945,21 @@ debug("LEXER\n");
             break;
 
         case LEXER_ID_KEYWORD:
+            debug("case\t'LEXER_ID_KEYWORD'\n");
             if (!((symbol >= 'a' && symbol <= 'z') ||
-                  (symbol >= 'A' && symbol <= 'Z') ||
-                  (symbol >= '0' && symbol <= '9') ||
-                  (symbol == '_'))) {
+                    (symbol >= 'A' && symbol <= 'Z') ||
+                    (symbol >= '0' && symbol <= '9') ||
+                    (symbol == '_')))
+            {
                 token.value.value_name[token_name_pos] = 0;
                 token_name_pos = 0;
                 keyword = _get_keyword(token.value.value_name);
-                if (!keyword) {
+                if (!keyword)
+                {
                     token.type = TOKEN_ID;
-                } else {
+                }
+                else
+                {
                     token.type = TOKEN_KEYWORD;
                     token.value.value_keyword = keyword;
                 }
@@ -824,20 +967,24 @@ debug("LEXER\n");
                 *token_ret = token;
                 return SUCCESS;
 
-            } else if (symbol == EOF) {
+            }
+            else if (symbol == EOF)
+            {
                 token.type = TOKEN_EOF;
                 *token_ret = token;
                 return SUCCESS;
 
-            } else {
+            }
+            else
+            {
                 token.value.value_name[token_name_pos] = tolower(symbol);
                 token_name_pos ++;
                 break;
             }
 
-            default:
-                return LEXICAL_ERROR;
-                break;
+        default:
+            return LEXICAL_ERROR;
+            break;
         }
     }
 }
@@ -859,7 +1006,7 @@ int main() {
     while(1) {
         err = get_token(token, input);
         if (err) {
-            printf ("FUCK IT !!!!!!!!!!!!!!!!!!!!!!! \nehm... Error: Lexical Error.\n");
+            printf (".... IT !!!!!!!!!!!!!!!!!!!!!!! \nehm... Error: Lexical Error.\n");
             exit(1);
         }
         if (token->type == TOKEN_ID)
