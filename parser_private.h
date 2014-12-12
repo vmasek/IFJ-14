@@ -16,6 +16,12 @@
 #include "variables.h"
 #include "ial.h"
 
+/* BUILT-IN FUNCTION IDENTIFIERS */
+#define BIF_COPY "copy"
+#define BIF_FIND "find"
+#define BIF_LENGTH "length"
+#define BIF_SORT "sort"
+
 typedef struct var_record {
     Value data;
     Type type;

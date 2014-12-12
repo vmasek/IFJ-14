@@ -4,6 +4,7 @@
  * @author  Albert Uchytil (xuchyt03)
  ****************************************************************************/
 
+#include <string.h>
 
 #include "parser.h"
 #include "parser_private.h"
@@ -223,12 +224,11 @@ static int nt_var(FILE *input, Tree *vars, Tree *functions, bool eps,
     debug_token(&token);
     if (token.type == TOKEN_ID) {
         MALLOC_VAR(var, __FILE__);
-        debug("printing token before inserting to tree:\t [%s]\n", token.value.value_name);
-        debug("printing token cstring before inserting to tree:\t [%s]\n", cstr_create_str(token.value.value_name)->str);
-        CHECK_VALUE(insert_tree(vars, cstr_create_str(token.value.value_name),
-                                var, functions), ret);
+
         CHECK_VALUE(t_symbol(input, COLON), ret);
         CHECK_VALUE(nt_type(input, &(var->type)), ret);
+        CHECK_VALUE(insert_tree(vars, cstr_create_str(token.value.value_name),
+                                var, functions), ret);
         var->index = id;
         if (_var != NULL)
             *_var = var;
@@ -331,7 +331,6 @@ static int nt_func(FILE *input, Tree *globals, Tree *functions, Variables *vars)
         instr = func->first_instr;
 
         CHECK_VALUE(t_id(input, &id), ret);
-        CHECK_VALUE(update_tree(functions, id, func, globals), ret);
         CHECK_VALUE(tree_insert(func->locals, id, &(func->ret_value)), ret);
         func->ret_value.index = 0;
         func->local_count = 1;
@@ -349,10 +348,17 @@ static int nt_func(FILE *input, Tree *globals, Tree *functions, Variables *vars)
         func->ret_value.index = 0;
         CHECK_VALUE(t_symbol(input, SEMICOLON), ret);
 
+        debug("function pre update: type: %d id: %s\n", func->params[0]->type, id->str);
+
+        CHECK_VALUE(update_tree(functions, id, func, globals), ret);
+
         CHECK_VALUE(nt_func_body(input, func->locals, globals, functions,
                                  &instr, &(func->local_count), vars,
                                  &(func->params)), ret);
-        debug("Function: param_count = %u, local_count = %u\n", func->param_count, func->local_count);
+        if (!strcmp(id->str, BIF_COPY) || !strcmp(id->str, BIF_FIND) ||
+            !strcmp(id->str, BIF_LENGTH) || !strcmp(id->str, BIF_SORT)) {
+            return UNDEFINED_IDENTIFIER;
+        }
         debug_print_instruction(func->first_instr);
         return SUCCESS;
     }
@@ -510,6 +516,7 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
             CHECK_VALUE(t_id(input, &id), ret);
             CHECK_VALUE(t_symbol(input, PARENTHESIS_R), ret);
             CHECK_VALUE(search_trees(id, locals, globals, &unique_id, NULL), ret);
+            debug("ret: %d\n", ret);
             CHECK_VALUE(gen_instr(instr, I_READLN, unique_id, NULL), ret);
             return SUCCESS;
         } else if (token.value.value_keyword == KEYWORD_WRITE) {
@@ -607,6 +614,7 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
                                vars, instr, &type, false), ret);
         CHECK_VALUE(search_trees(cstr_create_str(token.value.value_name),
                                 locals, globals, &unique_id, &type2), ret);
+        
         if (type != type2) {
             return INCOMPATIBLE_TYPE;
         }
@@ -697,6 +705,34 @@ static int insert_tree(Tree *insert, cstring *id, void *data, Tree *other)
     }
 }
 
+static bool compare_var_record(Var_record *a, Var_record *b)
+{
+    if ((a == NULL && b != NULL) || (a != NULL && b == NULL))
+        return false;
+    return (a == NULL && b == NULL) ||
+           (a->type == b->type && a->index == b->index);
+}
+
+static bool compare_var_records(Var_record **a, Var_record **b, int n)
+{
+    for (int i = 0; i < n; i++) {
+        if (!compare_var_record(a[i], b[i]))
+            return false;
+    }
+    return true;
+}
+
+static int compare_functions(Func_record *a, Func_record *b)
+{
+    if (a != NULL && b != NULL &&
+        a->local_count == b->local_count &&
+        compare_var_records(a->params, b->params, a->local_count)) {
+        return SUCCESS;
+    } else {
+        return UNDEFINED_IDENTIFIER;
+    }
+}
+
 static int update_tree(Tree *update, cstring *id, void *data, Tree *other)
 {
     int ret;
@@ -704,6 +740,9 @@ static int update_tree(Tree *update, cstring *id, void *data, Tree *other)
     if ((node = tree_find_key(other, id)) != NULL) {
         return UNDEFINED_IDENTIFIER;
     } else  if ((node = tree_find_key(update, id)) != NULL) {
+        debug("%s\n", id->str);
+        CHECK_VALUE(compare_functions((Func_record *)data, (Func_record *)(node->data)),
+                    ret);
         node->data = data;
         return SUCCESS;
     } else {

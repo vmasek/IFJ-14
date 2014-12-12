@@ -22,12 +22,6 @@
 #define TREE_GLOBALS 1
 #define TREE_FUNCS 2
 
-/* BUILT-IN FUNCTION IDENTIFIERS */
-#define BIF_COPY "copy"
-#define BIF_FIND "find"
-#define BIF_LENGTH "length"
-#define BIF_SORT "sort"
-
 /* MACRO COUNTING ITEMS OF ARRAY */
 #define ARRAY_COUNT(array) (sizeof(array) / sizeof((array)[0]))
 
