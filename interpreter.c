@@ -9,6 +9,7 @@
 #include "interpreter.h"
 #include "builtin.h"
 
+void throw_away_line(void);
 
 int interpret(Instruction *item, Variables *globals)
 {
@@ -378,6 +379,31 @@ int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instru
 			item = item->next_instruction;
 			break;
 
+		case I_NEG:
+			debug("I_NEG\n");
+			CALCS_STACK_OPERATIONS_RESULT();
+
+			if ((types[0] == TYPE_INT))
+			{
+				debug("I_NEG - INT\n");
+				result.data.integer = - result.data.integer;
+				stack_push(calcs, TYPE_INT, &(result));
+			}
+			else if ((types[0] == TYPE_REAL))
+			{
+				debug("I_NEG - REAL\n");
+				result.data.real = - result.data.real;
+				stack_push(calcs, TYPE_REAL, &(result));
+			}
+			else
+			{
+				debug("Invalid type passed to instruction\n");
+				return INTERNAL_ERROR;
+			}
+
+			item = item->next_instruction;
+			break;
+
 		case I_LESS:
 
 			COMPARISON_INSTRUCTION("I_LESS",  < );
@@ -498,6 +524,7 @@ int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instru
 					debug("I_READLN - error loading int\n");
 					return INTERNAL_ERROR;
 				}
+				throw_away_line();
 			}
 			else if (types[0] == TYPE_REAL)
 			{
@@ -507,6 +534,7 @@ int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instru
 					debug("I_READLN - error loading real\n");
 					return INTERNAL_ERROR;
 				}
+				throw_away_line();
 			}
 			else if (types[0] == TYPE_STRING)
 			{
@@ -694,4 +722,14 @@ int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instru
 
 	}
 	return SUCCESS;
+}
+
+
+inline void throw_away_line(void)
+{
+	int chr;
+	do
+	{
+		chr = getchar();
+	} while (chr != '\n' && chr != EOF);
 }
