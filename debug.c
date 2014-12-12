@@ -164,6 +164,11 @@ void debug_instruction_print(Instruction *instruction)
 	Instruction *temp = instruction;
 	do
 	{
+		if(i>50)
+		{
+			fprintf(stderr, "\ttoo many instructions\n");
+			return;
+		}
 		fprintf(stderr, "\tInstruction %d:\t%s\n", i, INSTRUCTION_NAME[temp->instruction]);
 		i++;
 	} while ((temp=temp->next_instruction));
