@@ -1011,6 +1011,7 @@ int get_token(Token *token_ret, FILE *input)
 
 void unget_token(Token *token)
 {
+	debug("ungetting done\n");
     token_register(token, true);
 }
 

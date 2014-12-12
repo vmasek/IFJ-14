@@ -180,6 +180,7 @@ int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions,
         global_vars == NULL || instr_ptr == NULL)
         return INTERNAL_ERROR;
 
+    debug("Expression parsing started\n");
     stack_init(&sym_stack, TOKEN_STACK);
     stack_init(&type_stack, VALUE_STACK);
 
