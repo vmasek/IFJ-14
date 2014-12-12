@@ -934,7 +934,7 @@ int get_token(Token *token_ret, FILE *input)
 
         case LEXER_FLOAT_EXP_LOADING_FIRST:
             debug("case\t'LEXER_FLOAT_EXP_LOADING_FIRST'\n");
-            if (! (symbol >= '0' && symbol <= '9'))
+            if (! ((symbol >= '0' && symbol <= '9') || symbol == '-' || symbol == '+'))
             {
                 return LEXICAL_ERROR;
             }
