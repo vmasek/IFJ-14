@@ -334,8 +334,8 @@ int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instru
 					debug("Dividing by zero !");
 					return RUNTIME_DIV_BY_ZERO;
 				}
-				result.data.integer = values[1].data.integer / values[0].data.integer;
-				stack_push(calcs, TYPE_INT, &result);
+				result.data.real = (double)values[1].data.integer / values[0].data.integer;
+				stack_push(calcs, TYPE_REAL, &result);
 			}
 			else if ((types[0] == TYPE_REAL) && (types[1] == TYPE_REAL))
 			{
