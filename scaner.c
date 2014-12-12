@@ -417,6 +417,15 @@ int get_token(Token *token_ret, FILE *input)
                 state = LEXER_START;
                 break;
             }
+            else if (symbol == EOF)
+            {
+				debug("\tLEXER_COMMENT -\tEOF [%c]\t\tint char [%d]\n",symbol,symbol);
+                return LEXICAL_ERROR;
+            }
+            else
+            {
+				debug("\tLEXER_COMMENT -\tcomment char [%c]\t\tint char [%d]\n",symbol,symbol);
+			}
             break;
 
 
@@ -967,7 +976,6 @@ int get_token(Token *token_ret, FILE *input)
                 {
 					debug("\tLEXER_ID_KEYWORD -\tIS TOKEN\n");
                     token.type = TOKEN_ID;
-                    //token.value.value_keyword = keyword;
                 }
                 else
                 {
