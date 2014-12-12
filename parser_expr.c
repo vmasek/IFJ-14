@@ -557,8 +557,6 @@ static int handle_call(Token *tokens, Stack *type_stack, Tree **trees,
 
     IGNORE_PARAM(global_vars);
 
-    stack_print_types(type_stack);
-
     if (!strcmp(tokens[0].value.value_name, BIF_COPY)) {
         if (stack_index(type_stack, 2, (int *)&cur_type, NULL) != SUCCESS ||
             cur_type != TYPE_STRING ||
