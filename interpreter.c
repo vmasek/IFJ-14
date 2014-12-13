@@ -469,6 +469,9 @@ int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instru
 				}
 			}
 
+			item = item->next_instruction;
+			break;
+
 		case I_DEC:
 			debug("I_DEC\n");
 
