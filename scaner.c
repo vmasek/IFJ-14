@@ -915,6 +915,22 @@ int get_token(Token *token_ret, FILE *input)
                 return LEXICAL_ERROR;
             }
 
+            if(symbol == '+' || symbol == '-')
+            {
+                state = LEXER_FLOAT_EXP_LOADING_SIGN;
+                break;
+            }
+
+            state = LEXER_FLOAT_EXP_LOADING;
+            strcatc(buffer, symbol);
+            break;
+
+        case LEXER_FLOAT_EXP_LOADING_SIGN:
+            if (!((symbol >= '0' && symbol <= '9')))
+            {
+                return LEXICAL_ERROR;
+            }
+
             state = LEXER_FLOAT_EXP_LOADING;
             strcatc(buffer, symbol);
             break;
