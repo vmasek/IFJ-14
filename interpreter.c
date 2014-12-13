@@ -4,12 +4,14 @@
  * @author  Vojtech Mašek (xmasek15), Tomas Paulus (xpaulu01)
  *******************************************************************/
 
+#include <ctype.h>
 
 #include "debug.h"
 #include "interpreter.h"
 #include "builtin.h"
 
 void throw_away_line(void);
+int read_bool(bool *boolean);
 
 int interpret(Instruction *item, Variables *globals)
 {
@@ -628,6 +630,16 @@ int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instru
 				}
 				throw_away_line();
 			}
+			else if (types[0] == TYPE_BOOL)
+			{
+				debug("I_READLN - boolean\n");
+				if(read_bool(&(result.data.boolean))!=1)
+				{
+					debug("I_READLN - error loading bool\n");
+					return INTERNAL_ERROR;
+				}
+				throw_away_line();
+			}
 			else if (types[0] == TYPE_STRING)
 			{
 				debug("I_READLN - cstring\n");
@@ -816,6 +828,50 @@ int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instru
 	return SUCCESS;
 }
 
+inline int read_bool(bool *boolean)
+{
+	char buf[10] = {0}, chr;
+
+	do
+	{
+		chr = getchar();
+	} while (chr == ' ' || chr == '\t');
+	if(chr == '\n' || chr == EOF )
+	{
+		debug("no bool value before newline or eof\n");
+		return 0;
+	}
+	ungetc(chr,stdin);
+	fgets(buf, 6, stdin);
+	for (int i = 0; buf[i] && i<7 ; i++)
+    {
+		if(buf[i] == '\n' || buf[i] == EOF || buf[i] == ' ')
+		{
+			debug("end of buffer\n");
+			buf[i] = '\0';
+			break;
+		}
+		debug("LOWERING - char [ '%c' ] -> [ '%c' ]\n",buf[i],tolower(buf[i]));
+        buf[i] = tolower(buf[i]);
+    }
+	if(!strcmp(buf, "true"))
+	{
+		debug("\tloaded TRUE\n");
+		*boolean = true;
+		return 1;
+	}
+	else if(!strcmp(buf, "false"))
+	{
+		debug("\tloaded FALSE\n");
+		*boolean = false;
+		return 1;
+	}
+	else
+	{
+		debug("\tWRONG/NOT bool value\n");
+		return 0;
+	}
+}
 
 inline void throw_away_line(void)
 {
