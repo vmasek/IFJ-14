@@ -966,7 +966,7 @@ int get_token(Token *token_ret, FILE *input)
                 token.value.value_name[token_name_pos] = 0;
                 token_name_pos = 0;
                 debug("\tLEXER_ID_KEYWORD - String is [ %s ]\n", token.value.value_name);
-                for (int i = 0; token.value.value_name[i]; i++)
+                for (int i = 0; token.value.value_name[i] && i< TOKEN_IDENTIFIER_MAX_LENGTH; i++)
 				{
 					debug("LOWERING - char [ '%c' ] -> [ '%c' ]\n",token.value.value_name[i],tolower(token.value.value_name[i]));
 					token.value.value_name[i] = tolower(token.value.value_name[i]);
