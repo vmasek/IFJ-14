@@ -126,6 +126,7 @@ int parse(FILE *input, Instruction *first_instr, Variables *vars)
     tree_free(&globals);
     tree_free(&functions);
     tree_create(NULL);
+    gc_free(__FILE__);
 
     return ret;
 }
@@ -513,6 +514,21 @@ static int t_keyword(FILE *input, enum token_keyword keyword)
     return SYNTAX_ERROR;
 }
 
+static int t_keyword_catch(FILE *input, enum token_keyword keyword)
+{
+    int ret;
+    Token token;
+
+    CHECK_VALUE(get_token(&token, input), ret);
+    debug_token(&token);
+    if (token.type == TOKEN_KEYWORD &&
+        token.value.value_keyword == keyword) {
+        return SUCCESS;
+    }
+    unget_token(&token);
+    return RETURNING;
+}
+
 static int nt_cmd_list(FILE *input, Tree *locals, Tree *globals, Tree *functions,
                        Instruction **instr, Variables *vars, bool empty)
 {
@@ -549,6 +565,7 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
     cstring *id;
     Instruction *tmp_instr = NULL;
     Instruction *tmp_instr2 = NULL;
+    bool downto = false;
 
     CHECK_VALUE(get_token(&token, input), ret);
     debug_token(&token);
@@ -565,7 +582,8 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
             return SUCCESS;
         } else if (token.value.value_keyword == KEYWORD_WRITE) {
             CHECK_VALUE(t_symbol(input, PARENTHESIS_L), ret);
-            CHECK_VALUE(nt_arg_list_write(input, locals, globals, functions, instr, vars), ret);
+            CHECK_VALUE(nt_arg_list_write(input, locals, globals, functions, instr, vars),
+                        ret);
             CHECK_VALUE(t_symbol(input, PARENTHESIS_R), ret);
             return SUCCESS;
         } else if (token.value.value_keyword == KEYWORD_IF) {
@@ -637,18 +655,25 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
                 return INCOMPATIBLE_TYPE;
             }
             CHECK_VALUE(gen_instr(instr, I_ASSIGN, unique_id, NULL), ret);
-            CHECK_VALUE(t_keyword(input, KEYWORD_TO), ret);
+            CATCH_VALUE(t_keyword_catch(input, KEYWORD_DOWNTO), ret);
+            if (ret == RETURNING) {
+                CHECK_VALUE(t_keyword(input, KEYWORD_TO), ret);
+                downto = true;
+            }
             CHECK_VALUE(gen_instr(instr, I_NOP, 0, NULL), ret);
             tmp_instr = *instr;
+            CHECK_VALUE(gen_instr(instr, I_PUSH, unique_id, NULL), ret);
             CHECK_VALUE(parse_expr(input, locals, globals,functions,
                                    vars, instr, &type, false), ret);
+            CHECK_VALUE(gen_instr(instr, (downto ? I_LESS : I_GREATER),  0, NULL), ret);
+            CHECK_VALUE(gen_instr(instr, I_JMP, 0, NULL), ret);
+            CHECK_VALUE(gen_instr(&tmp_instr2, I_NOP, 0, NULL), ret);
+            (*instr)->alt_instruction = tmp_instr2;
             CHECK_VALUE(t_keyword(input, KEYWORD_DO), ret);
             CHECK_VALUE(nt_comp_cmd(input, locals, globals, functions, instr, vars), ret);
-            CHECK_VALUE(gen_instr(instr, I_INC, unique_id, NULL), ret);
+            CHECK_VALUE(gen_instr(instr, (downto ? I_INC : I_DEC), unique_id, NULL), ret);
             (*instr)->next_instruction = tmp_instr;
-            CHECK_VALUE(gen_instr(&tmp_instr, I_NOP, 0, NULL), ret);
-            (*instr)->alt_instruction = tmp_instr;
-            *instr = (*instr)->alt_instruction;
+            (*instr) = tmp_instr2;
             return SUCCESS;
         }
     } else if (token.type == TOKEN_ID) {

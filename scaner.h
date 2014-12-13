@@ -29,6 +29,7 @@ enum token_keyword {
     KEYWORD_BEGIN,      // b
     KEYWORD_BOOLEAN,
     KEYWORD_DO,         // d
+    KEYWORD_DOWNTO,
     KEYWORD_ELSE,       // e
     KEYWORD_END,
     KEYWORD_FALSE,      // f

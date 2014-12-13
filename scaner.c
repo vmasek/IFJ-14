@@ -65,6 +65,9 @@ static enum token_keyword _get_keyword(char *name)
         if (!strcmp(name, "do"))
             return KEYWORD_DO;
 
+        if (!strcmp(name, "downto"))
+            return KEYWORD_DOWNTO;
+
         break;
 
     case 'e':
