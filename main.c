@@ -64,6 +64,7 @@ int main(int argc, char *argv[])
     fclose(fp);
     variables_free(&global_vars);
     free_instr();
+    cstr_gc_free_all();
 
 	debug("MAIN RETURN CODE is: [ %d ]\n", ret);
     return print_error(ret);
