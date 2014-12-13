@@ -597,7 +597,7 @@ static int handle_call(Token *tokens, Stack *type_stack, Tree **trees,
         if ((node = tree_find_key_ch(trees[TREE_FUNCS],
                                      tokens[0].value.value_name)) == NULL) {
             debug("Semantic error\n");
-            return SEMANTIC_ERROR;
+            return UNDEFINED_IDENTIFIER;
         }
         function = node->data;
         instr_type = I_CALL;
