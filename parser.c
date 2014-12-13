@@ -24,9 +24,6 @@
 #define CHECK_VALUE(val, ret) if (((ret) = (val)) != SUCCESS) return (ret);
 #define CATCH_VALUE(val, ret) if (((ret) = (val)) != SUCCESS && (ret) != RETURNING) return (ret)
 
-
-
-
 static int nt_program(FILE *input, Tree *globals, Tree *functions,
                       Instruction **first_instr, Variables *vars);
 static int nt_var_section(FILE *input, Tree *vars_tree, Tree *functions,
@@ -70,6 +67,27 @@ static int update_tree(Tree *update, cstring *id, void *data, Tree *other);
 static int check_functions_init(Tree *functions);
 bool check_init(Tree_Node *node);
 extern int file_end(FILE *input);
+
+static void var_init(Var_record *var)
+{
+    if (var != NULL) {
+        var->id = NULL;
+    }
+}
+
+static void func_init(Func_record *func)
+{
+    if (func != NULL) {
+        func->local_count = 0;
+        func->param_count = 0;
+        func->params = NULL;
+        var_init(&(func->ret_value));
+        func->locals = NULL;
+        func->first_instr = NULL;
+        func->declared = NULL;
+        func->defined = NULL;
+    }
+}
 
 inline int file_end(FILE *input)
 {
@@ -229,6 +247,7 @@ static int nt_var(FILE *input, Tree *vars, Tree *functions, bool eps,
     debug_token(&token);
     if (token.type == TOKEN_ID) {
         MALLOC_VAR(var, __FILE__);
+        var_init(var);
 
         CHECK_VALUE(t_symbol(input, COLON), ret);
         CHECK_VALUE(nt_type(input, &(var->type)), ret);
@@ -332,9 +351,8 @@ static int nt_func(FILE *input, Tree *globals, Tree *functions, Variables *vars)
     if (token.type == TOKEN_KEYWORD &&
         token.value.value_keyword == KEYWORD_FUNCTION) {
         MALLOC_FUNC(func, __FILE__);
+        func_init(func);
         tree_create(&(func->locals));
-        func->declared = false;
-        func->defined = false;
         CHECK_VALUE(gen_instr(&(func->first_instr), I_NOP, 0, NULL), ret);
         instr = func->first_instr;
 

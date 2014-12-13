@@ -30,6 +30,9 @@ int gen_instr(Instruction **instr_ptr, Instruction_type type, int index,
         .alt_instruction = alt_instr
     };
 
+    if (instr_ptr == NULL)
+        return INTERNAL_ERROR;
+
     if (*instr_ptr != NULL)
         (*instr_ptr)->next_instruction = new_instr;
 
