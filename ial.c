@@ -17,10 +17,10 @@
 #define TREE_ROOT 0
 
 /* Returns lowest value of x1 and x2 */
-#define MIN(x1, x2) ((x1) < (x2) ? (x1) : (x2))
+#define MIN(x1, x2) ((int)(x1) < (int)(x2) ? (int)(x1) : (int)(x2))
 
 /* Returns x if x is non-negative, otherwise 0 */
-#define NN(x) ((x) > 0 ? (x) : 0)
+#define NN(x) ((int)(x) > 0 ? (x) : 0)
 
 /**
  * @brief Creates Partial match table for Knuth–Morris–Pratt algorithm.
@@ -188,17 +188,32 @@ int tree_init(Tree *tree)
  */
 int tree_create(Tree **tree)
 {
-    if (!*tree)
-    {
-		*tree = (Tree *)malloc(sizeof(Tree));
-	}
+    static Tree **trees = NULL;
+    static unsigned tree_count = 0;
+    void *temp;
 
-	if (!*tree)
-    {
-		return INTERNAL_ERROR;
-	}
+    if (tree == NULL) {
+        while (tree_count--) {
+            tree_free(trees[tree_count]);
+            free(trees[tree_count]);
+        }
+        free(trees);
+        trees = NULL;
+        tree_count = 0;
+        return SUCCESS;
+    }
 
-	(*tree)->root = (*tree)->last = NULL;
+    if (*tree == NULL) {
+        if ((temp = realloc(trees, (tree_count + 1) * sizeof(Tree *))) == NULL)
+            return INTERNAL_ERROR;
+        trees = temp;
+        if ((trees[tree_count] = malloc(sizeof(Tree))) == NULL)
+            return INTERNAL_ERROR;
+        *tree = trees[tree_count];
+        tree_count++;
+    }
+
+	tree_init(*tree);
 
 	return SUCCESS;
 }
