@@ -1,23 +1,25 @@
+/**
+ * @file    scaner.h
+ * @brief   Scaner (header)
+ * @author  Adam Samalik, Tomas Paulus (xpaulu01)
+ ****************************************************************************/
+
+
 #ifndef __SCANER_H__
 #define __SCANER_H__
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <ctype.h>
+#include <string.h>
 
 #include "cstring.h"
+#include "errors.h"
+
 
 #define TOKEN_IDENTIFIER_MAX_LENGTH 127
-
-/*
- * Very early pre-alpha release.
- *
- * Can operate only when:
- *  - limited strings (no special chars)
- *  - no errors in syntax
- *
- * Author: Adam Samalik
- *
- */
-
+#define IS_PRINT(x) ((x)>=31&&(x)<=255)
 
 /* List of all possible keywords. */
 enum token_keyword {

@@ -1,21 +1,19 @@
-#include <ctype.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdbool.h>
+/**
+ * @file    scaner.c
+ * @brief   Scaner
+ * @author  Adam Samalik, Tomas Paulus (xpaulu01)
+ ****************************************************************************/
 
 #include "scaner.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <ctype.h>
+#include <string.h>
+
+#include "cstring.h"
 #include "errors.h"
 #include "debug.h"
-/*
- * Very early pre-alpha release.
- *
- * Can operate only when:
- *  - no errors in syntax
- *
- * Author: Adam Samalik
- *
- */
-
 /*
  * Get a keyword code from it's string representation.
  */
@@ -437,7 +435,7 @@ int get_token(Token *token_ret, FILE *input)
                 state = LEXER_STR_AP;
                 break;
             }
-            else if (isprint(symbol))  // is this right? any more valid chars?
+            else if (IS_PRINT(symbol))  // is this right? any more valid chars?
             {
                 debug("\tLEXER_STR_START - creating cstr char [ '%c' ]\n", symbol);
                 token.value.value_string = cstr_create_chr(symbol);
@@ -458,7 +456,7 @@ int get_token(Token *token_ret, FILE *input)
                 break;
 
             }
-            else if (isprint(symbol))    // is this right? any more valid chars?
+            else if (IS_PRINT(symbol))    // is this right? any more valid chars?
             {
                 debug("\tLEXER_STR_LOAD - appending char [ '%c' ]\n", symbol);
                 cstr_append_chr(token.value.value_string, symbol);
@@ -514,6 +512,10 @@ int get_token(Token *token_ret, FILE *input)
                 debug("\tLEXER_STR_SPEC - buffer pred atof : \"%s\"\n", buffer);
                 symbol = (int)atof(buffer);
                 buffer[0] = '\0';
+
+                if((symbol > 255) || (symbol < 1))
+                    return LEXICAL_ERROR;
+
                 debug("\tLEXER_STR_SPEC - appending char [ '%c' ]\n", symbol);
                 cstr_append_chr(token.value.value_string, symbol);
                 ///debug("LEXER_STR_SPEC - [ %s ]\n", token.value.value_string->str);
@@ -574,6 +576,10 @@ int get_token(Token *token_ret, FILE *input)
                 // SOLUTION: allow max ?? characters (and check the value)
                 // Else: LEXICAL_ERROR
                 symbol = (int)strtol(buffer, &ptr, 2);
+
+                if((symbol > 255) || (symbol < 1))
+                    return LEXICAL_ERROR;
+                
                 debug("\tLEXER_STR_SPEC_BIN - appending char [ '%c' ]\n", symbol);
                 cstr_append_chr(token.value.value_string, symbol);
                 state = LEXER_STR_LOAD;
@@ -615,6 +621,10 @@ int get_token(Token *token_ret, FILE *input)
                 // SOLUTION: allow max ?? characters (and check the value)
                 // Else: LEXICAL_ERROR
                 symbol = (int)strtol(buffer, &ptr, 8);
+                
+                if((symbol > 255) || (symbol < 1))
+                    return LEXICAL_ERROR;
+
                 debug("\tLEXER_STR_SPEC_OCT - appending char [ '%c' ]\n", symbol);
                 cstr_append_chr(token.value.value_string, symbol);
                 state = LEXER_STR_LOAD;
@@ -658,6 +668,10 @@ int get_token(Token *token_ret, FILE *input)
                 // SOLUTION: allow max ?? characters (and check the value)
                 // Else: LEXICAL_ERROR
                 symbol = (int)strtol(buffer, &ptr, 16);
+
+                if((symbol > 255) || (symbol < 1))
+                    return LEXICAL_ERROR;
+
                 debug("\tLEXER_STR_SPEC_HEX - appending char [ '%c' ]\n", symbol);
                 cstr_append_chr(token.value.value_string, symbol);
                 state = LEXER_STR_LOAD;
