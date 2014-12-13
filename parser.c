@@ -125,7 +125,7 @@ int parse(FILE *input, Instruction *first_instr, Variables *vars)
 
     tree_free(&globals);
     tree_free(&functions);
-
+    tree_create(NULL);
 
     return ret;
 }
@@ -532,7 +532,8 @@ static int nt_cmd_sublist(FILE *input, Tree *locals, Tree *globals, Tree *functi
         return (empty) ? RETURNING : SYNTAX_ERROR;
     }
     CHECK_VALUE(t_symbol_catch(input, SEMICOLON), ret);
-    CHECK_VALUE(nt_cmd_sublist(input, locals, globals, functions, instr, vars, false), ret);
+    CHECK_VALUE(nt_cmd_sublist(input, locals, globals, functions, instr, vars, false),
+                ret);
 
     return SUCCESS;
 }
@@ -556,8 +557,10 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
             CHECK_VALUE(t_symbol(input, PARENTHESIS_L), ret);
             CHECK_VALUE(t_id(input, &id), ret);
             CHECK_VALUE(t_symbol(input, PARENTHESIS_R), ret);
-            CHECK_VALUE(search_trees(id, locals, globals, &unique_id, NULL), ret);
-            debug("ret: %d\n", ret);
+            CHECK_VALUE(search_trees(id, locals, globals, &unique_id, &type), ret);
+            if (type == TYPE_BOOL) {
+                return INCOMPATIBLE_TYPE;
+            }
             CHECK_VALUE(gen_instr(instr, I_READLN, unique_id, NULL), ret);
             return SUCCESS;
         } else if (token.value.value_keyword == KEYWORD_WRITE) {
