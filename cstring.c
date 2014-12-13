@@ -402,6 +402,12 @@ int cstr_cmp(cstring const *s1, cstring const *s2)
 		debug("one of cstrings to compare not given.\n\n");
 	}
 
+    if (s1 == NULL && s2 == NULL) {
+        return 0;
+    } else if ((s1 == NULL && s2 != NULL) || (s1 != NULL && s2 == NULL)) {
+        return -1;
+    }
+
     return strcmp(s1->str, s2->str);
 }
 

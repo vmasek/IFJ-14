@@ -16,6 +16,8 @@
 #include "ial.h"
 #endif
 
+#define MAX(x1, x2) ((x1) > (x2) ? (x1) : (x2))
+
 /**
  * Value checking macro
  */
@@ -43,7 +45,7 @@ static int nt_func_section(FILE *input, Tree *globals, Tree *functions,
 static int nt_func(FILE *input, Tree *globals, Tree *functions, Variables *vars);
 static int t_id(FILE *input, cstring **_id);
 static int nt_paramlist(FILE *input, Func_record *func, Tree *functions, unsigned *count);
-static int nt_func_body(FILE *input, Tree *locals, Tree *globals, Tree *functions,
+static int nt_func_body(FILE *input, Func_record *func, Tree *globals, Tree *functions,
                         Instruction **instr, unsigned *_var_count, Variables *vars,
                         Var_record ***var_ar);
 static int nt_comp_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
@@ -86,10 +88,11 @@ int parse(FILE *input, Instruction *first_instr, Variables *vars)
     int ret = SUCCESS;
     Tree globals;
     Tree functions;
-    //Instruction *tmp = first_instr; TODO REMOVE
 
     tree_init(&globals);
     tree_init(&functions);
+    //DIRTY WORKARROUND
+    tree_insert(&functions, cstr_create_str(""), NULL);
     ret = nt_program(input, &globals, &functions, &first_instr, vars);
 
 
@@ -102,7 +105,6 @@ int parse(FILE *input, Instruction *first_instr, Variables *vars)
 	fprintf(stderr, "\n===========================================================================\n\n");
 #endif
 
-    //*first_instr = *tmp; TODO REMOVE
     tree_free(&globals);
     tree_free(&functions);
 
@@ -214,11 +216,12 @@ static int nt_var_sublist(FILE *input, Tree *vars_tree, Tree *functions,
 }
 
 static int nt_var(FILE *input, Tree *vars, Tree *functions, bool eps,
-                  Var_record **_var, int id)
+                  Var_record **_var, int unique_id)
 {
     int ret;
     Token token;
     Var_record *var = NULL;
+    cstring *id;
 
     CHECK_VALUE(get_token(&token, input), ret);
     debug_token(&token);
@@ -227,9 +230,10 @@ static int nt_var(FILE *input, Tree *vars, Tree *functions, bool eps,
 
         CHECK_VALUE(t_symbol(input, COLON), ret);
         CHECK_VALUE(nt_type(input, &(var->type)), ret);
-        CHECK_VALUE(insert_tree(vars, cstr_create_str(token.value.value_name),
-                                var, functions), ret);
-        var->index = id;
+        id = cstr_create_str(token.value.value_name);
+        CHECK_VALUE(insert_tree(vars, id, var, functions), ret);
+        var->index = unique_id;
+        var->id = id;
         if (_var != NULL)
             *_var = var;
         return SUCCESS;
@@ -327,6 +331,8 @@ static int nt_func(FILE *input, Tree *globals, Tree *functions, Variables *vars)
         token.value.value_keyword == KEYWORD_FUNCTION) {
         MALLOC_FUNC(func, __FILE__);
         tree_create(&(func->locals));
+        func->declared = false;
+        func->defined = false;
         CHECK_VALUE(gen_instr(&(func->first_instr), I_NOP, 0, NULL), ret);
         instr = func->first_instr;
 
@@ -352,7 +358,7 @@ static int nt_func(FILE *input, Tree *globals, Tree *functions, Variables *vars)
 
         CHECK_VALUE(update_tree(functions, id, func, globals), ret);
 
-        CHECK_VALUE(nt_func_body(input, func->locals, globals, functions,
+        CHECK_VALUE(nt_func_body(input, func, globals, functions,
                                  &instr, &(func->local_count), vars,
                                  &(func->params)), ret);
         if (!strcmp(id->str, BIF_COPY) || !strcmp(id->str, BIF_FIND) ||
@@ -412,7 +418,7 @@ static int nt_paramlist(FILE *input, Func_record *func, Tree *functions, unsigne
     return SUCCESS;
 }
 
-static int nt_func_body(FILE *input, Tree *locals, Tree *globals, Tree *functions,
+static int nt_func_body(FILE *input, Func_record * func, Tree *globals, Tree *functions,
                         Instruction **instr, unsigned *_var_count, Variables *vars,
                         Var_record ***var_ar)
 {
@@ -425,25 +431,38 @@ static int nt_func_body(FILE *input, Tree *locals, Tree *globals, Tree *function
     if (token.type == TOKEN_KEYWORD &&
         token.value.value_keyword == KEYWORD_FORWARD) {
         CHECK_VALUE(t_symbol(input, SEMICOLON), ret);
+        if (func->declared) {
+            debug("Forward redeclaration.\n");
+            return UNDEFINED_IDENTIFIER;
+        }
+        debug("Forward declared.\n");
+        func->declared = true;
         return SUCCESS;
     } else {
         unget_token(&token);
-        CATCH_VALUE(nt_var_section(input, locals, functions, var_ar,  &count,
+        CATCH_VALUE(nt_var_section(input, func->locals, functions, var_ar,  &count,
                                    false, NULL), ret);
         if (_var_count != NULL)
-            *_var_count += count;
-        //TODO: consider removing I_NOP
+            *_var_count += count; 
         if (*instr == NULL) {
             CHECK_VALUE(gen_instr(instr, I_NOP, 0, NULL), ret)
         }
-        CHECK_VALUE(nt_comp_cmd(input, locals, globals, functions, instr, vars), ret);
+        CHECK_VALUE(nt_comp_cmd(input, func->locals, globals, functions, instr, vars),
+                    ret);
         CHECK_VALUE(t_symbol(input, SEMICOLON), ret)
         CHECK_VALUE(gen_instr(instr, I_HALT, 0, NULL), ret);
         #ifdef DEBUG
 	    debug("\n==============================PRINTING TREE LOCALS==================================\n");
-	    tree_print(locals);
+	    tree_print(func->locals);
 	    fprintf(stderr, "\n===========================================================================\n\n");
         #endif
+        if (func->defined) {
+            debug("Function redefinition.\n");
+            return UNDEFINED_IDENTIFIER;
+        }
+        debug("Function defined.\n");
+        func->declared = true;
+        func->defined = true;
         return SUCCESS;
     }
 }
@@ -477,7 +496,8 @@ static int nt_cmd_list(FILE *input, Tree *locals, Tree *globals, Tree *functions
                        Instruction **instr, Variables *vars, bool empty)
 {
     int ret;
-    CATCH_VALUE(nt_cmd_sublist(input, locals, globals, functions, instr, vars, empty), ret);
+    CATCH_VALUE(nt_cmd_sublist(input, locals, globals, functions, instr, vars, empty),
+                ret);
 
     return SUCCESS;
 }
@@ -647,7 +667,8 @@ static int nt_arg_list_write(FILE *input, Tree *locals, Tree *globals, Tree *fun
     debug_token(&token);
     if (token.type == TOKEN_SYMBOL &&
         token.value.value_symbol == COMMA) {
-        CHECK_VALUE(nt_arg_list_write(input, locals, globals, functions, instr, vars), ret);
+        CHECK_VALUE(nt_arg_list_write(input, locals, globals, functions, instr, vars),
+                    ret);
     } else {
         unget_token(&token);
     }
@@ -709,8 +730,8 @@ static bool compare_var_record(Var_record *a, Var_record *b)
 {
     if ((a == NULL && b != NULL) || (a != NULL && b == NULL))
         return false;
-    return (a == NULL && b == NULL) ||
-           (a->type == b->type && a->index == b->index);
+    return (a == NULL && b == NULL) || (!cstr_cmp(a->id, b->id) &&
+           (a->type == b->type && a->index == b->index));
 }
 
 static bool compare_var_records(Var_record **a, Var_record **b, int n)
@@ -724,9 +745,11 @@ static bool compare_var_records(Var_record **a, Var_record **b, int n)
 
 static int compare_functions(Func_record *a, Func_record *b)
 {
+    //debug("Wololo\n");
     if (a != NULL && b != NULL &&
         a->local_count == b->local_count &&
-        compare_var_records(a->params, b->params, a->local_count)) {
+        compare_var_records(a->params, b->params,
+                            MAX(a->local_count, b->local_count))) {
         return SUCCESS;
     } else {
         return UNDEFINED_IDENTIFIER;
@@ -743,6 +766,8 @@ static int update_tree(Tree *update, cstring *id, void *data, Tree *other)
         debug("%s\n", id->str);
         CHECK_VALUE(compare_functions((Func_record *)data, (Func_record *)(node->data)),
                     ret);
+        ((Func_record *)data)->declared = ((Func_record *)node->data)->declared;
+        ((Func_record *)data)->defined = ((Func_record *)node->data)->defined;
         node->data = data;
         return SUCCESS;
     } else {

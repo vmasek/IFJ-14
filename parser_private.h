@@ -26,6 +26,7 @@ typedef struct var_record {
     Value data;
     Type type;
     unsigned index;
+    cstring *id;
 } Var_record;
 
 typedef struct func_record {
@@ -35,6 +36,8 @@ typedef struct func_record {
     Var_record ret_value;
     Tree *locals;
     Instruction *first_instr;
+    bool declared;
+    bool defined;
 } Func_record;
 
 /**
