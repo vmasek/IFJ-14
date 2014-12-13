@@ -1242,11 +1242,11 @@ printf("\n\n\n%s:[test %d.]-----------------------------------------------------
 	if(calcs.count==1)
 	{
 		stack_index(&calcs, 0, (int*)&typ, &temp);
-		if(typ == TYPE_INT && (temp.data.integer == ( values[0].data.integer / values[1].data.integer )))
+		if(typ == TYPE_REAL && (temp.data.real == ( (double)values[0].data.integer / values[1].data.integer )))
 			printf("\n%s:[test %d.] DIV was OK.\n", __func__, test);
 		else
 		{
-			printf("\n%s:[test %d.] ERROR: stack value is %d and should be %d\n", __func__, test, temp.data.integer, values[0].data.integer / values[1].data.integer);
+			printf("\n%s:[test %d.] ERROR: stack value is %f and should be %f\n", __func__, test, temp.data.real, (double)values[0].data.integer / values[1].data.integer);
 			break;
 		}
 	}
