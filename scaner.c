@@ -14,26 +14,10 @@
 #include "cstring.h"
 #include "errors.h"
 #include "debug.h"
+
 /*
  * Get a keyword code from it's string representation.
  */
-
-int convert_binary(int binary_number)
-{
-    int base = 1, reminder = 0, decimal = 0;
-
-    while (binary_number > 0)
-    {
-        reminder = binary_number % 10;
-        decimal = decimal + reminder * base;
-        binary_number = binary_number / 10;
-        base = base * 2;
-
-    }
-
-    return decimal;
-}
-
 static bool token_register(Token *token, bool set)
 {
     static Token saved_token;
@@ -60,14 +44,6 @@ static bool token_register(Token *token, bool set)
 
 static enum token_keyword _get_keyword(char *name)
 {
-	///zmazat !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // lowercase it before
-    //for (int i = 0; name[i]; i++)
-    //{
-	//	debug("LOWERING - char [ '%c' ] -> [ '%c' ]\n",name[i],tolower(name[i]));
-    //    name[i] = tolower(name[i]);
-    //}
-
     switch (name[0])
     {
     case 'a':
@@ -456,7 +432,7 @@ int get_token(Token *token_ret, FILE *input)
                 break;
 
             }
-            else if (IS_PRINT(symbol))    // is this right? any more valid chars?
+            else if (IS_PRINT(symbol))
             {
                 debug("\tLEXER_STR_LOAD - appending char [ '%c' ]\n", symbol);
                 cstr_append_chr(token.value.value_string, symbol);
@@ -482,7 +458,6 @@ int get_token(Token *token_ret, FILE *input)
             else if (symbol == '#')
             {
                 debug("\tLEXER_STR_AP - special char (#)\n");
-                //cstr_append_chr(token.value.value_string, symbol); //toto je zle
                 state = LEXER_STR_SPEC;
                 break;
             }
@@ -492,7 +467,6 @@ int get_token(Token *token_ret, FILE *input)
                 debug("EOF\n");
                 return LEXICAL_ERROR;
             }
-
             else
             {
                 ungetc(symbol, input);
@@ -506,9 +480,6 @@ int get_token(Token *token_ret, FILE *input)
             debug("case\t'LEXER_STR_SPEC'\n");
             if (symbol == '\'')
             {
-                // FIXME what if the int is too big?!
-                // SOLUTION: allow max three characters and then check the
-                // value. Else: LEXICAL_ERROR
                 debug("\tLEXER_STR_SPEC - buffer pred atof : \"%s\"\n", buffer);
                 symbol = (int)atof(buffer);
                 buffer[0] = '\0';
@@ -541,7 +512,7 @@ int get_token(Token *token_ret, FILE *input)
                 state = LEXER_STR_SPEC_HEX_FIRST;
                 break;
             }
-            else if (isdigit(symbol))
+            else if (IS_DIGIT(symbol))
             {
                 debug("\tLEXER_STR_SPEC - is digit [ '%c' ]\n", symbol);
                 strcatc(buffer, symbol);
@@ -572,9 +543,6 @@ int get_token(Token *token_ret, FILE *input)
             debug("case\t'LEXER_STR_SPEC_BIN'\n");
             if (symbol == '\'')
             {
-                // FIXME what if the int is too big?!
-                // SOLUTION: allow max ?? characters (and check the value)
-                // Else: LEXICAL_ERROR
                 symbol = (int)strtol(buffer, &ptr, 2);
 
                 if((symbol > 255) || (symbol < 1))
@@ -617,9 +585,6 @@ int get_token(Token *token_ret, FILE *input)
             if (symbol == '\'')
             {
                 debug("SPEC_OCT koniec stringu\n");
-                // FIXME what if the int is too big?!
-                // SOLUTION: allow max ?? characters (and check the value)
-                // Else: LEXICAL_ERROR
                 symbol = (int)strtol(buffer, &ptr, 8);
                 
                 if((symbol > 255) || (symbol < 1))
@@ -664,9 +629,6 @@ int get_token(Token *token_ret, FILE *input)
             debug("case\t'LEXER_STR_SPEC_HEX'\n");
             if (symbol == '\'')
             {
-                // FIXME what if the int is too big?!
-                // SOLUTION: allow max ?? characters (and check the value)
-                // Else: LEXICAL_ERROR
                 symbol = (int)strtol(buffer, &ptr, 16);
 
                 if((symbol > 255) || (symbol < 1))
@@ -1028,41 +990,3 @@ void unget_token(Token *token)
 	debug("ungetting done\n");
     token_register(token, true);
 }
-
-/*
- * Just for testing purpose
- */
-/*
-int main() {
-    FILE *input = fopen("test", "r");
-    Token *token = malloc(sizeof(Token *));
-    int err;
-
-    while(1) {
-        err = get_token(token, input);
-        if (err) {
-            printf (".... IT !!!!!!!!!!!!!!!!!!!!!!! \nehm... Error: Lexical Error.\n");
-            exit(1);
-        }
-        if (token->type == TOKEN_ID)
-            printf (" TOKEN_ID          %s", token->value.value_name);
-        else if (token->type == TOKEN_KEYWORD)
-            printf (" TOKEN_KEYWORD     %d", token->value.value_keyword);
-        else if (token->type == TOKEN_INT)
-            printf (" TOKEN_INT         %d", token->value.value_int);
-        else if (token->type == TOKEN_FLOAT)
-            printf (" TOKEN_FLOAT       %f", token->value.value_float);
-        else if (token->type == TOKEN_SYMBOL)
-            printf (" TOKEN_SYMBOL      %d", token->value.value_int);
-        else if (token->type == TOKEN_STRING)
-            printf (" TOKEN_STRING      %s", token->value.value_string->str);
-        else
-            break;
-        printf("\n");
-    }
-
-
-    //fclose(input); segfault.. why?
-
-    return 0;
-} */

@@ -20,6 +20,7 @@
 
 #define TOKEN_IDENTIFIER_MAX_LENGTH 127
 #define IS_PRINT(x) ((x)>=31&&(x)<=255)
+#define IS_DIGIT(x) ((x)>='0'&&(x)<='9')
 
 /* List of all possible keywords. */
 enum token_keyword {
