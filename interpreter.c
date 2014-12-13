@@ -567,7 +567,7 @@ int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instru
 			else if (types[0] == TYPE_REAL)
 			{
 				debug("I_WRITE - REAL\n");
-				printf("%f", result.data.real);
+				printf("%g", result.data.real);
 			}
 			else if (types[0] == TYPE_STRING)
 			{
