@@ -458,7 +458,7 @@ if [[ $tests == true || $PROJECT == true  ]]; then
 	if [[ $ALL == true || $SKAL == true ]]; then
 	    counter=0
 	    OK_count=0
-	    echo "-------------------------------------TESTy-od-skala---------------------------------------------------------------------"
+	    echo "-------------------------------------TESTy-od-skala + pridane a upravene nase---------------------------------------------------------------------"
 	    for file in "${FILES_SKAL[@]}"; do
 		    run_test $file
 		    ((counter++))
