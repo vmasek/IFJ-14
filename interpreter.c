@@ -185,18 +185,17 @@ int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instru
 				return INTERNAL_ERROR;
 			}
 
-			if(instructions->top == NULL)
+			if(stack_top(instructions, NULL, item) == SUCCESS)
 			{
-				debug("I_HALT - Successfull end of interpretation.");
-				return SUCCESS;
+				debug("I_HALT - continue.\n");
+				stack_pop(instructions);
 			}
 			else
 			{
-				debug("I_HALT - continue.");
+				debug("I_HALT - Successful end of interpretation.\n");
+				item = NULL;
 			}
 
-
-			item = item->next_instruction;
 			break;
 
 		case I_ADD:
