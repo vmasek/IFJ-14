@@ -168,14 +168,15 @@ static int nt_var_list(FILE *input, Tree *vars_tree, Tree *functions, Var_record
 
     if ((ret = nt_var_sublist(input, vars_tree, functions, var_ar,
                               count, global, vars)) == RETURNING) {
-       if ((*var_ar =
-           (Var_record **)gc_realloc(__FILE__, *var_ar,
+        debug("reallocating %d bytes\n", ((*count) + 1) * sizeof(Var_record *));
+        if ((*var_ar =
+            (Var_record **)gc_realloc(__FILE__, *var_ar,
                                      ((*count) + 1) * sizeof(Var_record *)))
-                   == NULL) {
-           return INTERNAL_ERROR;
-       }
-       (*var_ar)[id] = var;
-       return SUCCESS;
+                    == NULL) {
+            return INTERNAL_ERROR;
+        }
+        (*var_ar)[id] = var;
+        return SUCCESS;
     } else if (ret == SUCCESS) {
         (*var_ar)[id] = var;
         return SUCCESS;
@@ -199,6 +200,7 @@ static int nt_var_sublist(FILE *input, Tree *vars_tree, Tree *functions,
     (*count)++;
     if ((ret = nt_var_sublist(input, vars_tree, functions, var_ar,
                               count, global, vars)) == RETURNING) {
+        debug("reallocating %d bytes\n", ((*count) + 1) * sizeof(Var_record *));
         if ((*var_ar =
             (Var_record **)gc_realloc(__FILE__, *var_ar,
                                       ((*count) + 1) * sizeof(Var_record *)))
@@ -342,10 +344,11 @@ static int nt_func(FILE *input, Tree *globals, Tree *functions, Variables *vars)
         func->local_count = 1;
         CHECK_VALUE(t_symbol(input, PARENTHESIS_L), ret);
         //TODO: Pavluv vymysl urezat
-        CATCH_VALUE(nt_paramlist(input, func, functions, &func->local_count),
+        CATCH_VALUE(nt_paramlist(input, func, functions, &(func->local_count)),
                     ret);
         if (func->params == NULL) {
             func->params = (Var_record **)gc_malloc(__FILE__, sizeof(Var_record *));
+            func->local_count = 1;
         }
         func->params[0] = &(func->ret_value);
         CHECK_VALUE(t_symbol(input, PARENTHESIS_R), ret);
@@ -440,8 +443,8 @@ static int nt_func_body(FILE *input, Func_record * func, Tree *globals, Tree *fu
         return SUCCESS;
     } else {
         unget_token(&token);
-        CATCH_VALUE(nt_var_section(input, func->locals, functions, var_ar,  &count,
-                                   false, NULL), ret);
+        CATCH_VALUE(nt_var_section(input, func->locals, functions, var_ar,
+                                   &func->local_count, false, NULL), ret);
         if (_var_count != NULL)
             *_var_count += count; 
         if (*instr == NULL) {
