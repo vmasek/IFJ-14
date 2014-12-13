@@ -159,7 +159,7 @@ int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions,
     int error;
     bool finished = false;
     Token input_token;
-    Token stack_token;
+    Token stack_token = {.type = TOKEN_EOF};
     enum terminal stack_term;
     enum terminal input_term;
     Stack sym_stack;
@@ -187,7 +187,7 @@ int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions,
         goto fail;
     }
 
-    if ((error = stack_push(&sym_stack, SYM_TERM, NULL)) != SUCCESS)
+    if ((error = stack_push(&sym_stack, SYM_TERM, &stack_token)) != SUCCESS)
         goto fail;
 
     while (!finished) {
