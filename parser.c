@@ -471,7 +471,7 @@ static int nt_func_body(FILE *input, Func_record * func, Tree *globals, Tree *fu
         CHECK_VALUE(nt_comp_cmd(input, func->locals, globals, functions, instr, vars),
                     ret);
         CHECK_VALUE(t_symbol(input, SEMICOLON), ret)
-        CHECK_VALUE(gen_instr(instr, I_HALT, 0, NULL), ret);
+        CHECK_VALUE(gen_instr(instr, I_HALT, func->local_count, NULL), ret);
         #ifdef DEBUG
 	    debug("\n==============================PRINTING TREE LOCALS==================================\n");
 	    tree_print(func->locals);
