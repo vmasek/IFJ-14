@@ -10,8 +10,36 @@
 #include "interpreter.h"
 #include "builtin.h"
 
-void throw_away_line(void);
-int read_bool(bool *boolean);
+#define GL_MIN_SIZE 16
+
+static int get_line(char **buffer)
+{
+    static unsigned size = 0;
+    int character;
+    unsigned read = 0;
+    char *temp;
+
+    if (buffer == NULL)
+        return INTERNAL_ERROR;
+
+    while (true) {
+        character = getchar();
+        if (read == size) {
+            if ((temp = realloc(*buffer, size + GL_MIN_SIZE)) == NULL)
+                return INTERNAL_ERROR;
+            *buffer = temp;
+            size += GL_MIN_SIZE;
+        }
+        if (character == '\n' || character == EOF) {
+            (*buffer)[read] = '\0';
+            break;
+        }
+        (*buffer)[read] = character;
+        read++;
+    }
+
+    return SUCCESS;
+}
 
 int interpret(Instruction *item, Variables *globals)
 {
@@ -22,7 +50,7 @@ int interpret(Instruction *item, Variables *globals)
 	}
 
 	int err_code;
-
+	char *buffer = NULL;
 	Stack calcs;
 	stack_init(&calcs, VALUE_STACK);
 	Stack locals;
@@ -31,7 +59,7 @@ int interpret(Instruction *item, Variables *globals)
 	stack_init(&instructions, INSTR_STACK);
 
 
-	if((err_code = interpret_loop(item, &calcs, &locals, &instructions, globals)) != SUCCESS)
+	if((err_code = interpret_loop(item, &calcs, &locals, &instructions, globals, &buffer)) != SUCCESS)
 	{
 		debug("INTERPRET LOOP returned NON success errcode.\n");
 	}
@@ -39,18 +67,19 @@ int interpret(Instruction *item, Variables *globals)
 	stack_free(&calcs);
 	stack_free(&locals);
 	stack_free(&instructions);
+	free(buffer);
 
 	return err_code; ///returns err_code given from interpreter_loop()
 }
 
 
-int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instructions, Variables *globals)
+int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instructions, Variables *globals, char **buffer)
 {
 
 	Value values[2];
 	Type  types[3];
 	Value result = {.inited = true};
-
+	char *endptr;
 
 	while(item)
 	{
@@ -590,6 +619,12 @@ int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instru
 		case I_READLN:
 			debug("I_READLN\n");
 
+			if (get_line(buffer) != SUCCESS)
+			{
+				debug("I_READLN - error loading string\n");
+				return INTERNAL_ERROR;
+			}
+
 			if(item->index < 0)																		/// index indicates local stack operation
 			{
 				debug("I_READLN - locals stack\n");
@@ -612,41 +647,28 @@ int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instru
 			if (types[0] == TYPE_INT)
 			{
 				debug("I_READLN - integer\n");
-				if(scanf("%d", &(result.data.integer))!=1)
+				result.data.integer = strtol(*buffer, &endptr, 10);
+				if (*endptr != '\0' && !isspace(*endptr))
 				{
 					debug("I_READLN - error loading int\n");
-					return INTERNAL_ERROR;
+					return RUNTIME_NUMERIC_IN;
 				}
-				throw_away_line();
 			}
 			else if (types[0] == TYPE_REAL)
 			{
 				debug("I_READLN - double\n");
-				if(scanf("%lf", &(result.data.real))!=1)
+				result.data.real = strtod(*buffer, &endptr);
+				if (*endptr != '\0' && !isspace(*endptr))
 				{
 					debug("I_READLN - error loading real\n");
-					return INTERNAL_ERROR;
+					return RUNTIME_NUMERIC_IN;
 				}
-				throw_away_line();
-			}
-			else if (types[0] == TYPE_BOOL)
-			{
-				debug("I_READLN - boolean\n");
-				if(read_bool(&(result.data.boolean))!=1)
-				{
-					debug("I_READLN - error loading bool\n");
-					return INTERNAL_ERROR;
-				}
-				throw_away_line();
-			}
+			}	
 			else if (types[0] == TYPE_STRING)
 			{
 				debug("I_READLN - cstring\n");
-				if(cstr_read_line(result.data.string = cstr_create_str(""))==NULL)
-				{
-					debug("I_READLN - error loading string\n");
+				if ((result.data.string = cstr_create_str(*buffer)) == NULL)
 					return INTERNAL_ERROR;
-				}
 			}
 			else
 			{
@@ -825,58 +847,4 @@ int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instru
 
 	}
 	return SUCCESS;
-}
-
-inline int read_bool(bool *boolean)
-{
-	char buf[10] = {0}, chr;
-
-	do
-	{
-		chr = getchar();
-	} while (chr == ' ' || chr == '\t');
-	if(chr == '\n' || chr == EOF )
-	{
-		debug("no bool value before newline or eof\n");
-		return 0;
-	}
-	ungetc(chr,stdin);
-	fgets(buf, 6, stdin);
-	for (int i = 0; buf[i] && i<7 ; i++)
-    {
-		if(buf[i] == '\n' || buf[i] == EOF || buf[i] == ' ')
-		{
-			debug("end of buffer\n");
-			buf[i] = '\0';
-			break;
-		}
-		debug("LOWERING - char [ '%c' ] -> [ '%c' ]\n",buf[i],tolower(buf[i]));
-        buf[i] = tolower(buf[i]);
-    }
-	if(!strcmp(buf, "true"))
-	{
-		debug("\tloaded TRUE\n");
-		*boolean = true;
-		return 1;
-	}
-	else if(!strcmp(buf, "false"))
-	{
-		debug("\tloaded FALSE\n");
-		*boolean = false;
-		return 1;
-	}
-	else
-	{
-		debug("\tWRONG/NOT bool value\n");
-		return 0;
-	}
-}
-
-inline void throw_away_line(void)
-{
-	int chr;
-	do
-	{
-		chr = getchar();
-	} while (chr != '\n' && chr != EOF);
 }

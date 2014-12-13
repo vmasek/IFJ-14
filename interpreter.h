@@ -24,7 +24,7 @@
 
 int interpret(Instruction *item, Variables *globals);
 
-int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instructions, Variables *globals);
+int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instructions, Variables *globals, char **buffer);
 
 
 /**
