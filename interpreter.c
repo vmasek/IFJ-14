@@ -184,7 +184,7 @@ int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instru
 		case I_CALL:
 			debug("I_CALL\n");
 
-			if (stack_push(instructions, 0, item->next_instruction) == INTERNAL_ERROR)
+			if (stack_push(instructions, 0, &item->next_instruction) == INTERNAL_ERROR)
 			{
 				debug("I_CALL - instructions stack push error.\n");
 				return INTERNAL_ERROR;
@@ -202,19 +202,19 @@ int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instru
 				return INTERNAL_ERROR;
 			}
 
-			if (stack_push(locals, item->index, NULL) == INTERNAL_ERROR)
+			if (stack_push(calcs, item->index, &result) == INTERNAL_ERROR)
 			{
 				debug("I_HALT - calcs stack push error.\n");
 				return INTERNAL_ERROR;
 			}
-
+			
 			if(stack_popping_spree(locals, item->index)==INTERNAL_ERROR) ///number of requied pop is in index
 			{
 				debug("I_HALT - Popping spree locals error.\n");
 				return INTERNAL_ERROR;
 			}
 
-			if(stack_top(instructions, NULL, item) == SUCCESS)
+			if(stack_top(instructions, NULL, &item) == SUCCESS)
 			{
 				debug("I_HALT - continue.\n");
 				stack_pop(instructions);
