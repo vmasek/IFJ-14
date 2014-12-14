@@ -63,7 +63,7 @@ int interpret(Instruction *item, Variables *globals)
 	{
 		debug("INTERPRET LOOP returned NON success errcode.\n");
 	}
-
+	debug("Number of items in calcs: %u, locals: %u, instrs: %u\n", calcs.count, locals.count, instructions.count);
 	stack_free(&calcs);
 	stack_free(&locals);
 	stack_free(&instructions);
@@ -115,7 +115,7 @@ int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instru
 					return INTERNAL_ERROR;
 				}
 			}
-
+			debug("Assigning to index %d (type %u)\n", item->index, types[0]);
 			item = item->next_instruction;
 			break;
 
@@ -140,6 +140,7 @@ int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instru
 					return INTERNAL_ERROR;
 				}
 			}
+			debug("I_PUSH - index %d (type %u)\n", item->index, types[0]);
 			///ACHTUNG! do not pop or change locals or globals
 			if (!result.inited)
 			{
@@ -170,8 +171,9 @@ int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instru
 			break;
 
 		case I_PREP:
-			debug("I_PREP - pushing to locals stack\n");
-			if (stack_push(locals, item->index, NULL) == INTERNAL_ERROR)
+			debug("I_PREP - pushing to locals stack (type %u)\n", item->index);
+			result.inited = false;
+			if (stack_push(locals, item->index, &result) == INTERNAL_ERROR)
 			{
 				debug("I_PREP - locals stack push error.\n");
 				return INTERNAL_ERROR;
@@ -202,7 +204,7 @@ int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instru
 				return INTERNAL_ERROR;
 			}
 
-			if (stack_push(calcs, item->index, &result) == INTERNAL_ERROR)
+			if (stack_push(calcs, types[0], &result) == INTERNAL_ERROR)
 			{
 				debug("I_HALT - calcs stack push error.\n");
 				return INTERNAL_ERROR;
@@ -343,7 +345,7 @@ int interpret_loop(Instruction *item, Stack *calcs, Stack *locals, Stack *instru
 			}
 			else
 			{
-				debug("Invalid type passed to instruction\n");
+				debug("Invalid types passed to instruction: %u %u\n", types[0], types[1]);
 				return INTERNAL_ERROR;
 			}
 
