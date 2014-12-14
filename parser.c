@@ -135,7 +135,7 @@ static int nt_program(FILE *input, Tree *globals, Tree *functions,
                       Instruction **first_instr, Variables *vars)
 {
     int ret;
-    unsigned global_count;
+    unsigned global_count = 0;
     Var_record **var_ar = NULL;
     CATCH_VALUE(nt_var_section(input, globals, functions, &var_ar, &global_count,
                                true, vars), ret);
@@ -152,7 +152,7 @@ static int nt_var_section(FILE *input, Tree *vars_tree, Tree *functions,
                           Variables *vars)
 {
     int ret;
-    *count = 0;
+    //*count = 0;
     Token token;
 
     CHECK_VALUE(get_token(&token, input), ret);
@@ -342,6 +342,7 @@ static int nt_func_section(FILE *input, Tree *globals, Tree *functions,
 static int nt_func(FILE *input, Tree *globals, Tree *functions, Variables *vars)
 {
     int ret;
+    int local_count;
     Token token;
     Func_record *func = NULL;
     Instruction *instr = NULL;
@@ -383,6 +384,8 @@ static int nt_func(FILE *input, Tree *globals, Tree *functions, Variables *vars)
         CHECK_VALUE(nt_func_body(input, func, globals, functions,
                                  &instr, &(func->local_count), vars,
                                  &(func->params)), ret);
+        func->local_count;
+        debug("func->local_count: %d %d\n", func->local_count, local_count);
         if (!strcmp(id->str, BIF_COPY) || !strcmp(id->str, BIF_FIND) ||
             !strcmp(id->str, BIF_LENGTH) || !strcmp(id->str, BIF_SORT)) {
             return UNDEFINED_IDENTIFIER;
@@ -420,7 +423,8 @@ static int nt_paramlist(FILE *input, Func_record *func, Tree *functions, unsigne
     CHECK_VALUE(nt_var(input, func->locals, functions, true, &var, id), ret);
     if ((ret = t_symbol_catch(input, SEMICOLON)) == RETURNING) {
         debug("Allocating space for %u vars\n", *count);
-        func->params = (Var_record **)gc_malloc(__FILE__, (*count) * sizeof(Var_record *));
+        func->params = (Var_record **)gc_malloc(__FILE__,
+                                                (*count) * sizeof(Var_record *));
         if (func->params == NULL) {
             return INTERNAL_ERROR;
         }
@@ -665,7 +669,8 @@ static int nt_cmd(FILE *input, Tree *locals, Tree *globals, Tree *functions,
             CHECK_VALUE(gen_instr(instr, I_PUSH, unique_id, NULL), ret);
             CHECK_VALUE(parse_expr(input, locals, globals,functions,
                                    vars, instr, &type, false), ret);
-            CHECK_VALUE(gen_instr(instr, (downto ? I_LESS : I_GREATER),  0, NULL), ret);
+            CHECK_VALUE(gen_instr(instr, (downto ? I_LESS_EQUAL : I_GREATER_EQUAL),
+                                  0, NULL), ret);
             CHECK_VALUE(gen_instr(instr, I_JMP, 0, NULL), ret);
             CHECK_VALUE(gen_instr(&tmp_instr2, I_NOP, 0, NULL), ret);
             (*instr)->alt_instruction = tmp_instr2;
@@ -699,7 +704,9 @@ static int nt_main(FILE *input, Tree *globals, Tree *functions,
                    Instruction **first_instr, Variables *vars)
 {
     int ret;
-    CHECK_VALUE(nt_comp_cmd(input, NULL, globals, functions, first_instr, vars), ret);
+    Tree locals;
+    tree_init(&locals);
+    CHECK_VALUE(nt_comp_cmd(input, &locals, globals, functions, first_instr, vars), ret);
     CHECK_VALUE(t_symbol(input, DOT), ret);
 
     return SUCCESS;
