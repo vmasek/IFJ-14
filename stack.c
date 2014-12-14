@@ -63,16 +63,6 @@ static void set_value(Stack *stack, struct stack_node *node, void *value)
 }
 
 /* BASIC OPERATIONS */
-int stack_count(Stack *stack)
-{
-    if (stack == NULL) {
-        debug("No stack given\n");
-        return INTERNAL_ERROR;
-    }
-
-    return stack->count;
-}
-
 int stack_free(Stack *stack)
 {
     if (stack == NULL) {

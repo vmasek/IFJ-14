@@ -22,7 +22,6 @@ typedef struct {
 } Stack;
 
 /* BASIC OPERATIONS */
-int stack_count(Stack *stack);
 int stack_free(Stack *stack);
 int stack_init(Stack *stack, Stack_type type);
 int stack_pop(Stack *stack);
