@@ -152,7 +152,8 @@ static int nt_var_section(FILE *input, Tree *vars_tree, Tree *functions,
                           Variables *vars)
 {
     int ret;
-    //*count = 0;
+    //if (global)
+    //    *count = 0;
     Token token;
 
     CHECK_VALUE(get_token(&token, input), ret);
@@ -173,7 +174,7 @@ static int nt_var_list(FILE *input, Tree *vars_tree, Tree *functions, Var_record
                        unsigned *count, bool global, Variables *vars)
 {
     int ret;
-    int id = *count;
+    int id = (*count);
     Var_record *var;
     CHECK_VALUE(nt_var(input, vars_tree, functions, false, &var, *count), ret);
     if (global && vars != NULL)
@@ -182,19 +183,18 @@ static int nt_var_list(FILE *input, Tree *vars_tree, Tree *functions, Var_record
     }
     CHECK_VALUE(t_symbol(input, SEMICOLON), ret);
     (*count)++;
-    CHECK_VALUE(nt_var_sublist(input, vars_tree, functions, var_ar,
-                               count, global, vars), ret);
-
     if ((ret = nt_var_sublist(input, vars_tree, functions, var_ar,
                               count, global, vars)) == RETURNING) {
-        debug("reallocating %d bytes\n", ((*count) + 1) * sizeof(Var_record *));
+        debug("reallocating %d bytes\n", ((*count)) * sizeof(Var_record *));
         if ((*var_ar =
             (Var_record **)gc_realloc(__FILE__, *var_ar,
-                                     ((*count) + 1) * sizeof(Var_record *)))
+                                     ((*count)) * sizeof(Var_record *)))
                     == NULL) {
             return INTERNAL_ERROR;
         }
         (*var_ar)[id] = var;
+        debug("ID: %d\n", id);
+        debug("variable location: %p\n", (*var_ar)[id]);
         return SUCCESS;
     } else if (ret == SUCCESS) {
         (*var_ar)[id] = var;
@@ -210,7 +210,7 @@ static int nt_var_sublist(FILE *input, Tree *vars_tree, Tree *functions,
                           Variables *vars)
 {
     int ret;
-    int id = *count;
+    int id = (*count);
     Var_record *var;
     CHECK_VALUE(nt_var(input, vars_tree, functions, true, &var, *count), ret);
     if (global && vars != NULL)
@@ -226,7 +226,10 @@ static int nt_var_sublist(FILE *input, Tree *vars_tree, Tree *functions,
                     == NULL) {
             return INTERNAL_ERROR;
         }
-        (*var_ar)[id] = var;
+        debug("Inserting variable %s at index %d on adress %p\n", var->id->str,
+               id, var);
+        ((*var_ar)[id]) = var;
+        debug("********** AFTER INSERT **********\n");
         return SUCCESS;
     } else if (ret == SUCCESS) {
         (*var_ar)[id] = var;
@@ -801,7 +804,6 @@ static bool compare_var_records(Var_record **a, Var_record **b, int n)
 
 static int compare_functions(Func_record *a, Func_record *b)
 {
-    //debug("Wololo\n");
     if (a != NULL && b != NULL &&
         a->local_count == b->local_count &&
         compare_var_records(a->params, b->params,
