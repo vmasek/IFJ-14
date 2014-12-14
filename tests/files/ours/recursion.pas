@@ -11,5 +11,5 @@ begin
 end;
 
 begin
-    write(factorial(5))
+    write(factorial(5),''#10'')
 end.

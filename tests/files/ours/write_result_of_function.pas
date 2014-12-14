@@ -6,5 +6,5 @@ begin
 end;
 
 begin
-    write(ID(5))
+    write(ID(5), ''#10'')
 end.
