@@ -229,11 +229,6 @@ int parse_expr(FILE *input, Tree *locals, Tree *globals, Tree *functions,
         }
     }
 
-    if (stack_count(&type_stack) != 1) { //TODO IS THIS NECESSARY?
-        error = INCOMPATIBLE_TYPE;
-        debug("Incompatible type\n");
-    }
-
     if (type != NULL)
         stack_top(&type_stack, (int *)type, NULL);
 
@@ -542,7 +537,6 @@ static int handle_call(Token *tokens, Stack *type_stack, Tree **trees,
     Type cur_type;
     Tree_Node *node;
     Instruction_type instr_type;
-    struct func_record *function;
     unsigned param_count = 0;
     unsigned local_count = 0;
     struct var_record **locals;
@@ -599,16 +593,15 @@ static int handle_call(Token *tokens, Stack *type_stack, Tree **trees,
             debug("Semantic error\n");
             return UNDEFINED_IDENTIFIER;
         }
-        function = node->data;
         instr_type = I_CALL;
-        param_count = function->param_count;
-        local_count = function->local_count;
-        ret_type = function->ret_value.type;
-        first_instr = function->first_instr;
-        locals = function->params;
+        param_count = ((struct func_record *)node->data)->param_count;
+        local_count = ((struct func_record *)node->data)->local_count;
+        ret_type = ((struct func_record *)node->data)->ret_value.type;
+        first_instr = ((struct func_record *)node->data)->first_instr;
+        locals = ((struct func_record *)node->data)->params;
         for (unsigned i = 0; i < param_count; i++) {
             if (stack_index(type_stack, i, (int *)&cur_type, NULL) != SUCCESS ||
-                cur_type != function->params[param_count - i]->type) {
+                cur_type != locals[param_count - i]->type) {
                 debug("Incompatible type\n");
                 return INCOMPATIBLE_TYPE;
             }
