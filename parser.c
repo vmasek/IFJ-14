@@ -345,7 +345,6 @@ static int nt_func_section(FILE *input, Tree *globals, Tree *functions,
 static int nt_func(FILE *input, Tree *globals, Tree *functions, Variables *vars)
 {
     int ret;
-    int local_count;
     Token token;
     Func_record *func = NULL;
     Instruction *instr = NULL;
@@ -387,8 +386,7 @@ static int nt_func(FILE *input, Tree *globals, Tree *functions, Variables *vars)
         CHECK_VALUE(nt_func_body(input, func, globals, functions,
                                  &instr, &(func->local_count), vars,
                                  &(func->params)), ret);
-        func->local_count;
-        debug("func->local_count: %d %d\n", func->local_count, local_count);
+        debug("func->local_count: %d\n", func->local_count);
         if (!strcmp(id->str, BIF_COPY) || !strcmp(id->str, BIF_FIND) ||
             !strcmp(id->str, BIF_LENGTH) || !strcmp(id->str, BIF_SORT)) {
             return UNDEFINED_IDENTIFIER;
