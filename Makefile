@@ -7,7 +7,7 @@ CC=gcc
 
 RM=rm -f
 STD= c99
-CFLAGS= -std=$(STD) -pedantic -Wall -Wextra $(FLAGS)
+CFLAGS= -std=$(STD) -O3 -pedantic -Wall -Wextra $(FLAGS)
 
 #name of compiled binary
 BIN=projekt_ifj

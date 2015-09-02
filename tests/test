@@ -320,6 +320,56 @@ if [[ $tests == true || $PROJECT == true  ]]; then
 			fi
 		fi
 
+		if [[ $mem_check == true ]]; then
+			valgrind_oks=0
+			valgrind $valgrind_additonal_opt --log-file=./files/valgrind."$file_name".out  "$BIN_PROJECT" "$source" 1>/dev/null 2>/dev/null
+			result=$(tail ./files/valgrind."$file_name".out)
+			#If all allocations were freed or if there are no allocations memcheck is useless
+			if [[ "$result" =~ "total heap usage: 0" || "$result" =~ "All heap blocks were freed -- no leaks are possible" ]]; then
+				valgrind_oks=5
+			else
+				if [[ "$result" =~ "still reachable: 0" ]]; then
+					valgrind_oks=$((valgrind_oks+1))
+				else
+					echo -e "\t[ ${red}FAIL${NC} ] ${color}still reachable memory${NC} has occured in memcheck of $file_name !"
+				fi
+
+				if [[ "$result" =~ "suppressed: 0" ]]; then
+					valgrind_oks=$((valgrind_oks+1))
+				else
+					echo -e "\t[ ${red}FAIL${NC} ] ${color}suppressed memory${NC} has occured in memcheck of $file_name !"
+				fi
+
+				if [[ "$result" =~ "possibly lost: 0" ]]; then
+					valgrind_oks=$((valgrind_oks+1))
+				else
+					echo -e "\t[ ${red}FAIL${NC} ] ${color}possibly lost memory${NC} has occured in memcheck of $file_name !"
+				fi
+
+				if [[ "$result" =~ "indirectly lost: 0" ]]; then
+					valgrind_oks=$((valgrind_oks+1))
+				else
+					echo -e "\t[ ${red}FAIL${NC} ] ${color}indirectly lost memory${NC} has occured in memcheck of $file_name !"
+				fi
+
+				if [[ "$result" =~ "definitely lost: 0" ]]; then
+					valgrind_oks=$((valgrind_oks+1))
+				else
+					echo -e "\t[ ${red}FAIL${NC} ] ${color}definitely lost memory${NC} has occured in memcheck of $file_name !"
+				fi
+			fi
+
+			#Checking how many valgrind errors and warnings has occured.
+			if [[ $valgrind_oks == 5 ]]; then
+				echo -e "\t\t[  ${green}OK${NC}  ] Memcheck of $file_name is error free."
+				rm ./files/valgrind."$file_name".out
+			else
+				echo -e "\t\t${color2}LOG:${NC}\t \"valgrind.$file_name.out\" ${color2}Try running:${NC} \"valgrind $valgrind_additonal_opt $BIN_PROJECT $source\""
+
+			fi
+		fi
+
+
 		if [[ $NO_DELETE == false && ( $OK == true || $DELETE == true ) ]]; then
 			rm -rf "$file.current.stdout" "$file.current.stderr" "$file.diff.out"
 		fi

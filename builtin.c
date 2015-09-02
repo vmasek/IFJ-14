@@ -51,9 +51,10 @@ cstring *copy(const cstring *s, int i, int n)
 		return NULL;
 	}
 
-    char *string = calloc(n + 1, 1);
-    strncpy(string, &s->str[i - 1], n);
-    return cstr_create_str(string);
+    cstring *string = cstr_create_str("");
+    cstr_resize(string, n);
+    strncpy(string->str, &s->str[i - 1], n);
+    return cstr_create_cstr(string);
 }
 
 

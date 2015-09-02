@@ -25,69 +25,69 @@
 /* List of all possible keywords. */
 enum token_keyword {
     NOT_A_KEYWORD = 0,
-    KEYWORD_AND,        // a
-    KEYWORD_BEGIN,      // b
+    KEYWORD_AND,        /// a
+    KEYWORD_BEGIN,      /// b
     KEYWORD_BOOLEAN,
-    KEYWORD_DO,         // d
+    KEYWORD_DO,         /// d
     KEYWORD_DOWNTO,
-    KEYWORD_ELSE,       // e
+    KEYWORD_ELSE,       /// e
     KEYWORD_END,
-    KEYWORD_FALSE,      // f
+    KEYWORD_FALSE,      /// f
     KEYWORD_FOR,
     KEYWORD_FORWARD,
     KEYWORD_FUNCTION,
-    KEYWORD_IF,         // i
+    KEYWORD_IF,         /// i
     KEYWORD_INTEGER,
-    KEYWORD_NOT,        // n
-    KEYWORD_OR,         // o
-    KEYWORD_READLN,     // r
+    KEYWORD_NOT,        /// n
+    KEYWORD_OR,         /// o
+    KEYWORD_READLN,     /// r
     KEYWORD_REAL,
     KEYWORD_REPEAT,
-    KEYWORD_STRING,     // s
-    KEYWORD_THEN,       // t
+    KEYWORD_STRING,     /// s
+    KEYWORD_THEN,       /// t
     KEYWORD_TRUE,
     KEYWORD_TO,
-    KEYWORD_UNTIL,      // u
-    KEYWORD_VAR,        // v
-    KEYWORD_WHILE,      // w
+    KEYWORD_UNTIL,      /// u
+    KEYWORD_VAR,        /// v
+    KEYWORD_WHILE,      /// w
     KEYWORD_WRITE,
-    KEYWORD_XOR,        // x
+    KEYWORD_XOR,        /// x
 };
 
 
 /* List of operations and other symbols */
 enum token_symbol {
-    ADDITION,       // +
-    SUBTRACTION,    // -
-    NEGATION,       // unary -
-    MULTIPLICATION, // *
-    DIVISION,       // /
-    COMPARISON,     // =
-    ASSIGNMENT,     // :=
-    SEMICOLON,      // ;
-    DOT,            // .
-    DOUBLE_DOT,     // ..
-    COLON,          // :
-    COMMA,          // ,
-    PARENTHESIS_L,  // (
-    PARENTHESIS_R,  // )
-    GREATER_THAN,   // >
-    LESS_THAN,      // <
-    GREATER_EQUAL,  // >=
-    LESS_EQUAL,     // <=
-    NOT_EQUAL,      // <>
+    ADDITION,       /// +
+    SUBTRACTION,    /// -
+    NEGATION,       /// unary -
+    MULTIPLICATION, /// *
+    DIVISION,       /// /
+    COMPARISON,     /// =
+    ASSIGNMENT,     /// :=
+    SEMICOLON,      /// ;
+    DOT,            /// .
+    DOUBLE_DOT,     /// ..
+    COLON,          /// :
+    COMMA,          /// ,
+    PARENTHESIS_L,  /// (
+    PARENTHESIS_R,  /// )
+    GREATER_THAN,   /// >
+    LESS_THAN,      /// <
+    GREATER_EQUAL,  /// >=
+    LESS_EQUAL,     /// <=
+    NOT_EQUAL,      /// <>
 };
 
 
 /* List of all Token types */
 enum token_type {
-    TOKEN_EOF,        //  --
-    TOKEN_ID,         //  value_name
-    TOKEN_INT,        //  value_int
-    TOKEN_FLOAT,      //  value_float
-    TOKEN_STRING,     // *value_string
-    TOKEN_KEYWORD,    //  value_keyword
-    TOKEN_SYMBOL,     //  value_symbol
+    TOKEN_EOF,        ///  --
+    TOKEN_ID,         ///  value_name
+    TOKEN_INT,        ///  value_int
+    TOKEN_FLOAT,      ///  value_float
+    TOKEN_STRING,     /// *value_string
+    TOKEN_KEYWORD,    ///  value_keyword
+    TOKEN_SYMBOL,     ///  value_symbol
 };
 
 
